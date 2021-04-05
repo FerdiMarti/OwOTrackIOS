@@ -13,6 +13,11 @@
 		9AE6EC002619FBFD007C6BBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFF2619FBFD007C6BBA /* Preview Assets.xcassets */; };
 		9AE6EC0B2619FBFD007C6BBA /* OwOTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC0A2619FBFD007C6BBA /* OwOTrackerTests.swift */; };
 		9AE6EC162619FBFD007C6BBA /* OwOTrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC152619FBFD007C6BBA /* OwOTrackerUITests.swift */; };
+		9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
+		9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
+		9AE6EC48261A3472007C6BBA /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
+		9AE6EC4D261A369D007C6BBA /* TrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC4C261A369D007C6BBA /* TrackingService.swift */; };
+		9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +50,11 @@
 		9AE6EC112619FBFD007C6BBA /* OwOTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EC152619FBFD007C6BBA /* OwOTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerUITests.swift; sourceTree = "<group>"; };
 		9AE6EC172619FBFD007C6BBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		9AE6EC272619FCC9007C6BBA /* Quaternion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
+		9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector3.swift; sourceTree = "<group>"; };
+		9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPGyroProviderClient.swift; sourceTree = "<group>"; };
+		9AE6EC4C261A369D007C6BBA /* TrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingService.swift; sourceTree = "<group>"; };
+		9AE6EC51261A3755007C6BBA /* GyroHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GyroHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,11 +105,15 @@
 		9AE6EBF72619FBFB007C6BBA /* OwOTracker */ = {
 			isa = PBXGroup;
 			children = (
+				9AE6EC262619FCA0007C6BBA /* math */,
 				9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */,
 				9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */,
 				9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */,
 				9AE6EC012619FBFD007C6BBA /* Info.plist */,
 				9AE6EBFE2619FBFD007C6BBA /* Preview Content */,
+				9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */,
+				9AE6EC4C261A369D007C6BBA /* TrackingService.swift */,
+				9AE6EC51261A3755007C6BBA /* GyroHandler.swift */,
 			);
 			path = OwOTracker;
 			sourceTree = "<group>";
@@ -128,6 +142,15 @@
 				9AE6EC172619FBFD007C6BBA /* Info.plist */,
 			);
 			path = OwOTrackerUITests;
+			sourceTree = "<group>";
+		};
+		9AE6EC262619FCA0007C6BBA /* math */ = {
+			isa = PBXGroup;
+			children = (
+				9AE6EC272619FCC9007C6BBA /* Quaternion.swift */,
+				9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */,
+			);
+			path = math;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -259,7 +282,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */,
 				9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */,
+				9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */,
+				9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */,
+				9AE6EC48261A3472007C6BBA /* UDPGyroProviderClient.swift in Sources */,
+				9AE6EC4D261A369D007C6BBA /* TrackingService.swift in Sources */,
 				9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
