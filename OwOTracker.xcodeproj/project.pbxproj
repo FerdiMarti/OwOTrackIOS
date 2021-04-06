@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9A08069D261B565400F92566 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
 		9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */; };
 		9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */; };
 		9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9A08069C261B565400F92566 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		9AE6EBF52619FBFB007C6BBA /* OwOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OwOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerApp.swift; sourceTree = "<group>"; };
 		9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */,
 				9AE6EC4C261A369D007C6BBA /* TrackingService.swift */,
 				9AE6EC51261A3755007C6BBA /* GyroHandler.swift */,
+				9A08069C261B565400F92566 /* Logger.swift */,
 			);
 			path = OwOTracker;
 			sourceTree = "<group>";
@@ -289,6 +292,7 @@
 				9AE6EC48261A3472007C6BBA /* UDPGyroProviderClient.swift in Sources */,
 				9AE6EC4D261A369D007C6BBA /* TrackingService.swift in Sources */,
 				9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */,
+				9A08069D261B565400F92566 /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

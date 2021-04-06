@@ -7,32 +7,41 @@
 
 import Foundation
 import Network
+import CoreHaptics
+import AudioToolbox
 
 class UDPGyroProviderClient {
 
     var connection: NWConnection?
+    var logger = Logger.getInstance()
     var hostUDP: NWEndpoint.Host = "10.211.55.3"
     var portUDP: NWEndpoint.Port = 6969
     
     private var packetId: Int64 = 0;
-    private var isConnected: Bool = false;
+    var isConnected: Bool = false;
+    var lastHeartbeat: Double = 0
+    
     public static var CURRENT_VERSION = 5;
-    var lastHeartbeat: Int = 0
     
     init(host: String, port: String) {
         hostUDP = NWEndpoint.Host(host)
         portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
-        connectToUDP()
     }
 
     func connectToUDP() {
-        // Transmited message:
+        logger.reset()
+        logger.addEntry("Attempting Connection")
+        isConnected = false
+        packetId = 0
+        lastHeartbeat = 0
         self.connection = NWConnection(host: hostUDP, port: portUDP, using: .udp)
         
         self.connection?.stateUpdateHandler = { (newState) in
-            print("This is stateUpdateHandler:")
             switch (newState) {
             case .ready:
+                self.logger.addEntry("Connection Ready")
+                self.logger.addEntry("Attempting Handshake")
+                self.handshake()
                 print("State: Ready\n")
             case .setup:
                 print("State: Setup\n")
@@ -44,11 +53,10 @@ class UDPGyroProviderClient {
                 print("ERROR! State not defined!\n")
             }
         }
-        
         self.connection?.start(queue: .global())
     }
     
-    func handshake() -> Bool {
+    func handshake() {
         var data = Data(capacity: 12)
         var first = Int32(bigEndian: 3)
         var second = Int64(bigEndian: 0)
@@ -56,63 +64,58 @@ class UDPGyroProviderClient {
         data.append(UnsafeBufferPointer(start: &second, count: 1))
         
         var tries = 0;
-        while(true) {
+        while(!isConnected && tries <= 12) {
             tries += 1;
-            if (tries > 12) {
-                print("Handshake timed out. Ensure that the IP address and port are correct, that the server is running and that you're connected to the same wifi network.");
-                return false
-            }
             sendUDP(data)
-            
             self.connection?.receiveMessage { (data, context, isComplete, error) in
-                if (isComplete) {
+                if (isComplete && !self.isConnected) {
                     if (data != nil) {
                         var result = String(data: data!, encoding: .ascii)!
+                        print(result)
                         if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
-                            print("Handshake failed, the server did not respond correctly. Ensure everything is up-to-date and that the port is correct.");
+                            self.logger.addEntry("Handshake Failed")
                             return
                         }
                         result = String(result[result.index(result.startIndex, offsetBy: 1)...])
                         if (!result.hasPrefix("Hey OVR =D")) {
-                            print("Handshake failed, the server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct");
+                            self.logger.addEntry("Handshake Failed")
                             return
                         }
                         result = String(result[result.index(result.startIndex, offsetBy: 11)...])
                         result = String(result[result.startIndex...result.startIndex])
                         let version = Int(result)!;
                         if (version != UDPGyroProviderClient.CURRENT_VERSION) {
-                            print("Handshake failed, mismatching version"
-                                    + "\nServer version: \(version)"
-                                    + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
-                                    + "\nPlease make sure everything is up to date.");
+                            self.logger.addEntry("Handshake Failed")
+                            return
                         }
+                        self.logger.addEntry("Handshake Succeded")
+                        self.isConnected = true
+                        return
                     } else {
-                        print("Data == nil")
+                        self.logger.addEntry("Handshake Failed")
+                        return
                     }
                 }
             }
-            self.isConnected = true
         }
-        
+        self.logger.addEntry("Handshake Failed")
     }
 
     func sendUDP(_ content: Data) {
         self.connection?.send(content: content, completion: NWConnection.SendCompletion.contentProcessed(({ (NWError) in
             if (NWError == nil) {
-                print("Data was sent to UDP")
+                //print("Data was sent to UDP")
             } else {
                 print("ERROR! Error when data (Type: Data) sending. NWError: \n \(NWError!)")
             }
         })))
     }
 
-    func receiveUDP() {
+    func receiveUDP(cb: @escaping (Data) -> Void) {
         self.connection?.receiveMessage { (data, context, isComplete, error) in
             if (isComplete) {
-                print("Receive is complete")
                 if (data != nil) {
-                    let backToString = String(data: data!, encoding: .ascii)
-                    print("Received message: \(backToString)")
+                    cb(data!)
                 } else {
                     print("Data == nil")
                 }
@@ -120,7 +123,36 @@ class UDPGyroProviderClient {
         }
     }
     
+    func runListener() {
+        while (self.isConnected) {
+            sleep(1)
+            self.receiveUDP(cb: { data in
+                self.lastHeartbeat = Date().timeIntervalSince1970;
+                print(data)
+                var msgType : UInt8 = 0
+                data.copyBytes(to: &msgType, count: 4)
+                if msgType == 1 {
+                    // just heartbeat
+                } else if msgType == 2 {
+                    // vibrate
+                    var restData = data.advanced(by: 4)
+                    let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                    restData = restData.advanced(by: 4)
+                    let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                    restData = restData.advanced(by: 4)
+                    let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                    if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                        self.vibrate()
+                    }
+                } else {
+                    print("Unknown message type \(msgType)")
+                }
+            })
+        }
+    }
+    
     private func provideFloats(floats: [Float], len: Int, msgType: Int32) {
+        logger.addEntry("Provided: \(floats)")
         if (!isConnected) {
             return;
         }
@@ -149,5 +181,41 @@ class UDPGyroProviderClient {
 
     public func provideAcc(accel: [Float]) {
         provideFloats(floats: accel, len: 3, msgType: 4);
+    }
+    
+    func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
+        // make sure that the device supports haptics
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }
+        var engine : CHHapticEngine
+        do {
+            engine = try CHHapticEngine()
+            try engine.start(completionHandler: { (error) in
+                var events = [CHHapticEvent]()
+                
+                // create one intense, sharp tap
+                let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1)
+                let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 1)
+                let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0)
+                events.append(event)
+                
+                // convert those events into a pattern and play it immediately
+                do {
+                    let pattern = try CHHapticPattern(events: events, parameters: [])
+                    let player = try engine.makePlayer(with: pattern)
+                    try player.start(atTime: 0)
+                    print("done")
+                } catch {
+                    print("Failed to play pattern: \(error.localizedDescription).")
+                }
+                
+            })
+        } catch {
+            return false
+        }
+        return true
+    }
+    
+    func vibrate() {
+        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
     }
 }
