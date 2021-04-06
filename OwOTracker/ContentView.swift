@@ -16,6 +16,7 @@ struct ContentView: View {
     let defaults = UserDefaults.standard
     let sensorHandler = GyroHandler.getInstance()
     let logger = Logger.getInstance()
+    let tService = TrackingService()
     
     var body: some View {
         TabView {
@@ -62,30 +63,38 @@ struct ContentView: View {
                 VStack {
                     if loading {
                         HStack {
-                            ProgressView()
+                            ProgressView().padding(.trailing, 5)
                             Text("Loading...")
-                        }
-                        Text(ipAdress)
-                        Text(port)
+                        }.padding(.bottom, 5)
+                        TextField("Ip Adress", text: $ipAdress)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
+                        TextField("Port", text: $port)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
+                        Button(action: {}, label: {Text("Connect")}).disabled(true).padding(.bottom, 5)
                     } else if connected {
-                        Text("Connected").foregroundColor(.green)
-                        Text(ipAdress)
-                        Text(port)
+                        Text("Connected").foregroundColor(.green).padding(.bottom, 5)
+                        TextField("Ip Adress", text: $ipAdress)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
+                        TextField("Port", text: $port)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
+                        Button(action: {
+                            tService.stop()
+                        }, label: {
+                            Text("Disconnect")
+                        }).padding(.bottom, 5)
                     } else {
+                        Text("Not Connected").foregroundColor(.gray).padding(.bottom, 5)
                         TextField("Ip Adress", text: $ipAdress)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         TextField("Port", text: $port)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                        Text("Not Connected").foregroundColor(.gray)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()).padding(.bottom, 5)
+                        Button(action: {
+                            tService.start(ipAdress: ipAdress, port: port, cView: self)
+                        }, label: {
+                            Text("Connect")
+                        })
+                        .padding(.bottom, 5)
                     }
-                    Button(action: {
-                        let tService = TrackingService(ipAdress: ipAdress, port: port, cView: self)
-                        tService.start()
-                    }, label: {
-                        Image(systemName: "link")
-                        Text("Connect")
-                    })
-                    .disabled(loading || connected)
                     Spacer()
                     Text(logger.get())
                 }

@@ -10,38 +10,48 @@ import Foundation
 public class TrackingService {
     var ipAdress = ""
     var port = ""
-    var cView: ContentView
+    var cView: ContentView?
     let logger = Logger.getInstance()
     let defaults = UserDefaults.standard
+    var gHandler: GyroHandler?
+    var client: UDPGyroProviderClient?
     
-    init(ipAdress: String, port: String, cView: ContentView) {
+    init() {}
+    
+    func start(ipAdress: String, port: String, cView: ContentView) {
+        self.cView = cView
         self.ipAdress = ipAdress
         self.port = port
-        self.cView = cView
-    }
-    
-    func start() {
         cView.loading = true
         DispatchQueue.init(label: "TrackingService").async {
-            let client = UDPGyroProviderClient(host: self.ipAdress, port: self.port)
-            client.connectToUDP()
+            self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port)
+            self.client!.connectToUDP()
             var tries = 0
-            while(!client.isConnected && tries < 5) {
+            while(!self.client!.isConnected && tries < 5) {
                 tries += 1
                 sleep(1)
             }
-            self.cView.loading = false
-            if (client.isConnected) {
+            self.cView!.loading = false
+            if (self.client!.isConnected) {
                 self.defaults.set(self.ipAdress, forKey: "ip")
                 self.defaults.set(self.port, forKey: "port")
                 self.logger.addEntry("Connection established")
-                self.cView.connected = true
-                let handler = GyroHandler.getInstance()
-                handler.startUpdates(client: client)
-                client.runListener()
+                self.cView!.connected = true
+                self.gHandler = GyroHandler.getInstance()
+                self.gHandler!.startUpdates(client: self.client!)
+                self.client!.runListener()
             } else {
                 self.logger.addEntry("Connection Failed")
             }
+        }
+    }
+    
+    func stop() {
+        gHandler?.stopUpdates()
+        client?.disconnectUDP()
+        if (client?.isConnected) != nil && !client!.isConnected {
+            cView?.connected = false
+            logger.addEntry("Disconnected")
         }
     }
 }

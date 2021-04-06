@@ -27,6 +27,12 @@ class UDPGyroProviderClient {
         hostUDP = NWEndpoint.Host(host)
         portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
     }
+    
+    func disconnectUDP() {
+        logger.addEntry("Disconnecting Client")
+        connection?.cancel()
+        isConnected = false
+    }
 
     func connectToUDP() {
         logger.reset()
@@ -53,7 +59,7 @@ class UDPGyroProviderClient {
                 print("ERROR! State not defined!\n")
             }
         }
-        self.connection?.start(queue: .global())
+        self.connection?.start(queue: DispatchQueue(label: "UDPConnection"))
     }
     
     func handshake() {
@@ -128,7 +134,6 @@ class UDPGyroProviderClient {
             sleep(1)
             self.receiveUDP(cb: { data in
                 self.lastHeartbeat = Date().timeIntervalSince1970;
-                print(data)
                 var msgType : UInt8 = 0
                 data.copyBytes(to: &msgType, count: 4)
                 if msgType == 1 {
