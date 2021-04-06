@@ -21,9 +21,7 @@ class Logger {
     }
     
     func addEntry(_ entry: String) {
-        DispatchQueue.main.async {
-            self.logEntries.append(entry)
-        }
+        self.logEntries.append(entry)
     }
     
     func get() -> String {

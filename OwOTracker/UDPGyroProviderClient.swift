@@ -180,7 +180,6 @@ class UDPGyroProviderClient {
     }
     
     private func provideFloats(floats: [Float], len: Int, msgType: Int32) {
-        logger.addEntry("Provided: \(floats)")
         if (!isConnected) {
             return;
         }
