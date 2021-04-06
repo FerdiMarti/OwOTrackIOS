@@ -24,7 +24,7 @@ public class TrackingService {
         self.port = port
         cView.loading = true
         DispatchQueue.init(label: "TrackingService").async {
-            self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port)
+            self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             self.client!.connectToUDP()
             var tries = 0
             while(!self.client!.isConnected && tries < 5) {
@@ -41,6 +41,7 @@ public class TrackingService {
                 self.gHandler!.startUpdates(client: self.client!)
                 self.client!.runListener()
             } else {
+                self.stop()
                 self.logger.addEntry("Connection Failed")
             }
         }

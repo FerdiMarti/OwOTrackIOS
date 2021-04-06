@@ -96,7 +96,9 @@ struct ContentView: View {
                         .padding(.bottom, 5)
                     }
                     Spacer()
-                    Text(logger.get())
+                    ScrollView {
+                        Text(logger.get()).padding()
+                    }
                 }
                 .padding()
                 .navigationTitle("Connect")

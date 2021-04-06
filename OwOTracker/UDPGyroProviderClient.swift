@@ -20,12 +20,14 @@ class UDPGyroProviderClient {
     private var packetId: Int64 = 0;
     var isConnected: Bool = false;
     var lastHeartbeat: Double = 0
+    var service: TrackingService
     
     public static var CURRENT_VERSION = 5;
     
-    init(host: String, port: String) {
+    init(host: String, port: String, service: TrackingService) {
         hostUDP = NWEndpoint.Host(host)
         portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
+        self.service = service
     }
     
     func disconnectUDP() {
@@ -77,14 +79,15 @@ class UDPGyroProviderClient {
                 if (isComplete && !self.isConnected) {
                     if (data != nil) {
                         var result = String(data: data!, encoding: .ascii)!
-                        print(result)
                         if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
                             self.logger.addEntry("Handshake Failed")
+                            self.service.stop()
                             return
                         }
                         result = String(result[result.index(result.startIndex, offsetBy: 1)...])
                         if (!result.hasPrefix("Hey OVR =D")) {
                             self.logger.addEntry("Handshake Failed")
+                            self.service.stop()
                             return
                         }
                         result = String(result[result.index(result.startIndex, offsetBy: 11)...])
@@ -92,13 +95,16 @@ class UDPGyroProviderClient {
                         let version = Int(result)!;
                         if (version != UDPGyroProviderClient.CURRENT_VERSION) {
                             self.logger.addEntry("Handshake Failed")
+                            self.service.stop()
                             return
                         }
                         self.logger.addEntry("Handshake Succeded")
                         self.isConnected = true
+                        self.lastHeartbeat = Date().timeIntervalSince1970;
                         return
                     } else {
                         self.logger.addEntry("Handshake Failed")
+                        self.service.stop()
                         return
                     }
                 }
@@ -131,6 +137,9 @@ class UDPGyroProviderClient {
     
     func runListener() {
         while (self.isConnected) {
+            if !self.checkConnection() {
+                return
+            }
             sleep(1)
             self.receiveUDP(cb: { data in
                 self.lastHeartbeat = Date().timeIntervalSince1970;
@@ -154,6 +163,20 @@ class UDPGyroProviderClient {
                 }
             })
         }
+    }
+    
+    func checkConnection() -> Bool {
+        if !isConnected {
+            return false
+        }
+        let time = Date().timeIntervalSince1970
+        let timeDiff = time - lastHeartbeat
+        if timeDiff > 10 {
+            logger.addEntry("Connection with server lost")
+            service.stop()
+            return false
+        }
+        return true
     }
     
     private func provideFloats(floats: [Float], len: Int, msgType: Int32) {
