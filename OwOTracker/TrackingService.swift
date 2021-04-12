@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 public class TrackingService {
     var ipAdress = ""
@@ -19,6 +20,9 @@ public class TrackingService {
     init() {}
     
     func start(ipAdress: String, port: String, cView: ContentView) {
+        
+        UIDevice.current.isProximityMonitoringEnabled = true
+        
         self.cView = cView
         self.ipAdress = ipAdress
         self.port = port
@@ -48,6 +52,9 @@ public class TrackingService {
     }
     
     func stop() {
+        DispatchQueue.main.async {
+            UIDevice.current.isProximityMonitoringEnabled = false
+        }
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
