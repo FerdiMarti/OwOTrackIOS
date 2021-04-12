@@ -31,28 +31,54 @@ public class GyroHandler {
         mmanager!.deviceMotionUpdateInterval = 0.1
         mmanager!.startDeviceMotionUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let quat = MotionData!.attitude.quaternion
-            let data = [Float(quat.x), Float(quat.y), Float(quat.z), Float(quat.w)]
+            var xi = Float(quat.x).bitPattern.bigEndian
+            var yi = Float(quat.y).bitPattern.bigEndian
+            var zi = Float(quat.z).bitPattern.bigEndian
+            var wi = Float(quat.w).bitPattern.bigEndian
+            let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+            let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+            let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+            let w = Data(buffer: UnsafeBufferPointer(start: &wi, count: 1))
+            let data = [x, y, z, w]
             client.provideRot(rot: data)
         })
         
         mmanager!.accelerometerUpdateInterval = 0.1
         mmanager!.startAccelerometerUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.acceleration
-            let data = [Float(values.x), Float(values.y), Float(values.z)]
+            var xi = Float(values.x).bitPattern.bigEndian
+            var yi = Float(values.y).bitPattern.bigEndian
+            var zi = Float(values.z).bitPattern.bigEndian
+            let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+            let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+            let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+            let data = [x, y, z]
             client.provideAcc(accel: data)
         })
         
         mmanager!.gyroUpdateInterval = 0.1
         mmanager!.startGyroUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.rotationRate
-            let data = [Float(values.x), Float(values.y), Float(values.z)]
+            var xi = Float(values.x).bitPattern.bigEndian
+            var yi = Float(values.y).bitPattern.bigEndian
+            var zi = Float(values.z).bitPattern.bigEndian
+            let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+            let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+            let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+            let data = [x, y, z]
             client.provideGyro(gyro: data)
         })
         
         mmanager!.magnetometerUpdateInterval = 0.1
         mmanager!.startMagnetometerUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.magneticField
-            let data = [Float(values.x), Float(values.y), Float(values.z)]
+            var xi = Float(values.x).bitPattern.bigEndian
+            var yi = Float(values.y).bitPattern.bigEndian
+            var zi = Float(values.z).bitPattern.bigEndian
+            let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+            let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+            let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+            let data = [x, y, z]
         })
     }
     

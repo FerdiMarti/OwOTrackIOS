@@ -179,34 +179,35 @@ class UDPGyroProviderClient {
         return true
     }
     
-    private func provideFloats(floats: [Float], len: Int, msgType: Int32) {
+    private func provideFloats(floats: [Data], len: Int, msgType: Int32) {
         if (!isConnected) {
             return;
         }
         var type = Int32(bigEndian: msgType)
         var id = Int64(bigEndian: packetId)
-        var values = floats
 
         let bytes = 12 + len * 4; // 12b header (int + long)  + floats (4b each)
 
         var data = Data(capacity: bytes)
         data.append(UnsafeBufferPointer(start: &type, count: 1))
         data.append(UnsafeBufferPointer(start: &id, count: 1))
-        data.append(UnsafeBufferPointer(start: &values, count: values.count))
+        for elem in floats {
+            data.append(elem)
+        }
 
         sendUDP(data)
         packetId += 1;
     }
 
-    public func provideGyro(gyro: [Float]) {
+    public func provideGyro(gyro: [Data]) {
         provideFloats(floats: gyro, len: 3, msgType: 2);
     }
 
-    public func provideRot(rot: [Float]) {
+    public func provideRot(rot: [Data]) {
         provideFloats(floats: rot, len: 4, msgType: 1);
     }
 
-    public func provideAcc(accel: [Float]) {
+    public func provideAcc(accel: [Data]) {
         provideFloats(floats: accel, len: 3, msgType: 4);
     }
     
