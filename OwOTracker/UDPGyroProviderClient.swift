@@ -155,9 +155,10 @@ class UDPGyroProviderClient {
                     let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
                     restData = restData.advanced(by: 4)
                     let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-                    if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                    /* if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
                         self.vibrate()
-                    }
+                    } */
+                    self.vibrate()
                 } else {
                     print("Unknown message type \(msgType)")
                 }
