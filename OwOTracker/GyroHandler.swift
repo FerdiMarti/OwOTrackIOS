@@ -79,6 +79,7 @@ public class GyroHandler {
             let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
             let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
             let data = [x, y, z]
+            //not implemented
         })
     }
     

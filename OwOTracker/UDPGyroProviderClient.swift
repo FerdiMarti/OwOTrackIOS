@@ -146,7 +146,7 @@ class UDPGyroProviderClient {
                 var msgType : UInt8 = 0
                 data.copyBytes(to: &msgType, count: 4)
                 if msgType == 1 {
-                    // just heartbeat
+                    // heartbeat
                 } else if msgType == 2 {
                     // vibrate
                     var restData = data.advanced(by: 4)
@@ -187,7 +187,7 @@ class UDPGyroProviderClient {
         var type = Int32(bigEndian: msgType)
         var id = Int64(bigEndian: packetId)
 
-        let bytes = 12 + len * 4; // 12b header (int + long)  + floats (4b each)
+        let bytes = 12 + len * 4;
 
         var data = Data(capacity: bytes)
         data.append(UnsafeBufferPointer(start: &type, count: 1))
@@ -220,14 +220,12 @@ class UDPGyroProviderClient {
             engine = try CHHapticEngine()
             try engine.start(completionHandler: { (error) in
                 var events = [CHHapticEvent]()
-                
-                // create one intense, sharp tap
+        
                 let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1)
                 let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 1)
                 let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0)
                 events.append(event)
                 
-                // convert those events into a pattern and play it immediately
                 do {
                     let pattern = try CHHapticPattern(events: events, parameters: [])
                     let player = try engine.makePlayer(with: pattern)
