@@ -28,7 +28,7 @@ public class GyroHandler {
     func startUpdates(client: UDPGyroProviderClient) {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
-        mmanager!.deviceMotionUpdateInterval = 0.1
+        mmanager!.deviceMotionUpdateInterval = 0.01
         mmanager!.startDeviceMotionUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let quat = MotionData!.attitude.quaternion
             var xi = Float(quat.x).bitPattern.bigEndian
@@ -43,7 +43,7 @@ public class GyroHandler {
             client.provideRot(rot: data)
         })
         
-        mmanager!.accelerometerUpdateInterval = 0.1
+        mmanager!.accelerometerUpdateInterval = 0.01
         mmanager!.startAccelerometerUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.acceleration
             var xi = Float(values.x).bitPattern.bigEndian
@@ -56,7 +56,7 @@ public class GyroHandler {
             client.provideAcc(accel: data)
         })
         
-        mmanager!.gyroUpdateInterval = 0.1
+        mmanager!.gyroUpdateInterval = 0.01
         mmanager!.startGyroUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.rotationRate
             var xi = Float(values.x).bitPattern.bigEndian
@@ -69,7 +69,7 @@ public class GyroHandler {
             client.provideGyro(gyro: data)
         })
         
-        mmanager!.magnetometerUpdateInterval = 0.1
+        mmanager!.magnetometerUpdateInterval = 0.01
         mmanager!.startMagnetometerUpdates(to: sensorQueue, withHandler: { (MotionData, Error) in
             let values = MotionData!.magneticField
             var xi = Float(values.x).bitPattern.bigEndian
