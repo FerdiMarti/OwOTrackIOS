@@ -68,5 +68,6 @@ public class TrackingService {
     func toggleMagnetometerUse(use: Bool) {
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
+        cView?.useMagnetometer = use
     }
 }

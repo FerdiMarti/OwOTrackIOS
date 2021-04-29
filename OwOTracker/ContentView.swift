@@ -12,7 +12,7 @@ struct ContentView: View {
     @State var port: String = "6969"
     @State var loading = false
     @State var connected = false
-    @State var magnetometer = true
+    @State var useMagnetometer = true
     
     let defaults = UserDefaults.standard
     let sensorHandler = GyroHandler.getInstance()
@@ -71,15 +71,15 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
-                        Toggle("Use Magnetometer", isOn: $magnetometer).disabled(true).padding(.bottom, 5)
-                        Button(action: {}, label: {Text("Connect")}).disabled(true).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $useMagnetometer).disabled(true).padding(.bottom, 5)
+                        Button(action: {}, label: {Text("Connect")}).disabled(true).padding(.bottom, 5).padding(.top, 5)
                     } else if connected {
                         Text("Connected").foregroundColor(.green).padding(.bottom, 5)
                         TextField("Ip Adress", text: $ipAdress)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
-                        Toggle("Use Magnetometer", isOn: $magnetometer).disabled(true).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $useMagnetometer).disabled(true).padding(.bottom, 5)
                         Button(action: {
                             tService.stop()
                         }, label: {
@@ -91,9 +91,9 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).padding(.bottom, 5)
-                        Toggle("Use Magnetometer", isOn: $magnetometer).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $useMagnetometer).padding(.bottom, 5)
                         Button(action: {
-                            tService.start(ipAdress: ipAdress, port: port, magnetometer: magnetometer, cView: self)
+                            tService.start(ipAdress: ipAdress, port: port, magnetometer: useMagnetometer, cView: self)
                         }, label: {
                             Text("Connect")
                         })
