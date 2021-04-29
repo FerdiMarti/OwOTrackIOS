@@ -41,6 +41,7 @@ public class TrackingService {
             if (self.client!.isConnected) {
                 self.defaults.set(self.ipAdress, forKey: "ip")
                 self.defaults.set(self.port, forKey: "port")
+                self.defaults.set(self.magnetometer, forKey: "useM")
                 self.logger.addEntry("Connection established")
                 self.cView!.connected = true
                 self.gHandler = GyroHandler.getInstance()

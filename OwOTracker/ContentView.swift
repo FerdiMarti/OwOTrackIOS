@@ -138,6 +138,11 @@ struct ContentView: View {
                 port = "6969"
                 self.defaults.set(port, forKey: "port")
             }
+            if let useMagnTemp = defaults.object(forKey: "useM") as? Bool {
+                useMagnetometer = useMagnTemp
+            } else {
+                self.defaults.set(useMagnetometer, forKey: "useM")
+            }
         }
     }
 }
