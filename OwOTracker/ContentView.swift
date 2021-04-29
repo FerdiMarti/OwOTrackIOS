@@ -12,6 +12,7 @@ struct ContentView: View {
     @State var port: String = "6969"
     @State var loading = false
     @State var connected = false
+    @State var magnetometer = true
     
     let defaults = UserDefaults.standard
     let sensorHandler = GyroHandler.getInstance()
@@ -70,6 +71,7 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $magnetometer).disabled(true).padding(.bottom, 5)
                         Button(action: {}, label: {Text("Connect")}).disabled(true).padding(.bottom, 5)
                     } else if connected {
                         Text("Connected").foregroundColor(.green).padding(.bottom, 5)
@@ -77,6 +79,7 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true)
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).disabled(true).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $magnetometer).disabled(true).padding(.bottom, 5)
                         Button(action: {
                             tService.stop()
                         }, label: {
@@ -88,8 +91,9 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                         TextField("Port", text: $port)
                             .textFieldStyle(RoundedBorderTextFieldStyle()).padding(.bottom, 5)
+                        Toggle("Use Magnetometer", isOn: $magnetometer).padding(.bottom, 5)
                         Button(action: {
-                            tService.start(ipAdress: ipAdress, port: port, cView: self)
+                            tService.start(ipAdress: ipAdress, port: port, magnetometer: magnetometer, cView: self)
                         }, label: {
                             Text("Connect")
                         })
@@ -106,6 +110,19 @@ struct ContentView: View {
             .tabItem {
                 Image(systemName: "wifi")
                 Text("Connect")
+            }
+            
+            //ThirdTab
+            NavigationView {
+                VStack {
+                    Text("Tipps, Tutorial, ...")
+                }
+                .padding()
+                .navigationTitle("Information")
+            }
+            .tabItem {
+                Image(systemName: "info.circle")
+                Text("Information")
             }
         }
         .onAppear {

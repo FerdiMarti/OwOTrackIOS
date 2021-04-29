@@ -11,6 +11,7 @@ import UIKit
 public class TrackingService {
     var ipAdress = ""
     var port = ""
+    var magnetometer = true
     var cView: ContentView?
     let logger = Logger.getInstance()
     let defaults = UserDefaults.standard
@@ -19,13 +20,14 @@ public class TrackingService {
     
     init() {}
     
-    func start(ipAdress: String, port: String, cView: ContentView) {
+    func start(ipAdress: String, port: String, magnetometer: Bool, cView: ContentView) {
         
         UIDevice.current.isProximityMonitoringEnabled = true
         
         self.cView = cView
         self.ipAdress = ipAdress
         self.port = port
+        self.magnetometer = magnetometer
         cView.loading = true
         DispatchQueue.init(label: "TrackingService").async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
@@ -42,7 +44,7 @@ public class TrackingService {
                 self.logger.addEntry("Connection established")
                 self.cView!.connected = true
                 self.gHandler = GyroHandler.getInstance()
-                self.gHandler!.startUpdates(client: self.client!)
+                self.gHandler!.startUpdates(client: self.client!, useMagn: magnetometer)
                 self.client!.runListener()
             } else {
                 self.stop()
@@ -61,5 +63,10 @@ public class TrackingService {
             cView?.connected = false
             logger.addEntry("Disconnected")
         }
+    }
+    
+    func toggleMagnetometerUse(use: Bool) {
+        gHandler?.stopUpdates()
+        gHandler?.startUpdates(client: client!, useMagn: use)
     }
 }

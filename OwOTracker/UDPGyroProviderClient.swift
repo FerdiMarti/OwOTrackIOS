@@ -17,16 +17,16 @@ class UDPGyroProviderClient {
     var hostUDP: NWEndpoint.Host = "10.211.55.3"
     var portUDP: NWEndpoint.Port = 6969
     
-    private var packetId: Int64 = 0;
-    var isConnected: Bool = false;
+    private var packetId: Int64 = 0
+    var isConnected: Bool = false
     var lastHeartbeat: Double = 0
     var service: TrackingService
     
-    public static var CURRENT_VERSION = 5;
+    public static var CURRENT_VERSION = 5
     
     init(host: String, port: String, service: TrackingService) {
-        hostUDP = NWEndpoint.Host(host)
-        portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
+        self.hostUDP = NWEndpoint.Host(host)
+        self.portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
         self.service = service
     }
     
@@ -159,6 +159,10 @@ class UDPGyroProviderClient {
                         self.vibrate()
                     } */
                     self.vibrate()
+                } else if msgType == 7 {
+                    let restData = data.advanced(by: 4)
+                    let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                    self.service.toggleMagnetometerUse(use: m == "y")
                 } else {
                     print("Unknown message type \(msgType)")
                 }
@@ -200,16 +204,28 @@ class UDPGyroProviderClient {
         packetId += 1;
     }
 
-    public func provideGyro(gyro: [Data]) {
-        provideFloats(floats: gyro, len: 3, msgType: 2);
-    }
-
     public func provideRot(rot: [Data]) {
         provideFloats(floats: rot, len: 4, msgType: 1);
     }
-
-    public func provideAcc(accel: [Data]) {
-        provideFloats(floats: accel, len: 3, msgType: 4);
+    
+    public func provideMagnetometerUse(enabled: Bool) {
+        if (!isConnected) {
+            return;
+        }
+        
+        let len = 12 + 2;
+        var type = Int32(bigEndian: 5)
+        var id = Int64(bigEndian: packetId)
+        let mstr = enabled ? "y" : "n"
+        var m = Int8(bigEndian: Int8(mstr)!)
+        
+        var data = Data(capacity: len)
+        data.append(UnsafeBufferPointer(start: &type, count: 1))
+        data.append(UnsafeBufferPointer(start: &id, count: 1))
+        data.append(UnsafeBufferPointer(start: &m, count: 1))
+        
+        sendUDP(data)
+        packetId += 1;
     }
     
     func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
