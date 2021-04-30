@@ -115,7 +115,7 @@ struct ContentView: View {
             //ThirdTab
             NavigationView {
                 VStack {
-                    Text("Tipps, Tutorial, ...")
+                    Text("Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.")
                 }
                 .padding()
                 .navigationTitle("Information")

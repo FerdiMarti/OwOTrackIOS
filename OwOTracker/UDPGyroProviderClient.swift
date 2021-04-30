@@ -228,6 +228,24 @@ class UDPGyroProviderClient {
         packetId += 1;
     }
     
+    public func recenterYaw() {
+        if (!isConnected) {
+            return;
+        }
+        
+        let len = 12 + 1;
+        var type = Int32(bigEndian: 6)
+        var id = Int64(bigEndian: packetId)
+        
+        var data = Data(capacity: len)
+        data.append(UnsafeBufferPointer(start: &type, count: 1))
+        data.append(UnsafeBufferPointer(start: &id, count: 1))
+        
+        sendUDP(data)
+        packetId += 1;
+        logger.addEntry("Recentered Yaw")
+    }
+    
     func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
         // make sure that the device supports haptics
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }

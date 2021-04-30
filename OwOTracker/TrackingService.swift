@@ -7,8 +7,9 @@
 
 import Foundation
 import UIKit
+import AVFoundation
 
-public class TrackingService {
+public class TrackingService: NSObject {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
@@ -17,20 +18,22 @@ public class TrackingService {
     let defaults = UserDefaults.standard
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
-    
-    init() {}
+    let audioSession = AVAudioSession.sharedInstance()
     
     func start(ipAdress: String, port: String, magnetometer: Bool, cView: ContentView) {
-        
-        UIDevice.current.isProximityMonitoringEnabled = true
-        
         self.cView = cView
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
         cView.loading = true
+        self.registerVolButtonListener()
+        UIDevice.current.isProximityMonitoringEnabled = true
         DispatchQueue.init(label: "TrackingService").async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
+            if self.client == nil {
+                self.logger.addEntry("Initializing Connection Failed")
+                return
+            }
             self.client!.connectToUDP()
             var tries = 0
             while(!self.client!.isConnected && tries < 5) {
@@ -45,7 +48,7 @@ public class TrackingService {
                 self.logger.addEntry("Connection established")
                 self.cView!.connected = true
                 self.gHandler = GyroHandler.getInstance()
-                self.gHandler!.startUpdates(client: self.client!, useMagn: magnetometer)
+                self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
                 self.client!.runListener()
             } else {
                 self.stop()
@@ -58,6 +61,11 @@ public class TrackingService {
         DispatchQueue.main.async {
             UIDevice.current.isProximityMonitoringEnabled = false
         }
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            
+        }
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
@@ -67,8 +75,32 @@ public class TrackingService {
     }
     
     func toggleMagnetometerUse(use: Bool) {
+        if client == nil {
+            return
+        }
+        audioSession.removeObserver(self, forKeyPath: "outputVolume", context: nil)
+        do {
+            try audioSession.setActive(false)
+        } catch {
+            print("audioSession could not be deinitialized")
+        }
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
         cView?.useMagnetometer = use
+    }
+    
+    func registerVolButtonListener() {
+        do {
+            try audioSession.setActive(true)
+        } catch {
+            print("audioSession could not be initialized")
+        }
+        audioSession.addObserver(self, forKeyPath: "outputVolume", options: NSKeyValueObservingOptions.new, context: nil)
+    }
+    
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == "outputVolume" {
+            client?.recenterYaw()
+        }
     }
 }

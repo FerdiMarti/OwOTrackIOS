@@ -10,7 +10,7 @@ import CoreMotion
 
 public class GyroHandler {
     
-    var mmanager : CMMotionManager?
+    var mmanager = CMMotionManager()
     static var instance : GyroHandler?
     var motionAvailable = true
     var accelerometerAvailable = true
@@ -18,34 +18,34 @@ public class GyroHandler {
     var magnetometerAvailable = true
     
     private init() {
-        mmanager = CMMotionManager()
-        motionAvailable = mmanager!.isDeviceMotionAvailable
-        accelerometerAvailable = mmanager!.isDeviceMotionAvailable
-        gyroAvailable = mmanager!.isGyroAvailable
-        magnetometerAvailable = mmanager!.isMagnetometerAvailable
+        motionAvailable = mmanager.isDeviceMotionAvailable
+        accelerometerAvailable = mmanager.isDeviceMotionAvailable
+        gyroAvailable = mmanager.isGyroAvailable
+        magnetometerAvailable = mmanager.isMagnetometerAvailable
     }
     
     func startUpdates(client: UDPGyroProviderClient, useMagn: Bool) {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
-        mmanager!.deviceMotionUpdateInterval = 0.01
-        mmanager!.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
-            let quat = MotionData!.attitude.quaternion
-            var xi = Float(quat.x).bitPattern.bigEndian
-            var yi = Float(quat.y).bitPattern.bigEndian
-            var zi = Float(quat.z).bitPattern.bigEndian
-            var wi = Float(quat.w).bitPattern.bigEndian
-            let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
-            let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
-            let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
-            let w = Data(buffer: UnsafeBufferPointer(start: &wi, count: 1))
-            let data = [x, y, z, w]
-            client.provideRot(rot: data)
+        mmanager.deviceMotionUpdateInterval = 0.01
+        mmanager.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
+            if let quat = MotionData?.attitude.quaternion {
+                var xi = Float(quat.x).bitPattern.bigEndian
+                var yi = Float(quat.y).bitPattern.bigEndian
+                var zi = Float(quat.z).bitPattern.bigEndian
+                var wi = Float(quat.w).bitPattern.bigEndian
+                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+                let w = Data(buffer: UnsafeBufferPointer(start: &wi, count: 1))
+                let data = [x, y, z, w]
+                client.provideRot(rot: data)
+            }
         })
     }
     
     func stopUpdates() {
-        mmanager?.stopDeviceMotionUpdates()
+        mmanager.stopDeviceMotionUpdates()
     }
     
     static func getInstance() -> GyroHandler {
