@@ -11,17 +11,24 @@ class Logger {
     
     private var logEntries = Array<String>()
     private static var instance : Logger?
+    private var cvc : ConnectViewController?
     
     init() {
         
     }
     
+    func attachVC(cvc: ConnectViewController) {
+        self.cvc = cvc
+    }
+    
     func reset() {
         logEntries.removeAll()
+        cvc?.updateLogs(text: get())
     }
     
     func addEntry(_ entry: String) {
         self.logEntries.append(entry)
+        cvc?.updateLogs(text: get())
     }
     
     func get() -> String {

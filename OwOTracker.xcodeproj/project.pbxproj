@@ -8,12 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		9A08069D261B565400F92566 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
+		9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
+		9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
+		9A728BDC263E018400E8605D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
+		9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BDD263E020E00E8605D /* ConnectViewController.swift */; };
+		9A728BE0263E139800E8605D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* Launch Screen.storyboard */; };
+		9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE2263E143F00E8605D /* InfoViewController.swift */; };
+		9A728BE5263E144A00E8605D /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE4263E144A00E8605D /* StatusViewController.swift */; };
+		9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
 		9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */; };
 		9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */; };
 		9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
 		9AE6EC002619FBFD007C6BBA /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFF2619FBFD007C6BBA /* Preview Assets.xcassets */; };
-		9AE6EC0B2619FBFD007C6BBA /* OwOTrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC0A2619FBFD007C6BBA /* OwOTrackerTests.swift */; };
-		9AE6EC162619FBFD007C6BBA /* OwOTrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC152619FBFD007C6BBA /* OwOTrackerUITests.swift */; };
 		9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
 		9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
 		9AE6EC48261A3472007C6BBA /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
@@ -21,37 +27,22 @@
 		9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		9AE6EC072619FBFD007C6BBA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9AE6EBED2619FBFB007C6BBA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9AE6EBF42619FBFB007C6BBA;
-			remoteInfo = OwOTracker;
-		};
-		9AE6EC122619FBFD007C6BBA /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 9AE6EBED2619FBFB007C6BBA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 9AE6EBF42619FBFB007C6BBA;
-			remoteInfo = OwOTracker;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		9A08069C261B565400F92566 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		9A728BB7263DFFBD00E8605D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		9A728BD9263E00BB00E8605D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		9A728BDB263E018400E8605D /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		9A728BDD263E020E00E8605D /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
+		9A728BDF263E139800E8605D /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		9A728BE2263E143F00E8605D /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
+		9A728BE4263E144A00E8605D /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
+		9A728BE6263E3DF900E8605D /* FadeTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FadeTextView.swift; sourceTree = "<group>"; };
 		9AE6EBF52619FBFB007C6BBA /* OwOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OwOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerApp.swift; sourceTree = "<group>"; };
 		9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9AE6EBFF2619FBFD007C6BBA /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9AE6EC012619FBFD007C6BBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9AE6EC062619FBFD007C6BBA /* OwOTrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AE6EC0A2619FBFD007C6BBA /* OwOTrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerTests.swift; sourceTree = "<group>"; };
-		9AE6EC0C2619FBFD007C6BBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9AE6EC112619FBFD007C6BBA /* OwOTrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AE6EC152619FBFD007C6BBA /* OwOTrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerUITests.swift; sourceTree = "<group>"; };
-		9AE6EC172619FBFD007C6BBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9AE6EC272619FCC9007C6BBA /* Quaternion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quaternion.swift; sourceTree = "<group>"; };
 		9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vector3.swift; sourceTree = "<group>"; };
 		9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPGyroProviderClient.swift; sourceTree = "<group>"; };
@@ -67,29 +58,37 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9AE6EC032619FBFD007C6BBA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9AE6EC0E2619FBFD007C6BBA /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9A728BB6263DD06100E8605D /* SwiftUI */ = {
+			isa = PBXGroup;
+			children = (
+				9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */,
+				9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */,
+			);
+			path = SwiftUI;
+			sourceTree = "<group>";
+		};
+		9A728BE1263E13C000E8605D /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				9A728BDD263E020E00E8605D /* ConnectViewController.swift */,
+				9A728BE6263E3DF900E8605D /* FadeTextView.swift */,
+				9A728BE2263E143F00E8605D /* InfoViewController.swift */,
+				9A728BE4263E144A00E8605D /* StatusViewController.swift */,
+				9A728BDF263E139800E8605D /* Launch Screen.storyboard */,
+				9A728BDB263E018400E8605D /* Main.storyboard */,
+				9A728BB7263DFFBD00E8605D /* AppDelegate.swift */,
+				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
 		9AE6EBEC2619FBFB007C6BBA = {
 			isa = PBXGroup;
 			children = (
 				9AE6EBF72619FBFB007C6BBA /* OwOTracker */,
-				9AE6EC092619FBFD007C6BBA /* OwOTrackerTests */,
-				9AE6EC142619FBFD007C6BBA /* OwOTrackerUITests */,
 				9AE6EBF62619FBFB007C6BBA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -98,8 +97,6 @@
 			isa = PBXGroup;
 			children = (
 				9AE6EBF52619FBFB007C6BBA /* OwOTracker.app */,
-				9AE6EC062619FBFD007C6BBA /* OwOTrackerTests.xctest */,
-				9AE6EC112619FBFD007C6BBA /* OwOTrackerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,9 +104,9 @@
 		9AE6EBF72619FBFB007C6BBA /* OwOTracker */ = {
 			isa = PBXGroup;
 			children = (
+				9A728BE1263E13C000E8605D /* UI */,
+				9A728BB6263DD06100E8605D /* SwiftUI */,
 				9AE6EC262619FCA0007C6BBA /* math */,
-				9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */,
-				9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */,
 				9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */,
 				9AE6EC012619FBFD007C6BBA /* Info.plist */,
 				9AE6EBFE2619FBFD007C6BBA /* Preview Content */,
@@ -127,24 +124,6 @@
 				9AE6EBFF2619FBFD007C6BBA /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
-			sourceTree = "<group>";
-		};
-		9AE6EC092619FBFD007C6BBA /* OwOTrackerTests */ = {
-			isa = PBXGroup;
-			children = (
-				9AE6EC0A2619FBFD007C6BBA /* OwOTrackerTests.swift */,
-				9AE6EC0C2619FBFD007C6BBA /* Info.plist */,
-			);
-			path = OwOTrackerTests;
-			sourceTree = "<group>";
-		};
-		9AE6EC142619FBFD007C6BBA /* OwOTrackerUITests */ = {
-			isa = PBXGroup;
-			children = (
-				9AE6EC152619FBFD007C6BBA /* OwOTrackerUITests.swift */,
-				9AE6EC172619FBFD007C6BBA /* Info.plist */,
-			);
-			path = OwOTrackerUITests;
 			sourceTree = "<group>";
 		};
 		9AE6EC262619FCA0007C6BBA /* math */ = {
@@ -176,42 +155,6 @@
 			productReference = 9AE6EBF52619FBFB007C6BBA /* OwOTracker.app */;
 			productType = "com.apple.product-type.application";
 		};
-		9AE6EC052619FBFD007C6BBA /* OwOTrackerTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE6EC1D2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrackerTests" */;
-			buildPhases = (
-				9AE6EC022619FBFD007C6BBA /* Sources */,
-				9AE6EC032619FBFD007C6BBA /* Frameworks */,
-				9AE6EC042619FBFD007C6BBA /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				9AE6EC082619FBFD007C6BBA /* PBXTargetDependency */,
-			);
-			name = OwOTrackerTests;
-			productName = OwOTrackerTests;
-			productReference = 9AE6EC062619FBFD007C6BBA /* OwOTrackerTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		9AE6EC102619FBFD007C6BBA /* OwOTrackerUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE6EC202619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrackerUITests" */;
-			buildPhases = (
-				9AE6EC0D2619FBFD007C6BBA /* Sources */,
-				9AE6EC0E2619FBFD007C6BBA /* Frameworks */,
-				9AE6EC0F2619FBFD007C6BBA /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				9AE6EC132619FBFD007C6BBA /* PBXTargetDependency */,
-			);
-			name = OwOTrackerUITests;
-			productName = OwOTrackerUITests;
-			productReference = 9AE6EC112619FBFD007C6BBA /* OwOTrackerUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -223,14 +166,6 @@
 				TargetAttributes = {
 					9AE6EBF42619FBFB007C6BBA = {
 						CreatedOnToolsVersion = 12.4;
-					};
-					9AE6EC052619FBFD007C6BBA = {
-						CreatedOnToolsVersion = 12.4;
-						TestTargetID = 9AE6EBF42619FBFB007C6BBA;
-					};
-					9AE6EC102619FBFD007C6BBA = {
-						CreatedOnToolsVersion = 12.4;
-						TestTargetID = 9AE6EBF42619FBFB007C6BBA;
 					};
 				};
 			};
@@ -248,8 +183,6 @@
 			projectRoot = "";
 			targets = (
 				9AE6EBF42619FBFB007C6BBA /* OwOTracker */,
-				9AE6EC052619FBFD007C6BBA /* OwOTrackerTests */,
-				9AE6EC102619FBFD007C6BBA /* OwOTrackerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -259,22 +192,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A728BDC263E018400E8605D /* Main.storyboard in Resources */,
 				9AE6EC002619FBFD007C6BBA /* Preview Assets.xcassets in Resources */,
+				9A728BE0263E139800E8605D /* Launch Screen.storyboard in Resources */,
 				9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9AE6EC042619FBFD007C6BBA /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9AE6EC0F2619FBFD007C6BBA /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,44 +209,21 @@
 				9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */,
 				9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */,
 				9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */,
+				9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */,
+				9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */,
 				9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */,
+				9A728BE5263E144A00E8605D /* StatusViewController.swift in Sources */,
+				9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */,
 				9AE6EC48261A3472007C6BBA /* UDPGyroProviderClient.swift in Sources */,
+				9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */,
 				9AE6EC4D261A369D007C6BBA /* TrackingService.swift in Sources */,
 				9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */,
+				9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */,
 				9A08069D261B565400F92566 /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		9AE6EC022619FBFD007C6BBA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9AE6EC0B2619FBFD007C6BBA /* OwOTrackerTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9AE6EC0D2619FBFD007C6BBA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9AE6EC162619FBFD007C6BBA /* OwOTrackerUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		9AE6EC082619FBFD007C6BBA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9AE6EBF42619FBFB007C6BBA /* OwOTracker */;
-			targetProxy = 9AE6EC072619FBFD007C6BBA /* PBXContainerItemProxy */;
-		};
-		9AE6EC132619FBFD007C6BBA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 9AE6EBF42619FBFB007C6BBA /* OwOTracker */;
-			targetProxy = 9AE6EC122619FBFD007C6BBA /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		9AE6EC182619FBFD007C6BBA /* Debug */ = {
@@ -379,7 +277,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -434,7 +332,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -450,12 +348,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = OwOTracker/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -474,12 +372,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = OwOTracker/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -489,90 +387,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
-		9AE6EC1E2619FBFD007C6BBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				INFOPLIST_FILE = OwOTrackerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ferdinandmartini.OwOTrackerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OwOTracker.app/OwOTracker";
-			};
-			name = Debug;
-		};
-		9AE6EC1F2619FBFD007C6BBA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				INFOPLIST_FILE = OwOTrackerTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ferdinandmartini.OwOTrackerTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OwOTracker.app/OwOTracker";
-			};
-			name = Release;
-		};
-		9AE6EC212619FBFD007C6BBA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				INFOPLIST_FILE = OwOTrackerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ferdinandmartini.OwOTrackerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = OwOTracker;
-			};
-			name = Debug;
-		};
-		9AE6EC222619FBFD007C6BBA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				INFOPLIST_FILE = OwOTrackerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ferdinandmartini.OwOTrackerUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = OwOTracker;
 			};
 			name = Release;
 		};
@@ -593,24 +407,6 @@
 			buildConfigurations = (
 				9AE6EC1B2619FBFD007C6BBA /* Debug */,
 				9AE6EC1C2619FBFD007C6BBA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		9AE6EC1D2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrackerTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9AE6EC1E2619FBFD007C6BBA /* Debug */,
-				9AE6EC1F2619FBFD007C6BBA /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		9AE6EC202619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrackerUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9AE6EC212619FBFD007C6BBA /* Debug */,
-				9AE6EC222619FBFD007C6BBA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

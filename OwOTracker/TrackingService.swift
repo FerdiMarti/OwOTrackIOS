@@ -13,19 +13,19 @@ public class TrackingService: NSObject {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
-    var cView: ContentView?
+    var cvc: ConnectViewController?
     let logger = Logger.getInstance()
     let defaults = UserDefaults.standard
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
-    let audioSession = AVAudioSession.sharedInstance()
+    var audioSession = AVAudioSession.sharedInstance()
     
-    func start(ipAdress: String, port: String, magnetometer: Bool, cView: ContentView) {
-        self.cView = cView
+    func start(ipAdress: String, port: String, magnetometer: Bool, cvc: ConnectViewController) {
+        self.cvc = cvc
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
-        cView.loading = true
+        cvc.setLoading()
         self.registerVolButtonListener()
         UIDevice.current.isProximityMonitoringEnabled = true
         DispatchQueue.init(label: "TrackingService").async {
@@ -40,13 +40,12 @@ public class TrackingService: NSObject {
                 tries += 1
                 sleep(1)
             }
-            self.cView!.loading = false
             if (self.client!.isConnected) {
                 self.defaults.set(self.ipAdress, forKey: "ip")
                 self.defaults.set(self.port, forKey: "port")
                 self.defaults.set(self.magnetometer, forKey: "useM")
                 self.logger.addEntry("Connection established")
-                self.cView!.connected = true
+                cvc.setConnected()
                 self.gHandler = GyroHandler.getInstance()
                 self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
                 self.client!.runListener()
@@ -61,15 +60,18 @@ public class TrackingService: NSObject {
         DispatchQueue.main.async {
             UIDevice.current.isProximityMonitoringEnabled = false
         }
+        if audioSession.observationInfo != nil {
+            audioSession.removeObserver(self, forKeyPath: "outputVolume")
+        }
         do {
             try audioSession.setActive(false)
         } catch {
-            
+            print("audioSession could not be deinitialized")
         }
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
-            cView?.connected = false
+            cvc?.setUnconnected()
             logger.addEntry("Disconnected")
         }
     }
@@ -78,15 +80,9 @@ public class TrackingService: NSObject {
         if client == nil {
             return
         }
-        audioSession.removeObserver(self, forKeyPath: "outputVolume", context: nil)
-        do {
-            try audioSession.setActive(false)
-        } catch {
-            print("audioSession could not be deinitialized")
-        }
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
-        cView?.useMagnetometer = use
+        cvc?.setMagnometerToggle(use: use)
     }
     
     func registerVolButtonListener() {

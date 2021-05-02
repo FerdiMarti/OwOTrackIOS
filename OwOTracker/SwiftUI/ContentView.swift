@@ -4,7 +4,7 @@
 //
 //  Created by Ferdinand Martini on 04.04.21.
 //
-
+/*
 import SwiftUI
 
 struct ContentView: View {
@@ -154,3 +154,4 @@ struct ContentView_Previews: PreviewProvider {
         }
     }
 }
+*/

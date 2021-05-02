@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="zEe-UY-1J0">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--Sensor Status-->
+        <scene sceneID="0Rq-1D-HsV">
+            <objects>
+                <viewController title="Sensor Status" id="SoH-Nc-DUG" customClass="StatusViewController" customModule="OwOTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="wcg-nG-xaz">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Available" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="VmD-Dc-wlE">
+                                <rect key="frame" x="173.5" y="358.5" width="67.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Accelerometer" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ibe-pV-u6B">
+                                <rect key="frame" x="151" y="387.5" width="112" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Available" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QdJ-Kh-isw">
+                                <rect key="frame" x="173.5" y="408.5" width="67.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Gyrosensor" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wjL-TS-dBh">
+                                <rect key="frame" x="163" y="437.5" width="88" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Available" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xjL-Ga-Max">
+                                <rect key="frame" x="173.5" y="458.5" width="67.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Magnetometer" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4Hc-sG-jc3">
+                                <rect key="frame" x="151" y="487.5" width="112" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Available" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="d90-oz-NoL">
+                                <rect key="frame" x="173.5" y="508.5" width="67.5" height="20.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Motion Sensor" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QAn-Ti-ILk">
+                                <rect key="frame" x="152" y="337.5" width="110.5" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="xv2-GO-NvR"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="4Hc-sG-jc3" firstAttribute="top" secondItem="xjL-Ga-Max" secondAttribute="bottom" constant="8" symbolic="YES" id="77p-0L-AA9"/>
+                            <constraint firstItem="wjL-TS-dBh" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="EZd-aN-SrF"/>
+                            <constraint firstItem="wjL-TS-dBh" firstAttribute="top" secondItem="QdJ-Kh-isw" secondAttribute="bottom" constant="8" symbolic="YES" id="HSy-Sc-LWY"/>
+                            <constraint firstItem="QAn-Ti-ILk" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="JAr-Qi-IVc"/>
+                            <constraint firstItem="xjL-Ga-Max" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="JHP-vw-EA8"/>
+                            <constraint firstItem="d90-oz-NoL" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="PVJ-8a-lOq"/>
+                            <constraint firstItem="QdJ-Kh-isw" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="SJI-2H-gpM"/>
+                            <constraint firstItem="xjL-Ga-Max" firstAttribute="top" secondItem="wjL-TS-dBh" secondAttribute="bottom" id="TXp-5c-K3g"/>
+                            <constraint firstItem="Ibe-pV-u6B" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="YUz-yL-2H0"/>
+                            <constraint firstItem="wjL-TS-dBh" firstAttribute="centerY" secondItem="wcg-nG-xaz" secondAttribute="centerY" id="enc-kJ-4uy"/>
+                            <constraint firstItem="Ibe-pV-u6B" firstAttribute="top" secondItem="VmD-Dc-wlE" secondAttribute="bottom" constant="8" symbolic="YES" id="gLh-0D-jdH"/>
+                            <constraint firstItem="QdJ-Kh-isw" firstAttribute="top" secondItem="Ibe-pV-u6B" secondAttribute="bottom" id="irk-dv-Q6E"/>
+                            <constraint firstItem="4Hc-sG-jc3" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="ish-XM-b1Y"/>
+                            <constraint firstItem="d90-oz-NoL" firstAttribute="top" secondItem="4Hc-sG-jc3" secondAttribute="bottom" id="lar-0K-8cH"/>
+                            <constraint firstItem="VmD-Dc-wlE" firstAttribute="top" secondItem="QAn-Ti-ILk" secondAttribute="bottom" id="pnF-0I-Q42"/>
+                            <constraint firstItem="VmD-Dc-wlE" firstAttribute="centerX" secondItem="wcg-nG-xaz" secondAttribute="centerX" id="sP1-qX-gJG"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Sensor Status" id="55V-n6-ZaI"/>
+                    <connections>
+                        <outlet property="accelAvailable" destination="QdJ-Kh-isw" id="RRr-lB-0yY"/>
+                        <outlet property="gyroAvailable" destination="xjL-Ga-Max" id="fGk-Qw-VFX"/>
+                        <outlet property="magnetometerAvailable" destination="d90-oz-NoL" id="tdT-jG-D3J"/>
+                        <outlet property="motionAvailable" destination="VmD-Dc-wlE" id="K6k-EA-rsD"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dWs-6a-kPI" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1273.913043478261" y="-648.21428571428567"/>
+        </scene>
+        <!--Connect-->
+        <scene sceneID="sZJ-xD-hJm">
+            <objects>
+                <viewController id="f6V-EJ-gk0" customClass="ConnectViewController" customModule="OwOTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="oYn-6U-I6r">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Not Connected" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hqB-DH-5ap">
+                                <rect key="frame" x="20" y="158" width="374" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="SUD-ws-kAw">
+                                <rect key="frame" x="20" y="187" width="374" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Yxy-N1-QUs">
+                                <rect key="frame" x="20" y="229" width="374" height="34"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QWt-SS-tfd">
+                                <rect key="frame" x="347" y="271" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Use Magnetometer" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gJh-Zl-kYb">
+                                <rect key="frame" x="20" y="276" width="319" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Mq-R5-Qa8">
+                                <rect key="frame" x="177.5" y="305" width="59" height="30"/>
+                                <state key="normal" title="Connect"/>
+                                <connections>
+                                    <action selector="connectPushed:" destination="f6V-EJ-gk0" eventType="touchUpInside" id="eIc-XV-eIw"/>
+                                </connections>
+                            </button>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="qk8-p0-oFg">
+                                <rect key="frame" x="114" y="158" width="28" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="2PB-Zz-3ng"/>
+                                </constraints>
+                            </activityIndicatorView>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Logs" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="woP-Rl-emz" customClass="FadeTextView" customModule="OwOTracker" customModuleProvider="target">
+                                <rect key="frame" x="87" y="343" width="240" height="470"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="QxY-8e-Ynd"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="bottom" secondItem="QxY-8e-Ynd" secondAttribute="bottom" id="1id-db-3AM"/>
+                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="centerX" secondItem="oYn-6U-I6r" secondAttribute="centerX" id="52r-K1-YKD"/>
+                            <constraint firstItem="qk8-p0-oFg" firstAttribute="top" secondItem="hqB-DH-5ap" secondAttribute="top" id="5ol-Gm-aAz"/>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="centerX" secondItem="0Mq-R5-Qa8" secondAttribute="centerX" id="5wt-dU-e7m"/>
+                            <constraint firstItem="QWt-SS-tfd" firstAttribute="top" secondItem="Yxy-N1-QUs" secondAttribute="bottom" constant="8" symbolic="YES" id="6jd-xw-CWT"/>
+                            <constraint firstItem="hqB-DH-5ap" firstAttribute="leading" secondItem="oYn-6U-I6r" secondAttribute="leadingMargin" id="BFG-H2-v2G"/>
+                            <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="QWt-SS-tfd" secondAttribute="trailing" constant="18" id="F4j-oZ-WN0"/>
+                            <constraint firstItem="qk8-p0-oFg" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="114" id="LVL-d5-DQr"/>
+                            <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="qk8-p0-oFg" secondAttribute="trailing" constant="272" id="LVh-Fs-cis"/>
+                            <constraint firstItem="gJh-Zl-kYb" firstAttribute="centerY" secondItem="QWt-SS-tfd" secondAttribute="centerY" id="PNY-mp-ypv"/>
+                            <constraint firstItem="SUD-ws-kAw" firstAttribute="trailing" secondItem="Yxy-N1-QUs" secondAttribute="trailing" id="PmF-lF-vSO"/>
+                            <constraint firstItem="Yxy-N1-QUs" firstAttribute="top" secondItem="SUD-ws-kAw" secondAttribute="bottom" constant="8" symbolic="YES" id="QKS-OT-RZ9"/>
+                            <constraint firstItem="QWt-SS-tfd" firstAttribute="leading" secondItem="gJh-Zl-kYb" secondAttribute="trailing" constant="8" symbolic="YES" id="RCa-X2-OaO"/>
+                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="top" secondItem="gJh-Zl-kYb" secondAttribute="bottom" constant="8" symbolic="YES" id="U5W-Yu-SUQ"/>
+                            <constraint firstItem="hqB-DH-5ap" firstAttribute="trailing" secondItem="SUD-ws-kAw" secondAttribute="trailing" id="Uyl-Ha-vZi"/>
+                            <constraint firstItem="SUD-ws-kAw" firstAttribute="top" secondItem="hqB-DH-5ap" secondAttribute="bottom" constant="8" symbolic="YES" id="cH9-VU-oPI"/>
+                            <constraint firstItem="hqB-DH-5ap" firstAttribute="trailing" secondItem="oYn-6U-I6r" secondAttribute="trailingMargin" id="eTu-hG-2EA"/>
+                            <constraint firstItem="SUD-ws-kAw" firstAttribute="leading" secondItem="Yxy-N1-QUs" secondAttribute="leading" id="fCp-ff-MYs"/>
+                            <constraint firstItem="Yxy-N1-QUs" firstAttribute="leading" secondItem="gJh-Zl-kYb" secondAttribute="leading" id="mIL-uz-qWh"/>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="top" secondItem="0Mq-R5-Qa8" secondAttribute="bottom" constant="8" symbolic="YES" id="n9U-aE-R2n"/>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="87" id="tlo-93-1Gw"/>
+                            <constraint firstItem="hqB-DH-5ap" firstAttribute="leading" secondItem="SUD-ws-kAw" secondAttribute="leading" id="wZq-fr-rzG"/>
+                            <constraint firstItem="hqB-DH-5ap" firstAttribute="top" secondItem="QxY-8e-Ynd" secondAttribute="top" constant="70" id="xI2-uC-XTM"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Connect" id="270-yT-lbo"/>
+                    <connections>
+                        <outlet property="connectButton" destination="0Mq-R5-Qa8" id="WNq-1P-Ewa"/>
+                        <outlet property="ipField" destination="SUD-ws-kAw" id="mAQ-4Z-MUl"/>
+                        <outlet property="loadingIndicator" destination="qk8-p0-oFg" id="7p1-us-lQH"/>
+                        <outlet property="loggingTextView" destination="woP-Rl-emz" id="JEx-Fe-O70"/>
+                        <outlet property="magnetometerToggle" destination="QWt-SS-tfd" id="RgA-o4-R78"/>
+                        <outlet property="portField" destination="Yxy-N1-QUs" id="iVO-do-UP5"/>
+                        <outlet property="statusLabel" destination="hqB-DH-5ap" id="IMv-qg-83v"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="k4D-q7-6yi" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1273.913043478261" y="20.758928571428569"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="uTt-wc-9bB">
+            <objects>
+                <tabBarController id="zEe-UY-1J0" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="UVO-z3-yKF">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="OUF-Wc-iqK" kind="relationship" relationship="viewControllers" id="97b-wW-Ey4"/>
+                        <segue destination="Kmm-Um-itF" kind="relationship" relationship="viewControllers" id="KqL-YN-161"/>
+                        <segue destination="gnJ-1Q-9MM" kind="relationship" relationship="viewControllers" id="G6q-9F-hU0"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Bur-2F-e28" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-761" y="34"/>
+        </scene>
+        <!--Connect-->
+        <scene sceneID="RdC-fO-VFL">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Kmm-Um-itF" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Connect" image="wifi" catalog="system" selectedImage="wifi" id="mHy-19-IlS"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="r7b-MP-s9f">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="f6V-EJ-gk0" kind="relationship" relationship="rootViewController" id="ehd-Pg-1sS"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="one-oI-MI3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="364" y="21"/>
+        </scene>
+        <!--Status-->
+        <scene sceneID="qKJ-Rr-yUn">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="OUF-Wc-iqK" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Status" image="iphone.radiowaves.left.and.right" catalog="system" selectedImage="iphone.radiowaves.left.and.right" id="XZh-ct-GKM"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="XAr-hX-0mp">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="SoH-Nc-DUG" kind="relationship" relationship="rootViewController" id="3Qd-my-XBp"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="VOT-o8-g9l" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="364" y="-648"/>
+        </scene>
+        <!--Information-->
+        <scene sceneID="ilj-e6-k1b">
+            <objects>
+                <viewController id="cwi-76-Lbg" customClass="InfoViewController" customModule="OwOTracker" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XIX-EH-Ufo">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
+                                <rect key="frame" x="20" y="88" width="374" height="725"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <string key="text">Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.</string>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                        </subviews>
+                        <viewLayoutGuide key="safeArea" id="758-5m-usc"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="cuI-MH-mYI" firstAttribute="top" secondItem="758-5m-usc" secondAttribute="top" id="9Hy-zC-PrS"/>
+                            <constraint firstItem="cuI-MH-mYI" firstAttribute="leading" secondItem="XIX-EH-Ufo" secondAttribute="leadingMargin" id="RXd-Ic-Csj"/>
+                            <constraint firstItem="cuI-MH-mYI" firstAttribute="bottom" secondItem="758-5m-usc" secondAttribute="bottom" id="sga-6j-aZD"/>
+                            <constraint firstItem="cuI-MH-mYI" firstAttribute="trailing" secondItem="XIX-EH-Ufo" secondAttribute="trailingMargin" id="slD-N8-hWW"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" title="Information" id="OQA-Yx-M6x"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="umz-jK-0RA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1273.913043478261" y="714.50892857142856"/>
+        </scene>
+        <!--Information-->
+        <scene sceneID="ucr-q1-SCe">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="gnJ-1Q-9MM" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Information" image="info.circle" catalog="system" selectedImage="info.circle" id="fBW-Pn-ID1"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="35s-jU-f6w">
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="cwi-76-Lbg" kind="relationship" relationship="rootViewController" id="ylp-hG-LC4"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SB3-GJ-2va" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="362" y="715"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="info.circle" catalog="system" width="128" height="121"/>
+        <image name="iphone.radiowaves.left.and.right" catalog="system" width="128" height="86"/>
+        <image name="wifi" catalog="system" width="128" height="91"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

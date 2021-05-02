@@ -246,6 +246,7 @@ class UDPGyroProviderClient {
         logger.addEntry("Recentered Yaw")
     }
     
+    /*
     func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
         // make sure that the device supports haptics
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }
@@ -274,7 +275,7 @@ class UDPGyroProviderClient {
             return false
         }
         return true
-    }
+    }*/
     
     func vibrate() {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
