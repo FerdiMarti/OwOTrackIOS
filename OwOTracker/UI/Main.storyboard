@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -219,7 +220,9 @@
         <scene sceneID="RdC-fO-VFL">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Kmm-Um-itF" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Connect" image="wifi" catalog="system" selectedImage="wifi" id="mHy-19-IlS"/>
+                    <tabBarItem key="tabBarItem" title="Connect" image="connect" id="mHy-19-IlS">
+                        <imageReference key="selectedImage" image="connect" symbolScale="medium" renderingMode="original"/>
+                    </tabBarItem>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="r7b-MP-s9f">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
@@ -238,7 +241,7 @@
         <scene sceneID="qKJ-Rr-yUn">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="OUF-Wc-iqK" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Status" image="iphone.radiowaves.left.and.right" catalog="system" selectedImage="iphone.radiowaves.left.and.right" id="XZh-ct-GKM"/>
+                    <tabBarItem key="tabBarItem" title="Status" image="status" selectedImage="status" id="XZh-ct-GKM"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="XAr-hX-0mp">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
@@ -289,7 +292,7 @@
         <scene sceneID="ucr-q1-SCe">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="gnJ-1Q-9MM" sceneMemberID="viewController">
-                    <tabBarItem key="tabBarItem" title="Information" image="info.circle" catalog="system" selectedImage="info.circle" id="fBW-Pn-ID1"/>
+                    <tabBarItem key="tabBarItem" title="Information" image="info" selectedImage="info" id="fBW-Pn-ID1"/>
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="35s-jU-f6w">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
@@ -306,9 +309,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="info.circle" catalog="system" width="128" height="121"/>
-        <image name="iphone.radiowaves.left.and.right" catalog="system" width="128" height="86"/>
-        <image name="wifi" catalog="system" width="128" height="91"/>
+        <image name="connect" width="23" height="23"/>
+        <image name="info" width="23" height="23"/>
+        <image name="status" width="23" height="23"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

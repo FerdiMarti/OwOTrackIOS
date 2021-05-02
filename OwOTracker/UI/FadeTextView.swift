@@ -9,7 +9,7 @@ import UIKit
 
 class FadeTextView: UITextView, UITextViewDelegate {
 
-    let fadePercentage: Double = 0.2
+    let fadePercentage: Double = 0.15
     let gradientLayer = CAGradientLayer()
     let transparentColor = UIColor.clear.cgColor
     let opaqueColor = UIColor.black.cgColor
