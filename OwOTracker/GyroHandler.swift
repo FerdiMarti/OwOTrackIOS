@@ -29,7 +29,8 @@ public class GyroHandler {
         sensorQueue.name = "SensorQueue"
         mmanager.deviceMotionUpdateInterval = 0.01
         mmanager.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
-            if let quat = MotionData?.attitude.quaternion {
+            if let md = MotionData {
+                let quat = md.attitude.quaternion
                 var xi = Float(quat.x).bitPattern.bigEndian
                 var yi = Float(quat.y).bitPattern.bigEndian
                 var zi = Float(quat.z).bitPattern.bigEndian
