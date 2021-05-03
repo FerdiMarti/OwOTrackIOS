@@ -8,8 +8,9 @@
 import Foundation
 import UIKit
 import AVFoundation
+import CoreLocation
 
-public class TrackingService: NSObject {
+public class TrackingService: NSObject, CLLocationManagerDelegate {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
@@ -19,6 +20,7 @@ public class TrackingService: NSObject {
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
     var audioSession = AVAudioSession.sharedInstance()
+    let locationManager = CLLocationManager()
     
     func start(ipAdress: String, port: String, magnetometer: Bool, cvc: ConnectViewController) {
         self.cvc = cvc
@@ -27,7 +29,7 @@ public class TrackingService: NSObject {
         self.magnetometer = magnetometer
         cvc.setLoading()
         self.registerVolButtonListener()
-        UIDevice.current.isProximityMonitoringEnabled = true
+        startBackgroundUsage()
         DispatchQueue.init(label: "TrackingService").async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             if self.client == nil {
@@ -68,6 +70,7 @@ public class TrackingService: NSObject {
         } catch {
             print("audioSession could not be deinitialized")
         }
+        locationManager.stopUpdatingLocation()
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
@@ -98,5 +101,30 @@ public class TrackingService: NSObject {
         if keyPath == "outputVolume" {
             client?.recenterYaw()
         }
+    }
+    
+    func startBackgroundUsage() {
+        locationManager.requestAlwaysAuthorization()
+        if CLLocationManager.locationServicesEnabled() {
+            switch CLLocationManager.authorizationStatus() {
+                case .notDetermined, .restricted, .denied:
+                    startProximitySensor()
+                case .authorizedAlways, .authorizedWhenInUse:
+                    print("Access")
+                @unknown default:
+                break
+            }
+        } else {
+                startProximitySensor()
+        }
+        locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+        locationManager.distanceFilter = 99999
+        locationManager.delegate = self
+        locationManager.startUpdatingLocation()
+    }
+    
+    func startProximitySensor() {
+        UIDevice.current.isProximityMonitoringEnabled = true
     }
 }
