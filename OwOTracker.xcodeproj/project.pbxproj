@@ -12,7 +12,7 @@
 		9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
 		9A728BDC263E018400E8605D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
 		9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BDD263E020E00E8605D /* ConnectViewController.swift */; };
-		9A728BE0263E139800E8605D /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* Launch Screen.storyboard */; };
+		9A728BE0263E139800E8605D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* LaunchScreen.storyboard */; };
 		9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE2263E143F00E8605D /* InfoViewController.swift */; };
 		9A728BE5263E144A00E8605D /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE4263E144A00E8605D /* StatusViewController.swift */; };
 		9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
@@ -33,7 +33,7 @@
 		9A728BD9263E00BB00E8605D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		9A728BDB263E018400E8605D /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		9A728BDD263E020E00E8605D /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
-		9A728BDF263E139800E8605D /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		9A728BDF263E139800E8605D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9A728BE2263E143F00E8605D /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
 		9A728BE4263E144A00E8605D /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
 		9A728BE6263E3DF900E8605D /* FadeTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FadeTextView.swift; sourceTree = "<group>"; };
@@ -77,7 +77,7 @@
 				9A728BE6263E3DF900E8605D /* FadeTextView.swift */,
 				9A728BE2263E143F00E8605D /* InfoViewController.swift */,
 				9A728BE4263E144A00E8605D /* StatusViewController.swift */,
-				9A728BDF263E139800E8605D /* Launch Screen.storyboard */,
+				9A728BDF263E139800E8605D /* LaunchScreen.storyboard */,
 				9A728BDB263E018400E8605D /* Main.storyboard */,
 				9A728BB7263DFFBD00E8605D /* AppDelegate.swift */,
 				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
@@ -194,7 +194,7 @@
 			files = (
 				9A728BDC263E018400E8605D /* Main.storyboard in Resources */,
 				9AE6EC002619FBFD007C6BBA /* Preview Assets.xcassets in Resources */,
-				9A728BE0263E139800E8605D /* Launch Screen.storyboard in Resources */,
+				9A728BE0263E139800E8605D /* LaunchScreen.storyboard in Resources */,
 				9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
