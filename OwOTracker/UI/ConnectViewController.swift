@@ -14,12 +14,14 @@ class ConnectViewController: UIViewController {
     @IBOutlet weak var portField: UITextField!
     @IBOutlet weak var magnetometerToggle: UISwitch!
     @IBOutlet weak var connectButton: UIButton!
+    @IBOutlet weak var discoverButton: UIButton!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
     @IBOutlet weak var loggingTextView: UITextView!
     
     let defaults = UserDefaults.standard
     let logger = Logger.getInstance()
     let tService = TrackingService()
+    let discoverer = AutoDiscovery()
     
     var isConnected = false
     var isLoading = false
@@ -49,6 +51,19 @@ class ConnectViewController: UIViewController {
         }
     }
     
+    @IBAction func discoverPushed(_ sender: Any) {
+        setLoading()
+        discoverer.sendDiscovery(cb: { (error, ip, port) in
+            if (error) {
+                self.setUnconnected()
+                return
+            }
+            self.ipField.text = ip
+            self.portField.text = port
+            self.setUnconnected()
+        })
+    }
+    
     @IBAction func connectPushed(_ sender: Any) {
         if isConnected {
             tService.stop()
@@ -73,6 +88,7 @@ class ConnectViewController: UIViewController {
             self.connectButton.setTitle("Connect", for: .focused)
             self.connectButton.setTitle("Connect", for: .normal)
             self.connectButton.setTitle("Connect", for: .selected)
+            self.discoverButton.isEnabled = false
             self.loggingTextView.text = ""
             self.loadingIndicator.startAnimating()
         }
@@ -93,6 +109,7 @@ class ConnectViewController: UIViewController {
             self.connectButton.setTitle("Disconnect", for: .focused)
             self.connectButton.setTitle("Disconnect", for: .normal)
             self.connectButton.setTitle("Disconnect", for: .selected)
+            self.discoverButton.isEnabled = false
             self.loadingIndicator.stopAnimating()
         }
     }
@@ -111,6 +128,7 @@ class ConnectViewController: UIViewController {
             self.connectButton.setTitle("Connect", for: .focused)
             self.connectButton.setTitle("Connect", for: .normal)
             self.connectButton.setTitle("Connect", for: .selected)
+            self.discoverButton.isEnabled = true
             self.loadingIndicator.stopAnimating()
         }
     }

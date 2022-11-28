@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="zEe-UY-1J0">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="zEe-UY-1J0">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -134,7 +134,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0Mq-R5-Qa8">
-                                <rect key="frame" x="177.5" y="305" width="59" height="30"/>
+                                <rect key="frame" x="268" y="305" width="59" height="30"/>
                                 <state key="normal" title="Connect"/>
                                 <connections>
                                     <action selector="connectPushed:" destination="f6V-EJ-gk0" eventType="touchUpInside" id="eIc-XV-eIw"/>
@@ -153,16 +153,23 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nRE-ww-1dT">
+                                <rect key="frame" x="87" y="305" width="60" height="30"/>
+                                <state key="normal" title="Discover"/>
+                                <connections>
+                                    <action selector="discoverPushed:" destination="f6V-EJ-gk0" eventType="touchUpInside" id="Zip-C6-5Tk"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="QxY-8e-Ynd"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="woP-Rl-emz" firstAttribute="bottom" secondItem="QxY-8e-Ynd" secondAttribute="bottom" id="1id-db-3AM"/>
-                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="centerX" secondItem="oYn-6U-I6r" secondAttribute="centerX" id="52r-K1-YKD"/>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="top" secondItem="0Mq-R5-Qa8" secondAttribute="bottom" constant="8" symbolic="YES" id="2st-co-LBg"/>
                             <constraint firstItem="qk8-p0-oFg" firstAttribute="top" secondItem="hqB-DH-5ap" secondAttribute="top" id="5ol-Gm-aAz"/>
-                            <constraint firstItem="woP-Rl-emz" firstAttribute="centerX" secondItem="0Mq-R5-Qa8" secondAttribute="centerX" id="5wt-dU-e7m"/>
                             <constraint firstItem="QWt-SS-tfd" firstAttribute="top" secondItem="Yxy-N1-QUs" secondAttribute="bottom" constant="8" symbolic="YES" id="6jd-xw-CWT"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="leading" secondItem="oYn-6U-I6r" secondAttribute="leadingMargin" id="BFG-H2-v2G"/>
+                            <constraint firstItem="nRE-ww-1dT" firstAttribute="baseline" secondItem="0Mq-R5-Qa8" secondAttribute="baseline" id="E0h-ry-O21"/>
                             <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="QWt-SS-tfd" secondAttribute="trailing" constant="18" id="F4j-oZ-WN0"/>
                             <constraint firstItem="qk8-p0-oFg" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="114" id="LVL-d5-DQr"/>
                             <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="qk8-p0-oFg" secondAttribute="trailing" constant="272" id="LVh-Fs-cis"/>
@@ -170,21 +177,24 @@
                             <constraint firstItem="SUD-ws-kAw" firstAttribute="trailing" secondItem="Yxy-N1-QUs" secondAttribute="trailing" id="PmF-lF-vSO"/>
                             <constraint firstItem="Yxy-N1-QUs" firstAttribute="top" secondItem="SUD-ws-kAw" secondAttribute="bottom" constant="8" symbolic="YES" id="QKS-OT-RZ9"/>
                             <constraint firstItem="QWt-SS-tfd" firstAttribute="leading" secondItem="gJh-Zl-kYb" secondAttribute="trailing" constant="8" symbolic="YES" id="RCa-X2-OaO"/>
-                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="top" secondItem="gJh-Zl-kYb" secondAttribute="bottom" constant="8" symbolic="YES" id="U5W-Yu-SUQ"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="trailing" secondItem="SUD-ws-kAw" secondAttribute="trailing" id="Uyl-Ha-vZi"/>
+                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="top" secondItem="gJh-Zl-kYb" secondAttribute="bottom" constant="8" symbolic="YES" id="ZYD-Co-vK9"/>
                             <constraint firstItem="SUD-ws-kAw" firstAttribute="top" secondItem="hqB-DH-5ap" secondAttribute="bottom" constant="8" symbolic="YES" id="cH9-VU-oPI"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="trailing" secondItem="oYn-6U-I6r" secondAttribute="trailingMargin" id="eTu-hG-2EA"/>
                             <constraint firstItem="SUD-ws-kAw" firstAttribute="leading" secondItem="Yxy-N1-QUs" secondAttribute="leading" id="fCp-ff-MYs"/>
+                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="trailing" secondItem="woP-Rl-emz" secondAttribute="trailing" id="hgA-1h-kjy"/>
+                            <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="0Mq-R5-Qa8" secondAttribute="trailing" constant="87" id="jZk-VA-ZNZ"/>
                             <constraint firstItem="Yxy-N1-QUs" firstAttribute="leading" secondItem="gJh-Zl-kYb" secondAttribute="leading" id="mIL-uz-qWh"/>
-                            <constraint firstItem="woP-Rl-emz" firstAttribute="top" secondItem="0Mq-R5-Qa8" secondAttribute="bottom" constant="8" symbolic="YES" id="n9U-aE-R2n"/>
                             <constraint firstItem="woP-Rl-emz" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="87" id="tlo-93-1Gw"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="leading" secondItem="SUD-ws-kAw" secondAttribute="leading" id="wZq-fr-rzG"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="top" secondItem="QxY-8e-Ynd" secondAttribute="top" constant="70" id="xI2-uC-XTM"/>
+                            <constraint firstItem="nRE-ww-1dT" firstAttribute="leading" secondItem="woP-Rl-emz" secondAttribute="leading" id="y7Q-mk-cra"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Connect" id="270-yT-lbo"/>
                     <connections>
                         <outlet property="connectButton" destination="0Mq-R5-Qa8" id="WNq-1P-Ewa"/>
+                        <outlet property="discoverButton" destination="nRE-ww-1dT" id="LXW-B2-9T9"/>
                         <outlet property="ipField" destination="SUD-ws-kAw" id="mAQ-4Z-MUl"/>
                         <outlet property="loadingIndicator" destination="qk8-p0-oFg" id="7p1-us-lQH"/>
                         <outlet property="loggingTextView" destination="woP-Rl-emz" id="JEx-Fe-O70"/>
@@ -267,7 +277,7 @@
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
                                 <rect key="frame" x="20" y="88" width="374" height="725"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <mutableString key="text">Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.   If you want the app to stay connected while running in the background or while the phone is locked, you have to give the app permission to always use location data.  Your location data will not be used by me or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is opened. Also the proximity sensor will be activated so that the screen turns off if it is covered by anything (like during a phone call).</mutableString>
+                                <string key="text">Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.   If you want the app to stay connected while running in the background or while the phone is locked, you have to give the app permission to always use location data.  Your location data will not be used by me or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is opened. Also the proximity sensor will be activated so that the screen turns off if it is covered by anything (like during a phone call).</string>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
@@ -283,6 +293,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Information" id="OQA-Yx-M6x"/>
+                    <connections>
+                        <outlet property="logView" destination="cuI-MH-mYI" id="oW6-QX-uky"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="umz-jK-0RA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -309,9 +322,9 @@
         </scene>
     </scenes>
     <resources>
-        <image name="connect" width="23" height="23"/>
-        <image name="info" width="23" height="23"/>
-        <image name="status" width="23" height="23"/>
+        <image name="connect" width="32" height="32"/>
+        <image name="info" width="32" height="32"/>
+        <image name="status" width="32" height="32"/>
         <systemColor name="labelColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

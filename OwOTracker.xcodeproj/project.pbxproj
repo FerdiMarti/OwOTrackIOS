@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		9A08069D261B565400F92566 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
+		9A4EF2AD29302C7E0060FE20 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
+		9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
+		9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
 		9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
 		9A728BDC263E018400E8605D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
@@ -29,6 +32,9 @@
 
 /* Begin PBXFileReference section */
 		9A08069C261B565400F92566 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoDiscovery.swift; sourceTree = "<group>"; };
+		9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnection.swift; sourceTree = "<group>"; };
+		9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnectionError.swift; sourceTree = "<group>"; };
 		9A728BB7263DFFBD00E8605D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		9A728BD9263E00BB00E8605D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		9A728BDB263E018400E8605D /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -61,6 +67,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9A4EF2AE293046B20060FE20 /* Lib */ = {
+			isa = PBXGroup;
+			children = (
+				9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */,
+				9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */,
+			);
+			path = Lib;
+			sourceTree = "<group>";
+		};
 		9A728BB6263DD06100E8605D /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
@@ -104,6 +119,7 @@
 		9AE6EBF72619FBFB007C6BBA /* OwOTracker */ = {
 			isa = PBXGroup;
 			children = (
+				9A4EF2AE293046B20060FE20 /* Lib */,
 				9A728BE1263E13C000E8605D /* UI */,
 				9A728BB6263DD06100E8605D /* SwiftUI */,
 				9AE6EC262619FCA0007C6BBA /* math */,
@@ -114,6 +130,7 @@
 				9AE6EC4C261A369D007C6BBA /* TrackingService.swift */,
 				9AE6EC51261A3755007C6BBA /* GyroHandler.swift */,
 				9A08069C261B565400F92566 /* Logger.swift */,
+				9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */,
 			);
 			path = OwOTracker;
 			sourceTree = "<group>";
@@ -206,9 +223,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */,
 				9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */,
 				9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */,
 				9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */,
+				9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */,
 				9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */,
 				9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */,
 				9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */,
@@ -219,6 +238,7 @@
 				9AE6EC4D261A369D007C6BBA /* TrackingService.swift in Sources */,
 				9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */,
 				9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */,
+				9A4EF2AD29302C7E0060FE20 /* AutoDiscovery.swift in Sources */,
 				9A08069D261B565400F92566 /* Logger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -348,9 +368,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
+				ENABLE_BITCODE = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = OwOTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
@@ -358,7 +379,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -372,9 +393,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTracker/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
+				ENABLE_BITCODE = YES;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = OwOTracker/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
@@ -382,7 +404,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4;
+				MARKETING_VERSION = 1.5;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
