@@ -125,6 +125,11 @@ class UDPGyroProviderClient {
 
     func receiveUDP(cb: @escaping (Data) -> Void) {
         self.connection?.receiveMessage { (data, context, isComplete, error) in
+            if (error != nil) {
+                print("Error while receiving: \(error!)")
+                return
+            }
+            
             if (isComplete) {
                 if (data != nil) {
                     cb(data!)
@@ -136,37 +141,42 @@ class UDPGyroProviderClient {
     }
     
     func runListener() {
-        while (self.isConnected) {
-            if !self.checkConnection() {
-                return
-            }
-            sleep(1)
-            self.receiveUDP(cb: { data in
-                self.lastHeartbeat = Date().timeIntervalSince1970;
-                var msgType : UInt8 = 0
-                data.copyBytes(to: &msgType, count: 4)
-                if msgType == 1 {
-                    // heartbeat
-                } else if msgType == 2 {
-                    // vibrate
-                    var restData = data.advanced(by: 4)
-                    let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-                    restData = restData.advanced(by: 4)
-                    let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-                    restData = restData.advanced(by: 4)
-                    let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-                    /* if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                        self.vibrate()
-                    } */
-                    self.vibrate()
-                } else if msgType == 7 {
-                    let restData = data.advanced(by: 4)
-                    let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
-                    self.service.toggleMagnetometerUse(use: m == "y")
-                } else {
-                    print("Unknown message type \(msgType)")
+        self.receiveUDP(cb: { data in
+            self.processReceivedData(data: data)
+            if self.isConnected {
+                if !self.checkConnection() {
+                    return
                 }
-            })
+                self.runListener()
+            }
+        })
+    }
+    
+    func processReceivedData(data: Data) {
+        self.lastHeartbeat = Date().timeIntervalSince1970;
+        var msgType : UInt8 = 0
+        data.copyBytes(to: &msgType, count: 4)
+        print(msgType)
+        if msgType == 1 {
+            // heartbeat
+        } else if msgType == 2 {
+            // vibrate
+            var restData = data.advanced(by: 4)
+            let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            restData = restData.advanced(by: 4)
+            let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            restData = restData.advanced(by: 4)
+            let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            /* if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                self.vibrate()
+            } */
+            self.vibrate()
+        } else if msgType == 7 {
+            let restData = data.advanced(by: 4)
+            let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            self.service.toggleMagnetometerUse(use: m == "y")
+        } else {
+            print("Unknown message type \(msgType)")
         }
     }
     
