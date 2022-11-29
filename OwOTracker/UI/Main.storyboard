@@ -293,9 +293,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Information" id="OQA-Yx-M6x"/>
-                    <connections>
-                        <outlet property="logView" destination="cuI-MH-mYI" id="oW6-QX-uky"/>
-                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="umz-jK-0RA" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
