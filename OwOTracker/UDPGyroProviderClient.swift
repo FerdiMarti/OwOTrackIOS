@@ -66,29 +66,78 @@ class UDPGyroProviderClient {
         self.connection?.start(queue: DispatchQueue(label: "UDPConnection"))
     }
     
-    func handshake() {
-        var data = Data(capacity: 12)
+    func buildHeaderInfo(slime: Bool) -> Data {
+        var len = 12
+        if slime { len += 36 + 9 }
+        
+        var data = Data(capacity: len)
+        
         var first = Int32(bigEndian: 3)
         var second = Int64(bigEndian: 0)
         data.append(UnsafeBufferPointer(start: &first, count: 1))
         data.append(UnsafeBufferPointer(start: &second, count: 1))
         
+        if !slime {
+            return data
+        }
+        
+        var boardType = Int32(bigEndian: 0)
+        var imuType = Int32(bigEndian: 0)
+        var mcuType = Int32(bigEndian: 0)
+        var imuInfo : [Int32] = [0, 0, 0]
+        var firmwareBuild = Int32(bigEndian: 8)
+        var firmware = "owotrack8" // 9 bytes
+        var firmwareData = Data(firmware.utf8)
+        var firmwareLength : UInt8 = UInt8(firmware.count)
+        var pseudoMac : [UInt8] = [0, 69, 0, 0, 0, 0]
+        data.append(UnsafeBufferPointer(start: &boardType, count: 1))
+        data.append(UnsafeBufferPointer(start: &imuType, count: 1))
+        data.append(UnsafeBufferPointer(start: &mcuType, count: 1))
+        for i in imuInfo {
+            var d = i
+            data.append(UnsafeBufferPointer(start: &d, count: 1))
+        }
+        data.append(UnsafeBufferPointer(start: &firmwareBuild, count: 1))
+        data.append(UnsafeBufferPointer(start: &firmwareLength, count: 1))
+        data.append(firmwareData)
+        for i in pseudoMac {
+            var d = i
+            data.append(UnsafeBufferPointer(start: &d, count: 1))
+        }
+        data.append(UInt8(255))
+        
+        return data
+    }
+    
+    func handshake() {
         var tries = 0;
         while(!isConnected && tries <= 12) {
+            // if the user is running an old version of owoTrackVR driver,
+            // recvfrom() will fail as the max packet length the old driver
+            // supported was around 28 bytes. to maintain backwards
+            // compatibility the slime extensions are not sent after a
+            // certain number of failures
+            let sendSlimeExtensions = (tries < 7)
+            let sendData = buildHeaderInfo(slime: false)
+            print(sendData)
+            print(String(data: sendData, encoding: .utf8))
+            
             tries += 1;
-            sendUDP(data)
+            sendUDP(sendData)
             self.connection?.receiveMessage { (data, context, isComplete, error) in
                 if (isComplete && !self.isConnected) {
                     if (data != nil) {
                         var result = String(data: data!, encoding: .ascii)!
                         if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
                             self.logger.addEntry("Handshake Failed")
+                            self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
                             self.service.stop()
                             return
                         }
                         result = String(result[result.index(result.startIndex, offsetBy: 1)...])
                         if (!result.hasPrefix("Hey OVR =D")) {
                             self.logger.addEntry("Handshake Failed")
+                            self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
                             self.service.stop()
                             return
                         }
@@ -97,14 +146,22 @@ class UDPGyroProviderClient {
                         let version = Int(result)!;
                         if (version != UDPGyroProviderClient.CURRENT_VERSION) {
                             self.logger.addEntry("Handshake Failed")
+                            self.logger.addEntry("Handshake failed, mismatching version"
+                                                 + "\nServer version: \(version)"
+                                                 + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
+                                                 + "\nPlease make sure everything is up to date.")
                             self.service.stop()
                             return
                         }
                         self.logger.addEntry("Handshake Succeded")
+                        if !sendSlimeExtensions {
+                            self.logger.addEntry("Your overlay appears out-of-date with no non-fatal support for longer packet lengths, please update it")
+                        }
                         self.successfulHandshake()
                         return
                     } else {
                         self.logger.addEntry("Handshake Failed")
+                        self.logger.addEntry("Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data)")
                         self.service.stop()
                         return
                     }

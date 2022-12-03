@@ -147,7 +147,7 @@
                                 </constraints>
                             </activityIndicatorView>
                             <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Logs" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="woP-Rl-emz" customClass="FadeTextView" customModule="OwOTracker" customModuleProvider="target">
-                                <rect key="frame" x="87" y="343" width="240" height="470"/>
+                                <rect key="frame" x="20" y="343" width="374" height="470"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -182,13 +182,13 @@
                             <constraint firstItem="SUD-ws-kAw" firstAttribute="top" secondItem="hqB-DH-5ap" secondAttribute="bottom" constant="8" symbolic="YES" id="cH9-VU-oPI"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="trailing" secondItem="oYn-6U-I6r" secondAttribute="trailingMargin" id="eTu-hG-2EA"/>
                             <constraint firstItem="SUD-ws-kAw" firstAttribute="leading" secondItem="Yxy-N1-QUs" secondAttribute="leading" id="fCp-ff-MYs"/>
-                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="trailing" secondItem="woP-Rl-emz" secondAttribute="trailing" id="hgA-1h-kjy"/>
+                            <constraint firstItem="0Mq-R5-Qa8" firstAttribute="trailing" secondItem="woP-Rl-emz" secondAttribute="trailing" constant="-67" id="hgA-1h-kjy"/>
                             <constraint firstItem="QxY-8e-Ynd" firstAttribute="trailing" secondItem="0Mq-R5-Qa8" secondAttribute="trailing" constant="87" id="jZk-VA-ZNZ"/>
                             <constraint firstItem="Yxy-N1-QUs" firstAttribute="leading" secondItem="gJh-Zl-kYb" secondAttribute="leading" id="mIL-uz-qWh"/>
-                            <constraint firstItem="woP-Rl-emz" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="87" id="tlo-93-1Gw"/>
+                            <constraint firstItem="woP-Rl-emz" firstAttribute="leading" secondItem="QxY-8e-Ynd" secondAttribute="leading" constant="20" id="tlo-93-1Gw"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="leading" secondItem="SUD-ws-kAw" secondAttribute="leading" id="wZq-fr-rzG"/>
                             <constraint firstItem="hqB-DH-5ap" firstAttribute="top" secondItem="QxY-8e-Ynd" secondAttribute="top" constant="70" id="xI2-uC-XTM"/>
-                            <constraint firstItem="nRE-ww-1dT" firstAttribute="leading" secondItem="woP-Rl-emz" secondAttribute="leading" id="y7Q-mk-cra"/>
+                            <constraint firstItem="nRE-ww-1dT" firstAttribute="leading" secondItem="woP-Rl-emz" secondAttribute="leading" constant="67" id="y7Q-mk-cra"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Connect" id="270-yT-lbo"/>
