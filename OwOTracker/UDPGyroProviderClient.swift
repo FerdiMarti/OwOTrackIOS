@@ -21,6 +21,7 @@ class UDPGyroProviderClient {
     var isConnected: Bool = false
     var lastHeartbeat: Double = 0
     var service: TrackingService
+    var connectionCheckTimer : Timer?
     
     public static var CURRENT_VERSION = 5
     
@@ -34,6 +35,7 @@ class UDPGyroProviderClient {
         logger.addEntry("Disconnecting Client")
         connection?.cancel()
         isConnected = false
+        connectionCheckTimer?.invalidate()
     }
 
     func connectToUDP() {
@@ -99,8 +101,7 @@ class UDPGyroProviderClient {
                             return
                         }
                         self.logger.addEntry("Handshake Succeded")
-                        self.isConnected = true
-                        self.lastHeartbeat = Date().timeIntervalSince1970;
+                        self.successfulHandshake()
                         return
                     } else {
                         self.logger.addEntry("Handshake Failed")
@@ -111,6 +112,16 @@ class UDPGyroProviderClient {
             }
         }
         self.logger.addEntry("Handshake Failed")
+    }
+    
+    func successfulHandshake() {
+        self.isConnected = true
+        self.lastHeartbeat = Date().timeIntervalSince1970;
+        DispatchQueue.main.async {
+            self.connectionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) in
+                self.checkConnection()
+            }
+        }
     }
 
     func sendUDP(_ content: Data) {
@@ -156,9 +167,10 @@ class UDPGyroProviderClient {
         self.lastHeartbeat = Date().timeIntervalSince1970;
         var msgType : UInt8 = 0
         data.copyBytes(to: &msgType, count: 4)
-        print(msgType)
-        if msgType == 1 {
-            // heartbeat
+        if msgType == 0 {
+            // Slime heartbeat
+        } else if msgType == 1 {
+            // OwODriver heartbeat
         } else if msgType == 2 {
             // vibrate
             var restData = data.advanced(by: 4)
@@ -171,12 +183,15 @@ class UDPGyroProviderClient {
                 self.vibrate()
             } */
             self.vibrate()
+        } else if msgType == 3 {
+            //Leftover Handshake Message
         } else if msgType == 7 {
             let restData = data.advanced(by: 4)
             let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
             self.service.toggleMagnetometerUse(use: m == "y")
         } else {
             print("Unknown message type \(msgType)")
+            print("Data \(String(data: data, encoding: .utf8))")
         }
     }
     
