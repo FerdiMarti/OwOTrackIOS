@@ -28,6 +28,8 @@ public class GyroHandler {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
         mmanager.deviceMotionUpdateInterval = 0.01
+        mmanager.gyroUpdateInterval = 0.01
+        mmanager.accelerometerUpdateInterval = 0.01
         mmanager.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
             if let md = MotionData {
                 let quat = md.attitude.quaternion
@@ -41,6 +43,30 @@ public class GyroHandler {
                 let w = Data(buffer: UnsafeBufferPointer(start: &wi, count: 1))
                 let data = [x, y, z, w]
                 client.provideRot(rot: data)
+            }
+        })
+        mmanager.startGyroUpdates(to: sensorQueue, withHandler: { (gyroData, Error) in
+            if let gd = gyroData {
+                var xi = Float(gd.rotationRate.x).bitPattern.bigEndian
+                var yi = Float(gd.rotationRate.y).bitPattern.bigEndian
+                var zi = Float(gd.rotationRate.z).bitPattern.bigEndian
+                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+                let data = [x, y, z]
+                client.provideGyro(gyro: data)
+            }
+        })
+        mmanager.startAccelerometerUpdates(to: sensorQueue, withHandler: { (accelData, Error) in
+            if let ad = accelData {
+                var xi = Float(ad.acceleration.x).bitPattern.bigEndian
+                var yi = Float(ad.acceleration.y).bitPattern.bigEndian
+                var zi = Float(ad.acceleration.z).bitPattern.bigEndian
+                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
+                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
+                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
+                let data = [x, y, z]
+                client.provideAccel(accel: data)
             }
         })
     }

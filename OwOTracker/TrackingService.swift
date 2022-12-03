@@ -61,6 +61,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     func stop() {
         DispatchQueue.main.async {
             UIDevice.current.isProximityMonitoringEnabled = false
+            UIDevice.current.isBatteryMonitoringEnabled = false
         }
         if audioSession.observationInfo != nil {
             audioSession.removeObserver(self, forKeyPath: "outputVolume")
@@ -99,7 +100,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "outputVolume" {
-            client?.recenterYaw()
+            client?.buttonPushed()
         }
     }
     
@@ -126,5 +127,13 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     
     func startProximitySensor() {
         UIDevice.current.isProximityMonitoringEnabled = true
+    }
+    
+    func startBatterLevelMonitoring() {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+    }
+    
+    func getBatteryLevel() -> Int {
+        return Int(UIDevice.current.batteryLevel * 100)
     }
 }

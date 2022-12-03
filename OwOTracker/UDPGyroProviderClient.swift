@@ -10,6 +10,21 @@ import Network
 import CoreHaptics
 import AudioToolbox
 
+class PacketTypes {
+    static let HEARTBEAT = 0;
+    static let ROTATION = 1;
+    static let GYRO = 2;
+    static let HANDSHAKE = 3;
+    static let ACCEL = 4;
+    static let PING_PONG = 10;
+    static let BATTERY_LEVEL = 12;
+    static let BUTTON_PUSHED = 60;
+    static let SEND_MAG_STATUS = 61;
+    static let CHANGE_MAG_STATUS = 62;
+    static let RECEIVE_HEARTBEAT = 1;
+    static let RECEIVE_VIBRATE = 2;
+}
+
 class UDPGyroProviderClient {
 
     var connection: NWConnection?
@@ -86,10 +101,10 @@ class UDPGyroProviderClient {
         var mcuType = Int32(bigEndian: 0)
         var imuInfo : [Int32] = [0, 0, 0]
         var firmwareBuild = Int32(bigEndian: 8)
-        var firmware = "owotrack8" // 9 bytes
+        var firmware = "owoTrack8" // 9 bytes
         var firmwareData = Data(firmware.utf8)
         var firmwareLength : UInt8 = UInt8(firmware.count)
-        var pseudoMac : [UInt8] = [0, 69, 0, 0, 0, 0]
+        var pseudoMac : [UInt8] = [79, 54, 74, 24, 71, 37]
         data.append(UnsafeBufferPointer(start: &boardType, count: 1))
         data.append(UnsafeBufferPointer(start: &imuType, count: 1))
         data.append(UnsafeBufferPointer(start: &mcuType, count: 1))
@@ -98,13 +113,12 @@ class UDPGyroProviderClient {
             data.append(UnsafeBufferPointer(start: &d, count: 1))
         }
         data.append(UnsafeBufferPointer(start: &firmwareBuild, count: 1))
-        data.append(UnsafeBufferPointer(start: &firmwareLength, count: 1))
+        data.append(firmwareLength)
         data.append(firmwareData)
         for i in pseudoMac {
-            var d = i
-            data.append(UnsafeBufferPointer(start: &d, count: 1))
+            data.append(i)
         }
-        data.append(UInt8(255))
+        data.append(UInt8(0xff))
         
         return data
     }
@@ -118,9 +132,9 @@ class UDPGyroProviderClient {
             // compatibility the slime extensions are not sent after a
             // certain number of failures
             let sendSlimeExtensions = (tries < 7)
-            let sendData = buildHeaderInfo(slime: false)
+            let sendData = buildHeaderInfo(slime: sendSlimeExtensions)
             print(sendData)
-            print(String(data: sendData, encoding: .utf8))
+            print(String(data: sendData, encoding: .ascii))
             
             tries += 1;
             sendUDP(sendData)
@@ -224,11 +238,11 @@ class UDPGyroProviderClient {
         self.lastHeartbeat = Date().timeIntervalSince1970;
         var msgType : UInt8 = 0
         data.copyBytes(to: &msgType, count: 4)
-        if msgType == 0 {
+        if msgType == PacketTypes.HEARTBEAT {
             // Slime heartbeat
-        } else if msgType == 1 {
+        } else if msgType == PacketTypes.RECEIVE_HEARTBEAT {
             // OwODriver heartbeat
-        } else if msgType == 2 {
+        } else if msgType == PacketTypes.RECEIVE_VIBRATE {
             // vibrate
             var restData = data.advanced(by: 4)
             let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
@@ -240,9 +254,11 @@ class UDPGyroProviderClient {
                 self.vibrate()
             } */
             self.vibrate()
-        } else if msgType == 3 {
+        } else if msgType == PacketTypes.HANDSHAKE {
             //Leftover Handshake Message
-        } else if msgType == 7 {
+        } else if msgType == PacketTypes.PING_PONG {
+            sendUDP(data)
+        } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
             let restData = data.advanced(by: 4)
             let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
             self.service.toggleMagnetometerUse(use: m == "y")
@@ -287,7 +303,15 @@ class UDPGyroProviderClient {
     }
 
     public func provideRot(rot: [Data]) {
-        provideFloats(floats: rot, len: 4, msgType: 1);
+        provideFloats(floats: rot, len: 4, msgType: Int32(PacketTypes.ROTATION));
+    }
+    
+    public func provideGyro(gyro: [Data]) {
+        provideFloats(floats: gyro, len: 3, msgType: Int32(PacketTypes.GYRO));
+    }
+    
+    public func provideAccel(accel: [Data]) {
+        provideFloats(floats: accel, len: 3, msgType: Int32(PacketTypes.ACCEL));
     }
     
     public func provideMagnetometerUse(enabled: Bool) {
@@ -296,7 +320,7 @@ class UDPGyroProviderClient {
         }
         
         let len = 12 + 2;
-        var type = Int32(bigEndian: 5)
+        var type = Int32(bigEndian: Int32(PacketTypes.SEND_MAG_STATUS))
         var id = Int64(bigEndian: packetId)
         let mstr = enabled ? "y" : "n"
         var m = Int8(bigEndian: Int8(mstr)!)
@@ -310,13 +334,17 @@ class UDPGyroProviderClient {
         packetId += 1;
     }
     
-    public func recenterYaw() {
+    public func provideBatteryLevel() {
+        
+    }
+    
+    public func buttonPushed() {
         if (!isConnected) {
             return;
         }
         
         let len = 12 + 1;
-        var type = Int32(bigEndian: 6)
+        var type = Int32(bigEndian: Int32(PacketTypes.BUTTON_PUSHED))
         var id = Int64(bigEndian: packetId)
         
         var data = Data(capacity: len)
@@ -325,7 +353,7 @@ class UDPGyroProviderClient {
         
         sendUDP(data)
         packetId += 1;
-        logger.addEntry("Recentered Yaw")
+        logger.addEntry("Button Pushed")
     }
     
     /*
