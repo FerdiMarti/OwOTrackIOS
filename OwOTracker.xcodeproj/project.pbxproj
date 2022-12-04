@@ -88,6 +88,7 @@
 		9A728BE1263E13C000E8605D /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				9A728BB6263DD06100E8605D /* SwiftUI */,
 				9A728BDD263E020E00E8605D /* ConnectViewController.swift */,
 				9A728BE6263E3DF900E8605D /* FadeTextView.swift */,
 				9A728BE2263E143F00E8605D /* InfoViewController.swift */,
@@ -121,7 +122,6 @@
 			children = (
 				9A4EF2AE293046B20060FE20 /* Lib */,
 				9A728BE1263E13C000E8605D /* UI */,
-				9A728BB6263DD06100E8605D /* SwiftUI */,
 				9AE6EC262619FCA0007C6BBA /* math */,
 				9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */,
 				9AE6EC012619FBFD007C6BBA /* Info.plist */,

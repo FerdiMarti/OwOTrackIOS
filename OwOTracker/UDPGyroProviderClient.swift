@@ -11,7 +11,6 @@ import CoreHaptics
 import AudioToolbox
 
 class PacketTypes {
-    static let HEARTBEAT = 0;
     static let ROTATION = 1;
     static let GYRO = 2;
     static let HANDSHAKE = 3;
@@ -66,6 +65,7 @@ class UDPGyroProviderClient {
             case .ready:
                 self.logger.addEntry("Connection Ready")
                 self.logger.addEntry("Attempting Handshake")
+                self.runListener()
                 self.handshake()
                 print("State: Ready\n")
             case .setup:
@@ -133,8 +133,6 @@ class UDPGyroProviderClient {
             // certain number of failures
             let sendSlimeExtensions = (tries < 7)
             let sendData = buildHeaderInfo(slime: sendSlimeExtensions)
-            print(sendData)
-            print(String(data: sendData, encoding: .ascii))
             
             tries += 1;
             sendUDP(sendData)
@@ -236,35 +234,36 @@ class UDPGyroProviderClient {
     
     func processReceivedData(data: Data) {
         self.lastHeartbeat = Date().timeIntervalSince1970;
-        var msgType : UInt8 = 0
-        data.copyBytes(to: &msgType, count: 4)
-        if msgType == PacketTypes.HEARTBEAT {
-            // Slime heartbeat
-        } else if msgType == PacketTypes.RECEIVE_HEARTBEAT {
-            // OwODriver heartbeat
+        var msgType : UInt32 = 0
+        msgType = UInt32(bigEndian: data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
+        var restData = data.advanced(by: 4)
+        print(msgType)
+        if msgType == PacketTypes.RECEIVE_HEARTBEAT {
+            // Heartbeat
         } else if msgType == PacketTypes.RECEIVE_VIBRATE {
             // vibrate
-            var restData = data.advanced(by: 4)
             let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
             restData = restData.advanced(by: 4)
             let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
             restData = restData.advanced(by: 4)
             let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-            /* if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+            if #available(iOS 13.0, *) {
+                if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                    self.vibrate()
+                }
+            } else {
                 self.vibrate()
-            } */
-            self.vibrate()
+            }
         } else if msgType == PacketTypes.HANDSHAKE {
             //Leftover Handshake Message
         } else if msgType == PacketTypes.PING_PONG {
             sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
-            let restData = data.advanced(by: 4)
             let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
             self.service.toggleMagnetometerUse(use: m == "y")
         } else {
             print("Unknown message type \(msgType)")
-            print("Data \(String(data: data, encoding: .utf8))")
+            print("Data \(String(data: data, encoding: .ascii))")
         }
     }
     
@@ -316,26 +315,38 @@ class UDPGyroProviderClient {
     
     public func provideMagnetometerUse(enabled: Bool) {
         if (!isConnected) {
-            return;
+            return
         }
         
         let len = 12 + 2;
         var type = Int32(bigEndian: Int32(PacketTypes.SEND_MAG_STATUS))
         var id = Int64(bigEndian: packetId)
         let mstr = enabled ? "y" : "n"
-        var m = Int8(bigEndian: Int8(mstr)!)
         
         var data = Data(capacity: len)
         data.append(UnsafeBufferPointer(start: &type, count: 1))
         data.append(UnsafeBufferPointer(start: &id, count: 1))
-        data.append(UnsafeBufferPointer(start: &m, count: 1))
+        data.append(Data(mstr.utf8))
         
         sendUDP(data)
-        packetId += 1;
+        packetId += 1
     }
     
-    public func provideBatteryLevel() {
+    public func provideBatteryLevel(level: Float) {
+        if (!isConnected) {
+            return
+        }
         
+        let len = 12 + 4;
+        var type = Int32(bigEndian: Int32(PacketTypes.BATTERY_LEVEL))
+        var id = Int64(bigEndian: packetId)
+        var bat = level.bitPattern.bigEndian
+        var data = Data(capacity: len)
+        data.append(UnsafeBufferPointer(start: &type, count: 1))
+        data.append(UnsafeBufferPointer(start: &id, count: 1))
+        data.append(UnsafeBufferPointer(start: &bat, count: 1))
+        sendUDP(data)
+        packetId += 1
     }
     
     public func buttonPushed() {
@@ -356,36 +367,44 @@ class UDPGyroProviderClient {
         logger.addEntry("Button Pushed")
     }
     
-    /*
+    
+    @available(iOS 13.0, *)
     func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
-        // make sure that the device supports haptics
         guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }
-        var engine : CHHapticEngine
+        var engine: CHHapticEngine?
         do {
             engine = try CHHapticEngine()
-            try engine.start(completionHandler: { (error) in
-                var events = [CHHapticEvent]()
-        
-                let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: 1)
-                let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: 1)
-                let event = CHHapticEvent(eventType: .hapticTransient, parameters: [intensity, sharpness], relativeTime: 0)
-                events.append(event)
-                
-                do {
-                    let pattern = try CHHapticPattern(events: events, parameters: [])
-                    let player = try engine.makePlayer(with: pattern)
-                    try player.start(atTime: 0)
-                    print("done")
-                } catch {
-                    print("Failed to play pattern: \(error.localizedDescription).")
-                }
-                
-            })
+            try engine?.start()
         } catch {
+            print("There was an error creating the engine: \(error.localizedDescription)")
             return false
         }
-        return true
-    }*/
+
+        // If something goes wrong, attempt to restart the engine immediately
+        engine?.resetHandler = { [weak self] in
+            print("The engine reset")
+
+            do {
+                try engine?.start()
+            } catch {
+                print("Failed to restart the engine: \(error)")
+            }
+        }
+        let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: a)
+        let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: f)
+        let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [intensity, sharpness], relativeTime: 0, duration: TimeInterval(d))
+
+        do {
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let player = try engine?.makePlayer(with: pattern)
+            try player?.start(atTime: 1)
+            print("Vibration Done")
+            return true
+        } catch {
+            print("Failed to play pattern: \(error.localizedDescription).")
+            return false
+        }
+    }
     
     func vibrate() {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))

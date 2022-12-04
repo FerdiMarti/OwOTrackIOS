@@ -21,6 +21,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     var client: UDPGyroProviderClient?
     var audioSession = AVAudioSession.sharedInstance()
     let locationManager = CLLocationManager()
+    var batteryTimer : Timer?
     
     func start(ipAdress: String, port: String, magnetometer: Bool, cvc: ConnectViewController) {
         self.cvc = cvc
@@ -48,9 +49,11 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.defaults.set(self.magnetometer, forKey: "useM")
                 self.logger.addEntry("Connection established")
                 cvc.setConnected()
+                self.startSendingBattery()
                 self.gHandler = GyroHandler.getInstance()
                 self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
                 self.client!.runListener()
+                self.client?.provideMagnetometerUse(enabled: self.magnetometer)
             } else {
                 self.stop()
                 self.logger.addEntry("Connection Failed")
@@ -59,10 +62,8 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     func stop() {
-        DispatchQueue.main.async {
-            UIDevice.current.isProximityMonitoringEnabled = false
-            UIDevice.current.isBatteryMonitoringEnabled = false
-        }
+        stopProximitySensor()
+        stopSendingBattery()
         if audioSession.observationInfo != nil {
             audioSession.removeObserver(self, forKeyPath: "outputVolume")
         }
@@ -123,17 +124,43 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         locationManager.distanceFilter = 99999
         locationManager.delegate = self
         locationManager.startUpdatingLocation()
+        startProximitySensor()
     }
     
     func startProximitySensor() {
         UIDevice.current.isProximityMonitoringEnabled = true
     }
     
+    func stopProximitySensor() {
+        DispatchQueue.main.async {
+            UIDevice.current.isProximityMonitoringEnabled = false
+        }
+    }
+    
     func startBatterLevelMonitoring() {
         UIDevice.current.isBatteryMonitoringEnabled = true
     }
     
-    func getBatteryLevel() -> Int {
-        return Int(UIDevice.current.batteryLevel * 100)
+    func startSendingBattery() {
+        self.startBatterLevelMonitoring()
+        let level = self.getBatteryLevel()
+        client?.provideBatteryLevel(level: level)
+        DispatchQueue.main.async {
+            self.batteryTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { (timer) in
+                let level = self.getBatteryLevel()
+                self.client?.provideBatteryLevel(level: level)
+            }
+        }
+    }
+    
+    func stopSendingBattery() {
+        batteryTimer?.invalidate()
+        DispatchQueue.main.async {
+            UIDevice.current.isBatteryMonitoringEnabled = false
+        }
+    }
+    
+    func getBatteryLevel() -> Float {
+        return abs(UIDevice.current.batteryLevel)
     }
 }

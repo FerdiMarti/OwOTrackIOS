@@ -73,6 +73,8 @@ public class GyroHandler {
     
     func stopUpdates() {
         mmanager.stopDeviceMotionUpdates()
+        mmanager.stopGyroUpdates()
+        mmanager.stopAccelerometerUpdates()
     }
     
     static func getInstance() -> GyroHandler {
