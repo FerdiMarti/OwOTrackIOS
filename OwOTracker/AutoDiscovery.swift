@@ -10,9 +10,7 @@ import Network
 
 class AutoDiscovery {
 
-    var connection: NWConnection?
     var logger = Logger.getInstance()
-    var portUDP = 35903
     var broadcastConnection: UDPBroadcastConnection?
     var isWaiting = false
     
@@ -60,13 +58,7 @@ class AutoDiscovery {
             logger.addEntry("Attempting Discovery")
             isWaiting = true
             try broadcastConnection!.sendBroadcast("DISCOVERY")
-            let timer = Timer.scheduledTimer(withTimeInterval: 5, repeats: false) { (timer) in
-                if self.isWaiting {
-                    self.logger.addEntry("No Tracker discovered")
-                    self.isWaiting = false
-                    cb(true, "", "")
-                }
-            }
+            Timer.scheduledTimer(timeInterval: 5, target: self, selector: #selector(self.checkSuccess), userInfo: cb, repeats: false)
         } catch {
             if let connectionError = error as? UDPBroadcastConnection.ConnectionError {
                 logger.addEntry(connectionError.localizedDescription)
@@ -78,6 +70,15 @@ class AutoDiscovery {
                 print("Error: \(error)\n")
                 cb(true, "", "")
             }
+        }
+    }
+    
+    @objc func checkSuccess(sender: Timer) {
+        if self.isWaiting {
+            self.logger.addEntry("No Tracker discovered")
+            self.isWaiting = false
+            let cb = sender.userInfo as! (Bool, String, String) -> Void
+            cb(true, "", "")
         }
     }
 }

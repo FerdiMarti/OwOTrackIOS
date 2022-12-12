@@ -146,11 +146,13 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         let level = self.getBatteryLevel()
         client?.provideBatteryLevel(level: level)
         DispatchQueue.main.async {
-            self.batteryTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { (timer) in
-                let level = self.getBatteryLevel()
-                self.client?.provideBatteryLevel(level: level)
-            }
+            self.batteryTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.sendBatteryLevel), userInfo: nil, repeats: true)
         }
+    }
+    
+    @objc func sendBatteryLevel() {
+        let level = self.getBatteryLevel()
+        self.client?.provideBatteryLevel(level: level)
     }
     
     func stopSendingBattery() {

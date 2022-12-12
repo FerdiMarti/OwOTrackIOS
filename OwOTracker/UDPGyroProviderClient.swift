@@ -187,9 +187,7 @@ class UDPGyroProviderClient {
         self.isConnected = true
         self.lastHeartbeat = Date().timeIntervalSince1970;
         DispatchQueue.main.async {
-            self.connectionCheckTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { (timer) in
-                self.checkConnection()
-            }
+            self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
         }
     }
 
@@ -267,7 +265,7 @@ class UDPGyroProviderClient {
         }
     }
     
-    func checkConnection() -> Bool {
+    @objc func checkConnection() -> Bool {
         if !isConnected {
             return false
         }
