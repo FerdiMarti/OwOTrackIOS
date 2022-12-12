@@ -1,2 +1,5 @@
 Other
 .DS_Store
+Gemfile
+Gemfile.lock
+fastlane
