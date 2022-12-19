@@ -1,6 +1,6 @@
 //
 //  AppDelegate.swift
-//  test
+//  OwOTracker
 //
 //  Created by Ferdinand Martini on 01.05.21.
 //

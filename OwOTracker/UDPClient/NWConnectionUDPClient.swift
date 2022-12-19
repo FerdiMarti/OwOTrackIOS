@@ -13,7 +13,7 @@ class NWConnectionUDPClient: CompatibleUDPClient {
 
     var connection: NWConnection?
     var logger = Logger.getInstance()
-    var hostUDP: NWEndpoint.Host = "10.211.55.3"
+    var hostUDP: NWEndpoint.Host = "192.168.0.10"
     var portUDP: NWEndpoint.Port = 6969
     
     init(host: String, port: Int) {

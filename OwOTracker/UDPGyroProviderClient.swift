@@ -25,7 +25,7 @@ class UDPGyroProviderClient {
 
     var connection: CompatibleUDPClient?
     var logger = Logger.getInstance()
-    var hostUDP = "10.211.55.3"
+    var hostUDP = "192.168.0.10"
     var portUDP = 6969
     
     private var packetId: Int64 = 0
@@ -60,7 +60,6 @@ class UDPGyroProviderClient {
         lastHeartbeat = 0
         if #available(iOS 12.0, *) {
             self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
-            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         } else {
             self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         }
@@ -218,18 +217,18 @@ class UDPGyroProviderClient {
         }
     }
     
-    @objc func checkConnection() -> Bool {
+    @objc func checkConnection() {
         if !isConnected {
-            return false
+            return
         }
         let time = Date().timeIntervalSince1970
         let timeDiff = time - lastHeartbeat
         if timeDiff > 10 {
             logger.addEntry("Connection with server lost")
             service.stop()
-            return false
+            return
         }
-        return true
+        return
     }
     
     private func provideFloats(floats: [Data], len: Int, msgType: Int32) {

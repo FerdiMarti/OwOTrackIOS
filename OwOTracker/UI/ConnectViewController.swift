@@ -35,7 +35,7 @@ class ConnectViewController: UIViewController {
         if let ipTemp = defaults.object(forKey: "ip") as? String {
             ipField.text = ipTemp
         } else {
-            ipField.text = "192.168.0.1"
+            ipField.text = "192.168.0.10"
             self.defaults.set(ipField.text, forKey: "ip")
         }
         if let portTemp = defaults.object(forKey: "port") as? String {
@@ -65,6 +65,14 @@ class ConnectViewController: UIViewController {
     }
     
     @IBAction func connectPushed(_ sender: Any) {
+        if !validatePort(port: self.portField.text) {
+            setStatusError(text: "Please enter a valid port number")
+            return
+        }
+        if !validateIPAddress(ip: self.ipField.text) {
+            setStatusError(text: "Please enter a valid ip address")
+            return
+        }
         if isConnected {
             tService.stop()
         } else if isLoading {
@@ -72,6 +80,11 @@ class ConnectViewController: UIViewController {
         } else {
             tService.start(ipAdress: ipField.text != nil ? ipField.text! : "", port: portField.text != nil ? portField.text! : "", magnetometer: magnetometerToggle.isOn, cvc: self)
         }
+    }
+    
+    func setStatusError(text: String) {
+        self.statusLabel.text = text
+        self.statusLabel.textColor = .red
     }
     
     func setLoading() {
@@ -145,5 +158,37 @@ class ConnectViewController: UIViewController {
             let range = NSMakeRange(self.loggingTextView.text.count - 1, 0)
             self.loggingTextView.scrollRangeToVisible(range)
         }
+    }
+    
+    func validatePort(port: String?) -> Bool {
+        if port == "" || port == nil {
+            return false
+        }
+        guard let nr = Int(port!) else {
+            return false
+        }
+        if (nr < 0 || nr > 65000) {
+            return false
+        }
+        return true
+    }
+    
+    func validateIPAddress(ip: String?) -> Bool {
+        if ip == "" || ip == nil {
+            return false
+        }
+        let parts = ip!.split(separator: ".")
+        if parts.count != 4 {
+            return false
+        }
+        for part in parts {
+            guard let nr = Int(part) else {
+                return false
+            }
+            if nr < 0 || nr > 255 {
+                return false
+            }
+        }
+        return true
     }
 }

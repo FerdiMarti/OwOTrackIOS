@@ -12,7 +12,7 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
 
     var client: UDPClient?
     var logger = Logger.getInstance()
-    var hostUDP = "10.211.55.3"
+    var hostUDP = "192.168.0.10"
     var portUDP = 6969
     var receiveQueue = DispatchQueue.init(label: "SwiftSocketReceive")
     

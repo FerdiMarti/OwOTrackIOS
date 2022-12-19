@@ -100,6 +100,7 @@
 		9A728BB6263DD06100E8605D /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
 				9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */,
 				9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */,
 			);
@@ -117,7 +118,6 @@
 				9A728BDF263E139800E8605D /* LaunchScreen.storyboard */,
 				9A728BDB263E018400E8605D /* Main.storyboard */,
 				9A728BB7263DFFBD00E8605D /* AppDelegate.swift */,
-				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
