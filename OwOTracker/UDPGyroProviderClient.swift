@@ -33,6 +33,7 @@ class UDPGyroProviderClient {
     
     private var packetId: Int64 = 0
     var isConnected: Bool = false
+    var isConnecting: Bool = false
     var lastHeartbeat: Double = 0
     var service: TrackingService
     var connectionCheckTimer : Timer?
@@ -49,6 +50,7 @@ class UDPGyroProviderClient {
         logger.addEntry("Disconnecting Client")
         self.connection?.close()
         isConnected = false
+        isConnecting = false
         connectionCheckTimer?.invalidate()
     }
 
@@ -56,18 +58,20 @@ class UDPGyroProviderClient {
         logger.reset()
         logger.addEntry("Attempting Connection")
         isConnected = false
+        isConnecting = false
         packetId = 0
         lastHeartbeat = 0
         if #available(iOS 12.0, *) {
             self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
+            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         } else {
             self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         }
-        
         self.connection?.open {
             self.logger.addEntry("Connection Ready")
             self.logger.addEntry("Attempting Handshake")
-            self.handshake(tries: 0)
+            self.runListener()
+            self.handshake()
         }
     }
     
@@ -113,8 +117,10 @@ class UDPGyroProviderClient {
         return data
     }
     
-    func handshake(tries: Int) {
-        if(!isConnected && tries <= 12) {
+    func handshake() {
+        isConnecting = true
+        var tries = 0
+        while(!isConnected && tries <= 12) {
             // if the user is running an old version of owoTrackVR driver,
             // recvfrom() will fail as the max packet length the old driver
             // supported was around 28 bytes. to maintain backwards
@@ -122,61 +128,43 @@ class UDPGyroProviderClient {
             // certain number of failures
             let sendSlimeExtensions = (tries < 7)
             let sendData = buildHeaderInfo(slime: sendSlimeExtensions)
-            
             self.connection?.sendUDP(sendData)
-            self.connection?.receiveUDP(cb: { data in  //TODO SwitSocket blocks here if no answer to handshake
-                if self.isConnected {
-                    return
-                }
-                let success = self.validateHandshakeResponse(data: data)
-                if success {
-                    self.logger.addEntry("Handshake Succeded")
-                    if !sendSlimeExtensions {
-                        self.logger.addEntry("Your overlay appears out-of-date with no non-fatal support for longer packet lengths, please update it")
-                    }
-                    self.successfulHandshake()
-                } else {
-                    self.handshake(tries: tries + 1)
-                }
-            })
-        } else if tries > 12 {
-            self.logger.addEntry("Handshake Failed")
-            self.logger.addEntry("\n Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
+            tries += 1
         }
     }
     
-    func validateHandshakeResponse(data: Data?) -> Bool {
-        if data != nil {
-            var result = String(data: data!, encoding: .ascii)!
-            if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
-                self.logger.addEntry("Handshake Failed")
-                self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
-                return false
-            }
-            result = String(result[result.index(result.startIndex, offsetBy: 1)...])
-            if (!result.hasPrefix("Hey OVR =D")) {
-                self.logger.addEntry("Handshake Failed")
-                self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
-                return false
-            }
-            result = String(result[result.index(result.startIndex, offsetBy: 11)...])
-            result = String(result[result.startIndex...result.startIndex])
-            let version = Int(result)!;
-            if (version != UDPGyroProviderClient.CURRENT_VERSION) {
-                self.logger.addEntry("Handshake Failed")
-                self.logger.addEntry("Handshake failed, mismatching version"
-                                     + "\nServer version: \(version)"
-                                     + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
-                                     + "\nPlease make sure everything is up to date.")
-                return false
-            }
-            return true
+    func validateHandshakeResponse(data: Data) {
+        //TODO validation without String
+        var result = String(data: data, encoding: .ascii)!
+        if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
+            self.logger.addEntry("Handshake Failed")
+            self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
+            return
         }
-        return false
+        result = String(result[result.index(result.startIndex, offsetBy: 1)...])
+        if (!result.hasPrefix("Hey OVR =D")) {
+            self.logger.addEntry("Handshake Failed")
+            self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
+            return
+        }
+        result = String(result[result.index(result.startIndex, offsetBy: 11)...])
+        result = String(result[result.startIndex...result.startIndex])
+        let version = Int(result)!;
+        if (version != UDPGyroProviderClient.CURRENT_VERSION) {
+            self.logger.addEntry("Handshake Failed")
+            self.logger.addEntry("Handshake failed, mismatching version"
+                                 + "\nServer version: \(version)"
+                                 + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
+                                 + "\nPlease make sure everything is up to date.")
+            return
+        }
+        self.logger.addEntry("Handshake Succeded")
+        self.successfulHandshake()
     }
     
     func successfulHandshake() {
         self.isConnected = true
+        self.isConnecting = false
         self.lastHeartbeat = Date().timeIntervalSince1970;
         DispatchQueue.main.async {
             self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
@@ -188,10 +176,7 @@ class UDPGyroProviderClient {
             if data != nil {
                 self.processReceivedData(data: data!)
             }
-            if self.isConnected {
-                if !self.checkConnection() {
-                    return
-                }
+            if self.isConnected || self.isConnecting {
                 self.runListener()
             }
         })
@@ -219,8 +204,12 @@ class UDPGyroProviderClient {
             } else {
                 self.vibrate()
             }
-        } else if msgType == PacketTypes.HANDSHAKE {
+        } else if msgType == PacketTypes.HANDSHAKE || msgType == 55076217 {
             //Leftover Handshake Message
+            if self.isConnected {
+                return
+            }
+            self.validateHandshakeResponse(data: data)
         } else if msgType == PacketTypes.PING_PONG {
             self.connection?.sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {

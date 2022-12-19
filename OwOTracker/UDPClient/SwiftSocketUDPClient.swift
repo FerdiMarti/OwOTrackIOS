@@ -14,6 +14,7 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     var logger = Logger.getInstance()
     var hostUDP = "10.211.55.3"
     var portUDP = 6969
+    var receiveQueue = DispatchQueue.init(label: "SwiftSocketReceive")
     
     init(host: String, port: Int) {
         self.hostUDP = host
@@ -27,6 +28,8 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     
     func close() {
         self.client?.close()
+//        receiveQueue.suspend()
+//        receiveQueue.finalize()
     }
 
     func sendUDP(_ content: Data) {
@@ -41,22 +44,24 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     }
     
     func receiveUDP(cb: @escaping (Data?) -> Void) {
-        guard let raw = self.client?.recv(1024*10)
-        else {
-            cb(nil)
-            return
+        receiveQueue.async {
+            guard let raw = self.client?.recv(1024*10)
+            else {
+                cb(nil)
+                return
+            }
+            guard let data = raw.0 else {
+                print("data == nil")
+                cb(nil)
+                return
+            }
+            let ip = raw.1
+            if (ip != self.hostUDP) {
+                self.logger.addEntry("Received UDP packet from wrong host")
+                cb(nil)
+                return
+            }
+            cb(Data(data))
         }
-        let ip = raw.1
-        if (ip != self.hostUDP) {
-            logger.addEntry("Received UDP packet from wrong host")
-            cb(nil)
-            return
-        }
-        guard let data = raw.0 else {
-            print("data == nil")
-            cb(nil)
-            return
-        }
-        cb(Data(data))
     }
 }

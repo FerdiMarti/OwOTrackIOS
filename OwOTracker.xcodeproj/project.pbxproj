@@ -28,6 +28,7 @@
 		9A8DFBA3294729CD00C01721 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		9A8DFBA5294ACB8700C01721 /* SwiftSocketUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA4294ACB8700C01721 /* SwiftSocketUDPClient.swift */; };
 		9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
+		9AB07CE82950733A006CD79F /* DeviceHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB07CE72950733A006CD79F /* DeviceHardware.swift */; };
 		9AE6EBF92619FBFB007C6BBA /* OwOTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */; };
 		9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */; };
 		9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
@@ -62,6 +63,7 @@
 		9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWConnectionUDPClient.swift; sourceTree = "<group>"; };
 		9A8DFBA4294ACB8700C01721 /* SwiftSocketUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSocketUDPClient.swift; sourceTree = "<group>"; };
 		9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleUDPClient.swift; sourceTree = "<group>"; };
+		9AB07CE72950733A006CD79F /* DeviceHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceHardware.swift; sourceTree = "<group>"; };
 		9AE6EBF52619FBFB007C6BBA /* OwOTracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OwOTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerApp.swift; sourceTree = "<group>"; };
 		9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 				9AE6EC51261A3755007C6BBA /* GyroHandler.swift */,
 				9A08069C261B565400F92566 /* Logger.swift */,
 				9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */,
+				9AB07CE72950733A006CD79F /* DeviceHardware.swift */,
 				9A8DFBA8294AD9CE00C01721 /* UDPClient */,
 			);
 			path = OwOTracker;
@@ -283,6 +286,7 @@
 				9AE6EBFB2619FBFB007C6BBA /* ContentView.swift in Sources */,
 				9A8DFB9B2946BBF700C01721 /* yudpsocket.c in Sources */,
 				9AE6EC52261A3755007C6BBA /* GyroHandler.swift in Sources */,
+				9AB07CE82950733A006CD79F /* DeviceHardware.swift in Sources */,
 				9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */,
 				9A8DFBA02946BBF700C01721 /* Socket.swift in Sources */,
 				9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */,

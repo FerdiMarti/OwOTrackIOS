@@ -21,6 +21,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     var audioSession = AVAudioSession.sharedInstance()
     let locationManager = CLLocationManager()
     var batteryTimer : Timer?
+    var trackingServiceQueue = DispatchQueue.init(label: "TrackingService")
     
     func start(ipAdress: String, port: String, magnetometer: Bool, cvc: ConnectViewController) {
         self.cvc = cvc
@@ -31,7 +32,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         cvc.setLoading()
         self.registerVolButtonListener()
         startBackgroundUsage()
-        DispatchQueue.init(label: "TrackingService").async {
+        trackingServiceQueue.async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             if self.client == nil {
                 self.logger.addEntry("Initializing Connection Failed")
@@ -49,9 +50,10 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.startSendingBattery()
                 self.gHandler = GyroHandler.getInstance()
                 self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
-                self.client!.runListener()
                 self.client?.provideMagnetometerUse(enabled: self.magnetometer)
             } else {
+                self.logger.addEntry("Handshake Failed")
+                self.logger.addEntry("\n Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
                 self.logger.addEntry("Connecting Failed")
                 self.stop()
             }
@@ -83,6 +85,8 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             cvc?.setUnconnected()
             logger.addEntry("Disconnected")
         }
+//        trackingServiceQueue.suspend()
+//        trackingServiceQueue.finalize()
     }
     
     func toggleMagnetometerUse(use: Bool) {
