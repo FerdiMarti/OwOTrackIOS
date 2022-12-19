@@ -29,7 +29,6 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     func close() {
         self.client?.close()
 //        receiveQueue.suspend()
-//        receiveQueue.finalize()
     }
 
     func sendUDP(_ content: Data) {

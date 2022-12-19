@@ -6,9 +6,6 @@
 //
 
 import Foundation
-import Network
-import CoreHaptics
-import AudioToolbox
 
 class PacketTypes {
     static let ROTATION = 1;
@@ -198,11 +195,11 @@ class UDPGyroProviderClient {
             restData = restData.advanced(by: 4)
             let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
             if #available(iOS 13.0, *) {
-                if self.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                    self.vibrate()
+                if DeviceHardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                    DeviceHardware.vibrate()
                 }
             } else {
-                self.vibrate()
+                DeviceHardware.vibrate()
             }
         } else if msgType == PacketTypes.HANDSHAKE || msgType == 55076217 {
             //Leftover Handshake Message
@@ -303,7 +300,7 @@ class UDPGyroProviderClient {
         packetId += 1
     }
     
-    public func buttonPushed() {
+    public func provideButtonPushed() {
         if (!isConnected) {
             return;
         }
@@ -319,48 +316,5 @@ class UDPGyroProviderClient {
         self.connection?.sendUDP(data)
         packetId += 1;
         logger.addEntry("Button Pushed")
-    }
-    
-    
-    @available(iOS 13.0, *)
-    func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }
-        var engine: CHHapticEngine?
-        do {
-            engine = try CHHapticEngine()
-            try engine?.start()
-        } catch {
-            print("There was an error creating the engine: \(error.localizedDescription)")
-            return false
-        }
-
-        // If something goes wrong, attempt to restart the engine immediately
-        engine?.resetHandler = { [weak self] in
-            print("The engine reset")
-
-            do {
-                try engine?.start()
-            } catch {
-                print("Failed to restart the engine: \(error)")
-            }
-        }
-        let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: a)
-        let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: f)
-        let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [intensity, sharpness], relativeTime: 0, duration: TimeInterval(d))
-
-        do {
-            let pattern = try CHHapticPattern(events: [event], parameters: [])
-            let player = try engine?.makePlayer(with: pattern)
-            try player?.start(atTime: 1)
-            print("Vibration Done")
-            return true
-        } catch {
-            print("Failed to play pattern: \(error.localizedDescription).")
-            return false
-        }
-    }
-    
-    func vibrate() {
-        AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
     }
 }

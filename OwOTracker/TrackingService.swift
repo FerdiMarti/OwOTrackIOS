@@ -6,8 +6,6 @@
 //
 
 import Foundation
-import UIKit
-import AVFoundation
 import CoreLocation
 
 public class TrackingService: NSObject, CLLocationManagerDelegate {
@@ -18,8 +16,6 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     let logger = Logger.getInstance()
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
-    var audioSession = AVAudioSession.sharedInstance()
-    let locationManager = CLLocationManager()
     var batteryTimer : Timer?
     var trackingServiceQueue = DispatchQueue.init(label: "TrackingService")
     
@@ -30,8 +26,9 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         self.magnetometer = magnetometer
         self.setDefaults()
         cvc.setLoading()
-        self.registerVolButtonListener()
-        startBackgroundUsage()
+        DeviceHardware.startProximitySensor()
+        DeviceHardware.registerVolButtonListener(target: self)
+        DeviceHardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             if self.client == nil {
@@ -68,17 +65,10 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     func stop() {
-        stopProximitySensor()
+        DeviceHardware.stopProximitySensor()
+        DeviceHardware.unregisterVolButtonListener(target: self)
+        DeviceHardware.stopBackgroundUsage()
         stopSendingBattery()
-        if audioSession.observationInfo != nil {
-            audioSession.removeObserver(self, forKeyPath: "outputVolume")
-        }
-        do {
-            try audioSession.setActive(false)
-        } catch {
-            print("audioSession could not be deinitialized")
-        }
-        locationManager.stopUpdatingLocation()
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
@@ -86,7 +76,6 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             logger.addEntry("Disconnected")
         }
 //        trackingServiceQueue.suspend()
-//        trackingServiceQueue.finalize()
     }
     
     func toggleMagnetometerUse(use: Bool) {
@@ -98,79 +87,27 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         cvc?.setMagnometerToggle(use: use)
     }
     
-    func registerVolButtonListener() {
-        do {
-            try audioSession.setActive(true)
-        } catch {
-            print("audioSession could not be initialized")
-        }
-        audioSession.addObserver(self, forKeyPath: "outputVolume", options: NSKeyValueObservingOptions.new, context: nil)
-    }
-    
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "outputVolume" {
-            client?.buttonPushed()
+            client?.provideButtonPushed()
         }
-    }
-    
-    func startBackgroundUsage() {
-        locationManager.requestAlwaysAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            switch CLLocationManager.authorizationStatus() {
-                case .notDetermined, .restricted, .denied:
-                    startProximitySensor()
-                case .authorizedAlways, .authorizedWhenInUse:
-                    print("Access")
-                @unknown default:
-                break
-            }
-        } else {
-                startProximitySensor()
-        }
-        locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        locationManager.distanceFilter = 99999
-        locationManager.delegate = self
-        locationManager.startUpdatingLocation()
-        startProximitySensor()
-    }
-    
-    func startProximitySensor() {
-        UIDevice.current.isProximityMonitoringEnabled = true
-    }
-    
-    func stopProximitySensor() {
-        DispatchQueue.main.async {
-            UIDevice.current.isProximityMonitoringEnabled = false
-        }
-    }
-    
-    func startBatterLevelMonitoring() {
-        UIDevice.current.isBatteryMonitoringEnabled = true
     }
     
     func startSendingBattery() {
-        self.startBatterLevelMonitoring()
-        let level = self.getBatteryLevel()
-        client?.provideBatteryLevel(level: level)
+        DeviceHardware.startBatteryLevelMonitoring()
+        sendBatteryLevel()
         DispatchQueue.main.async {
             self.batteryTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.sendBatteryLevel), userInfo: nil, repeats: true)
         }
     }
     
     @objc func sendBatteryLevel() {
-        let level = self.getBatteryLevel()
+        let level = DeviceHardware.getBatteryLevel()
         self.client?.provideBatteryLevel(level: level)
     }
     
     func stopSendingBattery() {
         batteryTimer?.invalidate()
-        DispatchQueue.main.async {
-            UIDevice.current.isBatteryMonitoringEnabled = false
-        }
-    }
-    
-    func getBatteryLevel() -> Float {
-        return abs(UIDevice.current.batteryLevel)
+        DeviceHardware.stopBatteryLevelMonitoring()
     }
 }
