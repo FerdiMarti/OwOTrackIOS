@@ -16,7 +16,6 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     var magnetometer = true
     var cvc: ConnectViewController?
     let logger = Logger.getInstance()
-    let defaults = UserDefaults.standard
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
     var audioSession = AVAudioSession.sharedInstance()
@@ -28,9 +27,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
-        self.defaults.set(self.ipAdress, forKey: "ip")
-        self.defaults.set(self.port, forKey: "port")
-        self.defaults.set(self.magnetometer, forKey: "useM")
+        self.setDefaults()
         cvc.setLoading()
         self.registerVolButtonListener()
         startBackgroundUsage()
@@ -59,6 +56,13 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.stop()
             }
         }
+    }
+    
+    func setDefaults() {
+        let defaults = UserDefaults.standard
+        defaults.set(self.ipAdress, forKey: "ip")
+        defaults.set(self.port, forKey: "port")
+        defaults.set(self.magnetometer, forKey: "useM")
     }
     
     func stop() {
