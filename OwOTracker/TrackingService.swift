@@ -28,6 +28,9 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
+        self.defaults.set(self.ipAdress, forKey: "ip")
+        self.defaults.set(self.port, forKey: "port")
+        self.defaults.set(self.magnetometer, forKey: "useM")
         cvc.setLoading()
         self.registerVolButtonListener()
         startBackgroundUsage()
@@ -38,15 +41,12 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 return
             }
             self.client!.connectToUDP()
-            var tries = 0
-            while(!self.client!.isConnected && tries < 5) {
-                tries += 1
+            var waited = 0
+            while(!self.client!.isConnected && waited < 5) {
+                waited += 1
                 sleep(1)
             }
             if (self.client!.isConnected) {
-                self.defaults.set(self.ipAdress, forKey: "ip")
-                self.defaults.set(self.port, forKey: "port")
-                self.defaults.set(self.magnetometer, forKey: "useM")
                 self.logger.addEntry("Connection established")
                 cvc.setConnected()
                 self.startSendingBattery()
@@ -55,8 +55,8 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.client!.runListener()
                 self.client?.provideMagnetometerUse(enabled: self.magnetometer)
             } else {
+                self.logger.addEntry("Connecting Failed")
                 self.stop()
-                self.logger.addEntry("Connection Failed")
             }
         }
     }

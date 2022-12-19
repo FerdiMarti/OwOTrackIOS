@@ -26,10 +26,10 @@ class PacketTypes {
 
 class UDPGyroProviderClient {
 
-    var connection: NWConnection?
+    var connection: CompatibleUDPClient?
     var logger = Logger.getInstance()
-    var hostUDP: NWEndpoint.Host = "10.211.55.3"
-    var portUDP: NWEndpoint.Port = 6969
+    var hostUDP = "10.211.55.3"
+    var portUDP = 6969
     
     private var packetId: Int64 = 0
     var isConnected: Bool = false
@@ -40,14 +40,14 @@ class UDPGyroProviderClient {
     public static var CURRENT_VERSION = 5
     
     init(host: String, port: String, service: TrackingService) {
-        self.hostUDP = NWEndpoint.Host(host)
-        self.portUDP = NWEndpoint.Port(port) ?? NWEndpoint.Port("6969")!
+        self.hostUDP = host
+        self.portUDP = Int(port) ?? 6969
         self.service = service
     }
     
     func disconnectUDP() {
         logger.addEntry("Disconnecting Client")
-        connection?.cancel()
+        self.connection?.close()
         isConnected = false
         connectionCheckTimer?.invalidate()
     }
@@ -58,27 +58,17 @@ class UDPGyroProviderClient {
         isConnected = false
         packetId = 0
         lastHeartbeat = 0
-        self.connection = NWConnection(host: hostUDP, port: portUDP, using: .udp)
-        
-        self.connection?.stateUpdateHandler = { (newState) in
-            switch (newState) {
-            case .ready:
-                self.logger.addEntry("Connection Ready")
-                self.logger.addEntry("Attempting Handshake")
-                self.runListener()
-                self.handshake()
-                print("State: Ready\n")
-            case .setup:
-                print("State: Setup\n")
-            case .cancelled:
-                print("State: Cancelled\n")
-            case .preparing:
-                print("State: Preparing\n")
-            default:
-                print("ERROR! State not defined!\n")
-            }
+        if #available(iOS 12.0, *) {
+            self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
+        } else {
+            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         }
-        self.connection?.start(queue: DispatchQueue(label: "UDPConnection"))
+        
+        self.connection?.open {
+            self.logger.addEntry("Connection Ready")
+            self.logger.addEntry("Attempting Handshake")
+            self.handshake(tries: 0)
+        }
     }
     
     func buildHeaderInfo(slime: Bool) -> Data {
@@ -123,9 +113,8 @@ class UDPGyroProviderClient {
         return data
     }
     
-    func handshake() {
-        var tries = 0;
-        while(!isConnected && tries <= 12) {
+    func handshake(tries: Int) {
+        if(!isConnected && tries <= 12) {
             // if the user is running an old version of owoTrackVR driver,
             // recvfrom() will fail as the max packet length the old driver
             // supported was around 28 bytes. to maintain backwards
@@ -134,53 +123,56 @@ class UDPGyroProviderClient {
             let sendSlimeExtensions = (tries < 7)
             let sendData = buildHeaderInfo(slime: sendSlimeExtensions)
             
-            tries += 1;
-            sendUDP(sendData)
-            self.connection?.receiveMessage { (data, context, isComplete, error) in
-                if (isComplete && !self.isConnected) {
-                    if (data != nil) {
-                        var result = String(data: data!, encoding: .ascii)!
-                        if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
-                            self.logger.addEntry("Handshake Failed")
-                            self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
-                            self.service.stop()
-                            return
-                        }
-                        result = String(result[result.index(result.startIndex, offsetBy: 1)...])
-                        if (!result.hasPrefix("Hey OVR =D")) {
-                            self.logger.addEntry("Handshake Failed")
-                            self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
-                            self.service.stop()
-                            return
-                        }
-                        result = String(result[result.index(result.startIndex, offsetBy: 11)...])
-                        result = String(result[result.startIndex...result.startIndex])
-                        let version = Int(result)!;
-                        if (version != UDPGyroProviderClient.CURRENT_VERSION) {
-                            self.logger.addEntry("Handshake Failed")
-                            self.logger.addEntry("Handshake failed, mismatching version"
-                                                 + "\nServer version: \(version)"
-                                                 + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
-                                                 + "\nPlease make sure everything is up to date.")
-                            self.service.stop()
-                            return
-                        }
-                        self.logger.addEntry("Handshake Succeded")
-                        if !sendSlimeExtensions {
-                            self.logger.addEntry("Your overlay appears out-of-date with no non-fatal support for longer packet lengths, please update it")
-                        }
-                        self.successfulHandshake()
-                        return
-                    } else {
-                        self.logger.addEntry("Handshake Failed")
-                        self.logger.addEntry("Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data)")
-                        self.service.stop()
-                        return
-                    }
+            self.connection?.sendUDP(sendData)
+            self.connection?.receiveUDP(cb: { data in  //TODO SwitSocket blocks here if no answer to handshake
+                if self.isConnected {
+                    return
                 }
-            }
+                let success = self.validateHandshakeResponse(data: data)
+                if success {
+                    self.logger.addEntry("Handshake Succeded")
+                    if !sendSlimeExtensions {
+                        self.logger.addEntry("Your overlay appears out-of-date with no non-fatal support for longer packet lengths, please update it")
+                    }
+                    self.successfulHandshake()
+                } else {
+                    self.handshake(tries: tries + 1)
+                }
+            })
+        } else if tries > 12 {
+            self.logger.addEntry("Handshake Failed")
+            self.logger.addEntry("\n Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
         }
-        self.logger.addEntry("Handshake Failed")
+    }
+    
+    func validateHandshakeResponse(data: Data?) -> Bool {
+        if data != nil {
+            var result = String(data: data!, encoding: .ascii)!
+            if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
+                self.logger.addEntry("Handshake Failed")
+                self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
+                return false
+            }
+            result = String(result[result.index(result.startIndex, offsetBy: 1)...])
+            if (!result.hasPrefix("Hey OVR =D")) {
+                self.logger.addEntry("Handshake Failed")
+                self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
+                return false
+            }
+            result = String(result[result.index(result.startIndex, offsetBy: 11)...])
+            result = String(result[result.startIndex...result.startIndex])
+            let version = Int(result)!;
+            if (version != UDPGyroProviderClient.CURRENT_VERSION) {
+                self.logger.addEntry("Handshake Failed")
+                self.logger.addEntry("Handshake failed, mismatching version"
+                                     + "\nServer version: \(version)"
+                                     + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
+                                     + "\nPlease make sure everything is up to date.")
+                return false
+            }
+            return true
+        }
+        return false
     }
     
     func successfulHandshake() {
@@ -190,37 +182,12 @@ class UDPGyroProviderClient {
             self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
         }
     }
-
-    func sendUDP(_ content: Data) {
-        self.connection?.send(content: content, completion: NWConnection.SendCompletion.contentProcessed(({ (NWError) in
-            if (NWError == nil) {
-                //print("Data was sent to UDP")
-            } else {
-                print("ERROR! Error when data (Type: Data) sending. NWError: \n \(NWError!)")
-            }
-        })))
-    }
-
-    func receiveUDP(cb: @escaping (Data) -> Void) {
-        self.connection?.receiveMessage { (data, context, isComplete, error) in
-            if (error != nil) {
-                print("Error while receiving: \(error!)")
-                return
-            }
-            
-            if (isComplete) {
-                if (data != nil) {
-                    cb(data!)
-                } else {
-                    print("Data == nil")
-                }
-            }
-        }
-    }
     
     func runListener() {
-        self.receiveUDP(cb: { data in
-            self.processReceivedData(data: data)
+        self.connection?.receiveUDP(cb: { data in
+            if data != nil {
+                self.processReceivedData(data: data!)
+            }
             if self.isConnected {
                 if !self.checkConnection() {
                     return
@@ -255,7 +222,7 @@ class UDPGyroProviderClient {
         } else if msgType == PacketTypes.HANDSHAKE {
             //Leftover Handshake Message
         } else if msgType == PacketTypes.PING_PONG {
-            sendUDP(data)
+            self.connection?.sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
             let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
             self.service.toggleMagnetometerUse(use: m == "y")
@@ -295,7 +262,7 @@ class UDPGyroProviderClient {
             data.append(elem)
         }
 
-        sendUDP(data)
+        self.connection?.sendUDP(data)
         packetId += 1;
     }
 
@@ -326,7 +293,7 @@ class UDPGyroProviderClient {
         data.append(UnsafeBufferPointer(start: &id, count: 1))
         data.append(Data(mstr.utf8))
         
-        sendUDP(data)
+        self.connection?.sendUDP(data)
         packetId += 1
     }
     
@@ -343,7 +310,7 @@ class UDPGyroProviderClient {
         data.append(UnsafeBufferPointer(start: &type, count: 1))
         data.append(UnsafeBufferPointer(start: &id, count: 1))
         data.append(UnsafeBufferPointer(start: &bat, count: 1))
-        sendUDP(data)
+        self.connection?.sendUDP(data)
         packetId += 1
     }
     
@@ -360,7 +327,7 @@ class UDPGyroProviderClient {
         data.append(UnsafeBufferPointer(start: &type, count: 1))
         data.append(UnsafeBufferPointer(start: &id, count: 1))
         
-        sendUDP(data)
+        self.connection?.sendUDP(data)
         packetId += 1;
         logger.addEntry("Button Pushed")
     }

@@ -3,3 +3,4 @@ Other
 Gemfile
 Gemfile.lock
 fastlane
+*xcuserdata*
