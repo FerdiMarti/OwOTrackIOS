@@ -34,6 +34,7 @@ class UDPGyroProviderClient {
     var lastHeartbeat: Double = 0
     var service: TrackingService
     var connectionCheckTimer : Timer?
+    var receivingBigEndian = true
     
     public static var CURRENT_VERSION = 5
     
@@ -170,7 +171,7 @@ class UDPGyroProviderClient {
     func runListener() {
         self.connection?.receiveUDP(cb: { data in
             if data != nil {
-                self.processReceivedData(data: data!)
+                self.processReceivedData(data: data!, recursion: false)
             }
             if self.isConnected || self.isConnecting {
                 self.runListener()
@@ -178,21 +179,26 @@ class UDPGyroProviderClient {
         })
     }
     
-    func processReceivedData(data: Data) {
+    func processReceivedData(data: Data, recursion: Bool) {
+        if !isConnected && isConnecting {
+            self.validateHandshakeResponse(data: data)
+            return
+        }
+        
         self.lastHeartbeat = Date().timeIntervalSince1970;
         var msgType : UInt32 = 0
-        msgType = UInt32(bigEndian: data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
+        msgType = readUInt32(data: data)
         var restData = data.advanced(by: 4)
         print(msgType)
         if msgType == PacketTypes.RECEIVE_HEARTBEAT {
             // Heartbeat
         } else if msgType == PacketTypes.RECEIVE_VIBRATE {
             // vibrate
-            let duration = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            let duration = readFloat(data: restData)
             restData = restData.advanced(by: 4)
-            let frequency = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            let frequency = readFloat(data: restData)
             restData = restData.advanced(by: 4)
-            let amplitude = Float(bitPattern: UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            let amplitude = readFloat(data: restData)
             if #available(iOS 13.0, *) {
                 if DeviceHardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
                     DeviceHardware.vibrate()
@@ -200,22 +206,57 @@ class UDPGyroProviderClient {
             } else {
                 DeviceHardware.vibrate()
             }
-        } else if msgType == PacketTypes.HANDSHAKE || msgType == 55076217 {
-            //Leftover Handshake Message
-            if self.isConnected {
-                return
-            }
-            self.validateHandshakeResponse(data: data)
+        } else if msgType == PacketTypes.HANDSHAKE{
+            //additional handshake messages
         } else if msgType == PacketTypes.PING_PONG {
             self.connection?.sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
-            let m = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            let m = readString(data: restData, length: 1)
             self.service.toggleMagnetometerUse(use: m == "y")
         } else {
+            if (msgType >= 2048 && !recursion) {
+                receivingBigEndian = !receivingBigEndian
+                processReceivedData(data: data, recursion: true)
+            }
             print("Unknown message type \(msgType)")
             print("Data \(String(data: data, encoding: .ascii))")
         }
     }
+    
+    func readFloat(data: Data) -> Float {
+        if receivingBigEndian {
+            return Float(bitPattern: UInt32(bigEndian: data.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+        } else {
+            return Float(bitPattern: UInt32(data.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
+        }
+    }
+    
+    func readUInt32(data: Data) -> UInt32 {
+        if receivingBigEndian {
+            return UInt32(bigEndian: data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
+        } else {
+            return UInt32(data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
+        }
+    }
+    
+    func readString(data: Data, length: Int) -> String {
+        //TODO fix reading of strings and test || error handling
+        var str = ""
+        var restData = data
+        while str.count < length {
+            print(str)
+            var char = ""
+            if receivingBigEndian {
+                char = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            } else {
+                char = String(UInt32(restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+            }
+            str += char
+            restData = data.advanced(by: 1)
+        }
+        return str
+    }
+
     
     @objc func checkConnection() {
         if !isConnected {
