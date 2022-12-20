@@ -167,7 +167,7 @@ class ConnectViewController: UIViewController {
         guard let nr = Int(port!) else {
             return false
         }
-        if (nr < 0 || nr > 65000) {
+        if (nr < 0 || nr > 65535) {
             return false
         }
         return true

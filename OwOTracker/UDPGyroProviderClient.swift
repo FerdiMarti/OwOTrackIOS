@@ -131,7 +131,6 @@ class UDPGyroProviderClient {
     }
     
     func validateHandshakeResponse(data: Data) {
-        //TODO validation without String
         var result = String(data: data, encoding: .ascii)!
         if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
             self.logger.addEntry("Handshake Failed")
@@ -189,7 +188,6 @@ class UDPGyroProviderClient {
         var msgType : UInt32 = 0
         msgType = readUInt32(data: data)
         var restData = data.advanced(by: 4)
-        print(msgType)
         if msgType == PacketTypes.RECEIVE_HEARTBEAT {
             // Heartbeat
         } else if msgType == PacketTypes.RECEIVE_VIBRATE {
@@ -219,7 +217,7 @@ class UDPGyroProviderClient {
                 processReceivedData(data: data, recursion: true)
             }
             print("Unknown message type \(msgType)")
-            print("Data \(String(data: data, encoding: .ascii))")
+            //print("Data \(String(data: data, encoding: .ascii))")
         }
     }
     
