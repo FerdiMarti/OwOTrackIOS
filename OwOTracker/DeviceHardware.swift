@@ -95,6 +95,8 @@ class DeviceHardware {
     }
     
     static func startBatteryLevelMonitoring() {
+        //additionally non async to enable it immediately
+        UIDevice.current.isBatteryMonitoringEnabled = true
         DispatchQueue.main.async {
             UIDevice.current.isBatteryMonitoringEnabled = true
         }

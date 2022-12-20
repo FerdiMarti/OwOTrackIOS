@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import UIKit
 
 public class TrackingService: NSObject, CLLocationManagerDelegate {
     var ipAdress = ""
