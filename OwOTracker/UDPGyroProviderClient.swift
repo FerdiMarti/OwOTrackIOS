@@ -242,12 +242,11 @@ class UDPGyroProviderClient {
         var str = ""
         var restData = data
         while str.count < length {
-            print(str)
             var char = ""
             if receivingBigEndian {
-                char = String(UInt32(bigEndian: restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                char = String(UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
             } else {
-                char = String(UInt32(restData.prefix(1).withUnsafeBytes { $0.load(as: UInt32.self) }))
+                char = String(UInt32(restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
             }
             str += char
             restData = data.advanced(by: 1)

@@ -76,7 +76,6 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             cvc?.setUnconnected()
             logger.addEntry("Disconnected")
         }
-//        trackingServiceQueue.suspend()
     }
     
     func toggleMagnetometerUse(use: Bool) {
