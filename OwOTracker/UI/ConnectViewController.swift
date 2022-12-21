@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ConnectViewController: UIViewController {
+class ConnectViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var statusLabel: UILabel!
     @IBOutlet weak var ipField: UITextField!
@@ -27,7 +27,9 @@ class ConnectViewController: UIViewController {
     var isLoading = false
     
     override func viewDidLoad() {
-        super.viewDidLoad()        
+        super.viewDidLoad()
+        ipField.delegate = self
+        portField.delegate = self
         logger.attachVC(cvc: self)
         setUnconnected()
         loadingIndicator.hidesWhenStopped = true
@@ -190,5 +192,10 @@ class ConnectViewController: UIViewController {
             }
         }
         return true
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        self.view.endEditing(true)
+        return false
     }
 }
