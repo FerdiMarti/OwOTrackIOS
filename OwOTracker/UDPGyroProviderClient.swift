@@ -238,7 +238,6 @@ class UDPGyroProviderClient {
     }
     
     func readString(data: Data, length: Int) -> String {
-        //TODO fix reading of strings and test || error handling
         var str = ""
         var restData = data
         while str.count < length {
@@ -261,7 +260,7 @@ class UDPGyroProviderClient {
         }
         let time = Date().timeIntervalSince1970
         let timeDiff = time - lastHeartbeat
-        if timeDiff > 10 {
+        if timeDiff > 5 {
             logger.addEntry("Connection with server lost")
             service.stop()
             return
