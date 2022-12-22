@@ -36,6 +36,12 @@ class UDPGyroProviderClient {
     var connectionCheckTimer : Timer?
     var receivingBigEndian = true
     
+    #if os(iOS)
+    let hardware = IPhoneHardware.self
+    #else
+    let hardware = WatchHardware.self
+    #endif
+    
     public static var CURRENT_VERSION = 5
     
     init(host: String, port: String, service: TrackingService) {
@@ -198,11 +204,11 @@ class UDPGyroProviderClient {
             restData = restData.advanced(by: 4)
             let amplitude = readFloat(data: restData)
             if #available(iOS 13.0, *) {
-                if DeviceHardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                    DeviceHardware.vibrate()
+                if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                    hardware.vibrate()
                 }
             } else {
-                DeviceHardware.vibrate()
+                hardware.vibrate()
             }
         } else if msgType == PacketTypes.HANDSHAKE{
             //additional handshake messages

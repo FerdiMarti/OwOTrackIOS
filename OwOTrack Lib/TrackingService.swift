@@ -13,23 +13,29 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
-    var cvc: ConnectViewController?
+    var connectUI: ConnectUI?
     let logger = Logger.getInstance()
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
     var batteryTimer : Timer?
     var trackingServiceQueue = DispatchQueue.init(label: "TrackingService")
     
-    func start(ipAdress: String, port: String, magnetometer: Bool, cvc: ConnectViewController) {
-        self.cvc = cvc
+    #if os(iOS)
+    let hardware = IPhoneHardware.self
+    #else
+    let hardware = WatchHardware.self
+    #endif
+    
+    func start(ipAdress: String, port: String, magnetometer: Bool, connectUI: ConnectUI) {
+        self.connectUI = connectUI
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
         self.setDefaults()
-        cvc.setLoading()
-        DeviceHardware.startProximitySensor()
-        DeviceHardware.registerVolButtonListener(target: self)
-        DeviceHardware.startBackgroundUsage(target: self)
+        connectUI.setLoading()
+        hardware.startProximitySensor()
+        hardware.registerVolButtonListener(target: self)
+        hardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             if self.client == nil {
@@ -44,7 +50,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             }
             if (self.client!.isConnected) {
                 self.logger.addEntry("Connection established")
-                cvc.setConnected()
+                connectUI.setConnected()
                 self.startSendingBattery()
                 self.gHandler = GyroHandler.getInstance()
                 self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
@@ -66,14 +72,14 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     func stop() {
-        DeviceHardware.stopProximitySensor()
-        DeviceHardware.unregisterVolButtonListener(target: self)
-        DeviceHardware.stopBackgroundUsage()
+        hardware.stopProximitySensor()
+        hardware.unregisterVolButtonListener(target: self)
+        hardware.stopBackgroundUsage()
         stopSendingBattery()
         gHandler?.stopUpdates()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
-            cvc?.setUnconnected()
+            connectUI?.setUnconnected()
             logger.addEntry("Disconnected")
         }
     }
@@ -84,7 +90,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         }
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
-        cvc?.setMagnometerToggle(use: use)
+        connectUI?.setMagnometerToggle(use: use)
     }
     
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
@@ -94,7 +100,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     func startSendingBattery() {
-        DeviceHardware.startBatteryLevelMonitoring()
+        hardware.startBatteryLevelMonitoring()
         sendBatteryLevel()
         DispatchQueue.main.async {
             self.batteryTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.sendBatteryLevel), userInfo: nil, repeats: true)
@@ -102,12 +108,12 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     @objc func sendBatteryLevel() {
-        let level = DeviceHardware.getBatteryLevel()
+        let level = hardware.getBatteryLevel()
         self.client?.provideBatteryLevel(level: level)
     }
     
     func stopSendingBattery() {
         batteryTimer?.invalidate()
-        DeviceHardware.stopBatteryLevelMonitoring()
+        hardware.stopBatteryLevelMonitoring()
     }
 }
