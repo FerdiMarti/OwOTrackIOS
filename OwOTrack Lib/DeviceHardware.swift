@@ -32,4 +32,6 @@ protocol DeviceHardware {
     static func startBackgroundUsage(target: CLLocationManagerDelegate)
     
     static func stopBackgroundUsage()
+    
+    static func getPseudoMacAddress() -> [UInt8]
 }

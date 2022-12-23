@@ -93,5 +93,20 @@ class WatchHardware: DeviceHardware {
     static func stopBackgroundUsage() {
         locationManager.stopUpdatingLocation()
     }
+    
+    static func getPseudoMacAddress() -> [UInt8] {
+        let defaults = UserDefaults.standard
+        if let mac = defaults.object(forKey: "mac") as? [UInt8] {
+            return mac
+        } else {
+            var mac : [UInt8] = []
+            while (mac.count < 6) {
+                let rand = Int.random(in: 0..<255)
+                mac.append(UInt8(rand))
+            }
+            defaults.set(mac, forKey: "mac")
+            return mac
+        }
+    }
 }
 #endif

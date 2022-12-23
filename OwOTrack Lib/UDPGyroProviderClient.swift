@@ -111,7 +111,7 @@ class UDPGyroProviderClient {
         var firmware = "owoTrack8" // 9 bytes
         var firmwareData = Data(firmware.utf8)
         var firmwareLength : UInt8 = UInt8(firmware.count)
-        var pseudoMac : [UInt8] = getPseudoMacAddress()
+        var pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
         data.append(UnsafeBufferPointer(start: &boardType, count: 1))
         data.append(UnsafeBufferPointer(start: &imuType, count: 1))
         data.append(UnsafeBufferPointer(start: &mcuType, count: 1))
@@ -368,20 +368,5 @@ class UDPGyroProviderClient {
         self.connection?.sendUDP(data)
         packetId += 1;
         logger.addEntry("Button Pushed")
-    }
-    
-    func getPseudoMacAddress() -> [UInt8] {
-        let defaults = UserDefaults.standard
-        if let mac = defaults.object(forKey: "mac") as? [UInt8] {
-            return mac
-        } else {
-            var mac : [UInt8] = []
-            while (mac.count < 6) {
-                let rand = Int.random(in: 0..<255)
-                mac.append(UInt8(rand))
-            }
-            defaults.set(mac, forKey: "mac")
-            return mac
-        }
     }
 }
