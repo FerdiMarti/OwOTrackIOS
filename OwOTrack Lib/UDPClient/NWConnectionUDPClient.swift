@@ -9,6 +9,7 @@ import Foundation
 import Network
 
 @available(iOS 12.0, *)
+@available(watchOS 5.0, *)
 class NWConnectionUDPClient: CompatibleUDPClient {
 
     var connection: NWConnection?

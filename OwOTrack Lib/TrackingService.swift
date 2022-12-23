@@ -22,7 +22,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     
     #if os(iOS)
     let hardware = IPhoneHardware.self
-    #else
+    #elseif os(watchOS)
     let hardware = WatchHardware.self
     #endif
     

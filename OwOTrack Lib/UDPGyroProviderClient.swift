@@ -38,7 +38,7 @@ class UDPGyroProviderClient {
     
     #if os(iOS)
     let hardware = IPhoneHardware.self
-    #else
+    #elseif os(watchOS)
     let hardware = WatchHardware.self
     #endif
     
@@ -65,11 +65,21 @@ class UDPGyroProviderClient {
         isConnecting = false
         packetId = 0
         lastHeartbeat = 0
+        
+        #if os(iOS)
         if #available(iOS 12.0, *) {
             self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
         } else {
             self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         }
+        #elseif os(watchOS)
+        if #available(watchOS 5.0, *) {
+            self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
+        } else {
+            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
+        }
+        #endif
+        
         self.connection?.open {
             self.logger.addEntry("Connection Ready")
             self.logger.addEntry("Attempting Handshake")

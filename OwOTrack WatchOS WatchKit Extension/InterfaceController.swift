@@ -17,6 +17,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     @IBOutlet weak var portField: WKInterfaceTextField!
     @IBOutlet weak var magnetometerToggle: WKInterfaceSwitch!
     @IBOutlet weak var connectButton: WKInterfaceButton!
+    @IBOutlet weak var loggingLabel: WKInterfaceLabel!
     
     var ipFieldText : String? = ""
     var portFieldText: String? = ""
@@ -43,15 +44,19 @@ class InterfaceController: WKInterfaceController, ConnectUI {
         logger.attachVC(connectUI: self)
         setUnconnected()
         if let ipTemp = defaults.object(forKey: "ip") as? String {
-            ipField.setText(ipTemp)
+            ipFieldText = ipTemp
+            ipField.setText(ipFieldText)
         } else {
-            ipField.setText("192.168.0.10")
+            ipFieldText = "192.168.0.10"
+            ipField.setText(ipFieldText)
             self.defaults.set(ipFieldText, forKey: "ip")
         }
         if let portTemp = defaults.object(forKey: "port") as? String {
-            portField.setText(portTemp)
+            portFieldText = portTemp
+            portField.setText(portFieldText)
         } else {
-            portField.setText("6969")
+            portFieldText = "6969"
+            portField.setText(portFieldText)
             self.defaults.set(portFieldText, forKey: "port")
         }
         if let useMagnTemp = defaults.object(forKey: "useM") as? Bool {
@@ -70,11 +75,10 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     }
     
     func updateLogs(text: String) {
-//        DispatchQueue.main.async {
-//            self.loggingTextView.text = text
-//            let range = NSMakeRange(self.loggingTextView.text.count - 1, 0)
-//            self.loggingTextView.scrollRangeToVisible(range)
-//        }
+        DispatchQueue.main.async {
+            self.loggingLabel.setText(text)
+            self.scroll(to: self.loggingLabel, at: .bottom, animated: true)
+        }
     }
     
     @IBAction func connectPushed(_ sender: Any) {
@@ -111,6 +115,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
             self.magnetometerToggle.setEnabled(false)
             self.connectButton.setEnabled(false)
             self.connectButton.setTitle("Connect")
+            self.loggingLabel.setText("")
         }
     }
     
@@ -147,14 +152,6 @@ class InterfaceController: WKInterfaceController, ConnectUI {
             self.magnetometerToggle.setOn(use)
         }
     }
-    
-//    func updateLogs(text: String) {
-//        DispatchQueue.main.async {
-//            self.loggingTextView.text = text
-//            let range = NSMakeRange(self.loggingTextView.text.count - 1, 0)
-//            self.loggingTextView.scrollRangeToVisible(range)
-//        }
-//    }
     
     func validatePort(port: String?) -> Bool {
         if port == "" || port == nil {

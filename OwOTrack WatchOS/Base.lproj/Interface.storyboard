@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="19529" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="AgC-eL-Hgc">
     <device id="watch38"/>
     <dependencies>
+        <deployment identifier="watchOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBWatchKitPlugin" version="19514"/>
     </dependencies>
@@ -9,20 +10,20 @@
         <!--Interface Controller-->
         <scene sceneID="aou-V4-d1y">
             <objects>
-                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="OwOTrack_WatchKit_App" customModuleProvider="target">
+                <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="OwOTrack_WatchOS_WatchKit_Extension">
                     <items>
-                        <label alignment="left" text="Label" id="kbE-M2-hxt"/>
-                        <textField width="1" alignment="left" text="IP" id="Aia-8N-cOw">
+                        <label alignment="left" text="Status" id="kbE-M2-hxt"/>
+                        <textField width="1" alignment="left" text="192.168.1.139" placeholder="IP" id="Aia-8N-cOw">
                             <connections>
                                 <action selector="ipFieldValueChange:" destination="AgC-eL-Hgc" id="4pp-dK-zvE"/>
                             </connections>
                         </textField>
-                        <textField width="1" alignment="left" text="Port" id="nKI-me-1Vd">
+                        <textField width="1" alignment="left" text="6969" placeholder="Port" id="nKI-me-1Vd">
                             <connections>
                                 <action selector="portFieldValueChange:" destination="AgC-eL-Hgc" id="qet-ZZ-JdE"/>
                             </connections>
                         </textField>
-                        <switch width="1" alignment="left" value="YES" title="Magn" id="Whc-qN-lEx">
+                        <switch width="1" alignment="left" value="YES" title="Magn." id="Whc-qN-lEx">
                             <connections>
                                 <action selector="magentometerToggleValueChange:" destination="AgC-eL-Hgc" id="RmZ-c1-jtQ"/>
                             </connections>
@@ -32,17 +33,19 @@
                                 <action selector="connectPushed:" destination="AgC-eL-Hgc" id="a1l-Ls-Hut"/>
                             </connections>
                         </button>
+                        <label alignment="left" text="Logs" numberOfLines="0" id="Jvr-av-AmU"/>
                     </items>
                     <connections>
                         <outlet property="connectButton" destination="2qB-Gp-0wE" id="HKN-Gu-d83"/>
                         <outlet property="ipField" destination="Aia-8N-cOw" id="bSf-mS-3WX"/>
+                        <outlet property="loggingLabel" destination="Jvr-av-AmU" id="bNY-Zr-3ee"/>
                         <outlet property="magnetometerToggle" destination="Whc-qN-lEx" id="5MF-NH-Evv"/>
                         <outlet property="portField" destination="nKI-me-1Vd" id="eXW-jS-Ezn"/>
                         <outlet property="statusLabel" destination="kbE-M2-hxt" id="vk6-LF-kcq"/>
                     </connections>
                 </controller>
             </objects>
-            <point key="canvasLocation" x="220" y="345"/>
+            <point key="canvasLocation" x="220" y="344.5"/>
         </scene>
         <!--Static Notification Interface Controller-->
         <scene sceneID="AEw-b0-oYE">
@@ -64,14 +67,14 @@
         <!--Notification Controller-->
         <scene sceneID="ZPc-GJ-vnh">
             <objects>
-                <controller id="4sK-HA-Art" customClass="NotificationController" customModule="OwOTrack_WatchKit_App" customModuleProvider="target"/>
+                <controller id="4sK-HA-Art" customClass="NotificationController" customModule="OwOTrack_WatchOS" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="468" y="643"/>
         </scene>
         <!--Notification Controller-->
         <scene sceneID="Niz-AI-uX2">
             <objects>
-                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="OwOTrack_WatchKit_App" customModuleProvider="target"/>
+                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="OwOTrack_WatchOS" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="468" y="345"/>
         </scene>
