@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ConnectViewController: UIViewController, UITextFieldDelegate {
+class ConnectViewController: UIViewController, UITextFieldDelegate, ConnectUI {
     
     @IBOutlet weak var statusLabel: UILabel!
     @IBOutlet weak var ipField: UITextField!
@@ -30,7 +30,7 @@ class ConnectViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         ipField.delegate = self
         portField.delegate = self
-        logger.attachVC(cvc: self)
+        logger.attachVC(connectUI: self)
         setUnconnected()
         loadingIndicator.hidesWhenStopped = true
         self.navigationController?.title = "Connect"
@@ -80,7 +80,7 @@ class ConnectViewController: UIViewController, UITextFieldDelegate {
         } else if isLoading {
         
         } else {
-            tService.start(ipAdress: ipField.text != nil ? ipField.text! : "", port: portField.text != nil ? portField.text! : "", magnetometer: magnetometerToggle.isOn, cvc: self)
+            tService.start(ipAdress: ipField.text != nil ? ipField.text! : "", port: portField.text != nil ? portField.text! : "", magnetometer: magnetometerToggle.isOn, connectUI: self)
         }
     }
     

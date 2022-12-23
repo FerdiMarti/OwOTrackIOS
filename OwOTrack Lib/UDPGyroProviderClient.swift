@@ -36,6 +36,12 @@ class UDPGyroProviderClient {
     var connectionCheckTimer : Timer?
     var receivingBigEndian = true
     
+    #if os(iOS)
+    let hardware = IPhoneHardware.self
+    #elseif os(watchOS)
+    let hardware = WatchHardware.self
+    #endif
+    
     public static var CURRENT_VERSION = 5
     
     init(host: String, port: String, service: TrackingService) {
@@ -59,11 +65,21 @@ class UDPGyroProviderClient {
         isConnecting = false
         packetId = 0
         lastHeartbeat = 0
+        
+        #if os(iOS)
         if #available(iOS 12.0, *) {
             self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
         } else {
             self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
         }
+        #elseif os(watchOS)
+        if #available(watchOS 5.0, *) {
+            self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
+        } else {
+            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
+        }
+        #endif
+        
         self.connection?.open {
             self.logger.addEntry("Connection Ready")
             self.logger.addEntry("Attempting Handshake")
@@ -198,11 +214,11 @@ class UDPGyroProviderClient {
             restData = restData.advanced(by: 4)
             let amplitude = readFloat(data: restData)
             if #available(iOS 13.0, *) {
-                if DeviceHardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                    DeviceHardware.vibrate()
+                if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                    hardware.vibrate()
                 }
             } else {
-                DeviceHardware.vibrate()
+                hardware.vibrate()
             }
         } else if msgType == PacketTypes.HANDSHAKE{
             //additional handshake messages

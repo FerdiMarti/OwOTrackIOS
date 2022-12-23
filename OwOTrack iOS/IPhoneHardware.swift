@@ -4,6 +4,7 @@
 //
 //  Created by Ferdinand Martini on 19.12.22.
 //
+#if os(iOS)
 
 import Foundation
 import AVFoundation
@@ -12,7 +13,7 @@ import AudioToolbox
 import UIKit
 import CoreLocation
 
-class DeviceHardware {
+class IPhoneHardware: DeviceHardware {
     static let audioSession = AVAudioSession.sharedInstance()
     static let locationManager = CLLocationManager()
     
@@ -131,3 +132,4 @@ class DeviceHardware {
         locationManager.stopUpdatingLocation()
     }
 }
+#endif
