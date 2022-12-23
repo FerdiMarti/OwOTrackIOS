@@ -15,8 +15,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9AE6EBF42619FBFB007C6BBA"
-               BuildableName = "OwOTracker.app"
-               BlueprintName = "OwOTrack"
+               BuildableName = "OwOTrack.app"
+               BlueprintName = "OwOTrack iOS"
                ReferencedContainer = "container:OwOTrack.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -45,8 +45,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE6EBF42619FBFB007C6BBA"
-            BuildableName = "OwOTracker.app"
-            BlueprintName = "OwOTrack"
+            BuildableName = "OwOTrack.app"
+            BlueprintName = "OwOTrack iOS"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -62,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE6EBF42619FBFB007C6BBA"
-            BuildableName = "OwOTracker.app"
-            BlueprintName = "OwOTrack"
+            BuildableName = "OwOTrack.app"
+            BlueprintName = "OwOTrack iOS"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

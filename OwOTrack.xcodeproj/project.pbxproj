@@ -153,7 +153,7 @@
 		9AE20E1B29549020001B0874 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
 		9AE20E3D295491B2001B0874 /* InterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
 		9AE20E3F295491C0001B0874 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		9AE6EBF52619FBFB007C6BBA /* OwOTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OwOTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OwOTrack iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EBF82619FBFB007C6BBA /* OwOTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackerApp.swift; sourceTree = "<group>"; };
 		9AE6EBFA2619FBFB007C6BBA /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -307,7 +307,7 @@
 		9AE6EBF62619FBFB007C6BBA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				9AE6EBF52619FBFB007C6BBA /* OwOTrack.app */,
+				9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */,
 				9AE20E002954901D001B0874 /* OwOTrack.app */,
 				9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */,
 			);
@@ -372,9 +372,9 @@
 			productReference = 9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */;
 			productType = "com.apple.product-type.watchkit2-extension";
 		};
-		9AE6EBF42619FBFB007C6BBA /* OwOTrack */ = {
+		9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE6EC1A2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrack" */;
+			buildConfigurationList = 9AE6EC1A2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrack iOS" */;
 			buildPhases = (
 				9AE6EBF12619FBFB007C6BBA /* Sources */,
 				9AE6EBF22619FBFB007C6BBA /* Frameworks */,
@@ -386,9 +386,9 @@
 			dependencies = (
 				9AE20E1D29549020001B0874 /* PBXTargetDependency */,
 			);
-			name = OwOTrack;
+			name = "OwOTrack iOS";
 			productName = OwOTracker;
-			productReference = 9AE6EBF52619FBFB007C6BBA /* OwOTrack.app */;
+			productReference = 9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -425,7 +425,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9AE6EBF42619FBFB007C6BBA /* OwOTrack */,
+				9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */,
 				9AE20DFF2954901D001B0874 /* OwOTrack WatchOS */,
 				9AE20E0A2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */,
 			);
@@ -565,7 +565,7 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "OwOTrack WatchOS WatchKit Extension/Info.plist";
@@ -582,7 +582,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
@@ -600,7 +600,7 @@
 				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "OwOTrack WatchOS WatchKit Extension/Info.plist";
@@ -617,7 +617,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp.watchkitextension;
 				PRODUCT_NAME = "${TARGET_NAME}";
 				SDKROOT = watchos;
@@ -638,13 +638,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "OwOTrack WatchOS/OwOTrack WatchOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				GENERATE_INFOPLIST_FILE = YES;
 				IBSC_MODULE = OwOTrack_WatchOS_WatchKit_Extension;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp;
 				PRODUCT_NAME = OwOTrack;
 				SDKROOT = watchos;
@@ -665,13 +665,13 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "OwOTrack WatchOS/OwOTrack WatchOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				GENERATE_INFOPLIST_FILE = YES;
 				IBSC_MODULE = OwOTrack_WatchOS_WatchKit_Extension;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp;
 				PRODUCT_NAME = OwOTrack;
 				SDKROOT = watchos;
@@ -806,7 +806,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTrack iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				ENABLE_BITCODE = YES;
@@ -817,7 +817,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -833,7 +833,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"OwOTrack iOS/Preview Content\"";
 				DEVELOPMENT_TEAM = QG96Y277J7;
 				ENABLE_BITCODE = YES;
@@ -844,7 +844,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -882,7 +882,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE6EC1A2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrack" */ = {
+		9AE6EC1A2619FBFD007C6BBA /* Build configuration list for PBXNativeTarget "OwOTrack iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE6EC1B2619FBFD007C6BBA /* Debug */,
