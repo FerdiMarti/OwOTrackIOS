@@ -1,6 +1,6 @@
 //
 //  AutoDiscovery.swift
-//  OwOTracker
+//  OwOTrack
 //
 //  Created by Ferdinand Martini on 25.11.22.
 //
@@ -76,6 +76,7 @@ class AutoDiscovery {
     @objc func checkSuccess(sender: Timer) {
         if self.isWaiting {
             self.logger.addEntry("No Tracker discovered")
+            self.logger.addEntry("Discovery does not work with SlimeVR")
             self.isWaiting = false
             let cb = sender.userInfo as! (Bool, String, String) -> Void
             cb(true, "", "")

@@ -1,6 +1,6 @@
 //
 //  DeviceHardware.swift
-//  OwOTracker
+//  OwOTrack
 //
 //  Created by Ferdinand Martini on 21.12.22.
 //

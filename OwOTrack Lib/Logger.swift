@@ -1,6 +1,6 @@
 //
 //  Logger.swift
-//  OwOTracker
+//  OwOTrack
 //
 //  Created by Ferdinand Martini on 05.04.21.
 //

@@ -1,6 +1,6 @@
 //
 //  StatusViewController.swift
-//  OwOTracker
+//  OwOTrack
 //
 //  Created by Ferdinand Martini on 02.05.21.
 //
