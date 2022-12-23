@@ -274,12 +274,53 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" textAlignment="natural" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
                                 <rect key="frame" x="20" y="88" width="374" height="725"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <string key="text">Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.   If you want the app to stay connected while running in the background or while the phone is locked, you have to give the app permission to always use location data.  Your location data will not be used by me or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is opened. Also the proximity sensor will be activated so that the screen turns off if it is covered by anything (like during a phone call).</string>
-                                <color key="textColor" systemColor="labelColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                <attributedString key="attributedText">
+                                    <fragment>
+                                        <mutableString key="content">It is recommended to only use SlimeVR server since the OwOTrack driver is no longer maintained.
+
+----
+
+The "discover" feature tries to find the ip address of a running OwOTrack driver automatically. It only works with the OwOTrack Driver and not with SlimeVR.
+
+----
+
+Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.
+
+----
+
+</mutableString>
+                                        <attributes>
+                                            <font key="NSFont" size="13" name="HelveticaNeue"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment content="Background Usage">
+                                        <attributes>
+                                            <font key="NSFont" size="19" name="HelveticaNeue"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                    <fragment>
+                                        <mutableString key="content"> If you want the app to stay connected while running in the background or while the phone is turned off, you have to give the app permission to always use location data.  Your location data will not be used by the developer or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is open.
+
+The app can not run in the background forever and might disconnect after 10 - 30 minutes depending on your circumstances. If you want to avoid this, leave the app open and your phone unlocked.
+
+You can make the screen of your iPhone turn off by covering the sensor on the top of the phone (next to the camera). This will turn the screen off to save battery life and the app will stay connected.</mutableString>
+                                        <attributes>
+                                            <font key="NSFont" size="13" name="HelveticaNeue"/>
+                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
+                                                <tabStops/>
+                                            </paragraphStyle>
+                                        </attributes>
+                                    </fragment>
+                                </attributedString>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>

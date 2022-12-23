@@ -23,7 +23,7 @@
                                 <action selector="portFieldValueChange:" destination="AgC-eL-Hgc" id="qet-ZZ-JdE"/>
                             </connections>
                         </textField>
-                        <switch width="1" alignment="left" value="YES" title="Magn." id="Whc-qN-lEx">
+                        <switch width="1" alignment="left" value="YES" title="Magnetometer" id="Whc-qN-lEx">
                             <connections>
                                 <action selector="magentometerToggleValueChange:" destination="AgC-eL-Hgc" id="RmZ-c1-jtQ"/>
                             </connections>
@@ -67,14 +67,14 @@
         <!--Notification Controller-->
         <scene sceneID="ZPc-GJ-vnh">
             <objects>
-                <controller id="4sK-HA-Art" customClass="NotificationController" customModule="OwOTrack_WatchOS" customModuleProvider="target"/>
+                <controller id="4sK-HA-Art" customClass="NotificationController" customModule="OwOTrack" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="468" y="643"/>
         </scene>
         <!--Notification Controller-->
         <scene sceneID="Niz-AI-uX2">
             <objects>
-                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="OwOTrack_WatchOS" customModuleProvider="target"/>
+                <controller id="eXb-UN-Cd0" customClass="NotificationController" customModule="OwOTrack" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="468" y="345"/>
         </scene>
