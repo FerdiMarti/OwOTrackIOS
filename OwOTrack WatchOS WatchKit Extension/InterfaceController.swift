@@ -28,6 +28,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     var isLoading = false
     let logger = Logger.getInstance()
     
+    //these are neccessare to track changes in textField values, only way to get text in fields
     @IBAction func ipFieldValueChange(_ value: NSString?) {
         ipFieldText = value as String?
     }
@@ -41,28 +42,28 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     }
     
     override func awake(withContext context: Any?) {
-        logger.attachVC(connectUI: self)
+        logger.attachUI(connectUI: self)
         setUnconnected()
-        if let ipTemp = defaults.object(forKey: "ip") as? String {
+        if let ipTemp = defaults.object(forKey: IP_USERDEFAULTS_KEY) as? String {
             ipFieldText = ipTemp
             ipField.setText(ipFieldText)
         } else {
             ipFieldText = "192.168.0.10"
             ipField.setText(ipFieldText)
-            self.defaults.set(ipFieldText, forKey: "ip")
+            self.defaults.set(ipFieldText, forKey: IP_USERDEFAULTS_KEY)
         }
-        if let portTemp = defaults.object(forKey: "port") as? String {
+        if let portTemp = defaults.object(forKey: PORT_USERDEFAULTS_KEY) as? String {
             portFieldText = portTemp
             portField.setText(portFieldText)
         } else {
             portFieldText = "6969"
             portField.setText(portFieldText)
-            self.defaults.set(portFieldText, forKey: "port")
+            self.defaults.set(portFieldText, forKey: PORT_USERDEFAULTS_KEY)
         }
-        if let useMagnTemp = defaults.object(forKey: "useM") as? Bool {
+        if let useMagnTemp = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool {
             magnetometerToggle.setOn(useMagnTemp)
         } else {
-            self.defaults.set(magnetometerToggleValue, forKey: "useM")
+            self.defaults.set(magnetometerToggleValue, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
         }
     }
     
@@ -147,6 +148,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
         }
     }
     
+    //used if server triggers a change in magnetometer use
     func setMagnometerToggle(use: Bool) {
         DispatchQueue.main.async {
             self.magnetometerToggle.setOn(use)

@@ -7,6 +7,7 @@
 
 import Foundation
 
+//Protocol for UDP clients to abstract for uses in different iOS versions
 protocol CompatibleUDPClient {
     func open(cb: @escaping () -> Void) -> Void
     

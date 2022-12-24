@@ -7,6 +7,7 @@
 
 import Foundation
 
+//protocol to abstract the UI component on iOS and watchOS
 protocol ConnectUI {
     
     func setLoading()

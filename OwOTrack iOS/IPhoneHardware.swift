@@ -13,6 +13,7 @@ import AudioToolbox
 import UIKit
 import CoreLocation
 
+//static functions for iPhone hardware stuff
 class IPhoneHardware: DeviceHardware {
     static let audioSession = AVAudioSession.sharedInstance()
     static let locationManager = CLLocationManager()
@@ -79,6 +80,7 @@ class IPhoneHardware: DeviceHardware {
         AudioServicesPlayAlertSound(SystemSoundID(kSystemSoundID_Vibrate))
     }
     
+    //when enabled, the screen turns off if the sensor on the earpiece is covered
     static func startProximitySensor() {
         DispatchQueue.main.async {
             UIDevice.current.isProximityMonitoringEnabled = true
@@ -109,6 +111,7 @@ class IPhoneHardware: DeviceHardware {
         }
     }
     
+    //uses background location to keep the app running in background
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
         locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -132,6 +135,7 @@ class IPhoneHardware: DeviceHardware {
         locationManager.stopUpdatingLocation()
     }
     
+    //generates a random MAC address for SlimeVR (if not already generated before) and saves it in UserDefaults, actual MAC address can not be accessed
     static func getPseudoMacAddress() -> [UInt8] {
         let defaults = UserDefaults.standard
         if let mac = defaults.object(forKey: "mac") as? [UInt8] {

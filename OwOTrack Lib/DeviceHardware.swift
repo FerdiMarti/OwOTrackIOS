@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 
+//Protocol to abstract static functions to device hardware on iOS or watchOS
 protocol DeviceHardware {
     
     static func unregisterVolButtonListener(target: NSObject)

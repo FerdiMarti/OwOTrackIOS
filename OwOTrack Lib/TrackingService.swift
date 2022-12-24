@@ -9,17 +9,24 @@ import Foundation
 import CoreLocation
 import UIKit
 
+let TRACKING_SERVICE_QUEUE_LABEL = "TrackingService"
+let IP_USERDEFAULTS_KEY = "ip"
+let PORT_USERDEFAULTS_KEY = "port"
+let MAGNETOMETER_USERDEFAULTS_KEY = "useM"
+
+//manages connection, app and UI state
 public class TrackingService: NSObject, CLLocationManagerDelegate {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
-    var connectUI: ConnectUI?
+    var connectUI: ConnectUI?  // the UI component that needs to be updated when status changes
     let logger = Logger.getInstance()
     var gHandler: GyroHandler?
     var client: UDPGyroProviderClient?
-    var batteryTimer : Timer?
-    var trackingServiceQueue = DispatchQueue.init(label: "TrackingService")
+    var batteryTimer : Timer?   //timer that triggers sending of current battery level ever 10s
+    var trackingServiceQueue = DispatchQueue.init(label: TRACKING_SERVICE_QUEUE_LABEL)
     
+    //Switch between hardware class depending on device type
     #if os(iOS)
     let hardware = IPhoneHardware.self
     #elseif os(watchOS)
@@ -37,6 +44,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         hardware.registerVolButtonListener(target: self)
         hardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
+            //start connection
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
             if self.client == nil {
                 self.logger.addEntry("Initializing Connection Failed")
@@ -66,9 +74,9 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     
     func setDefaults() {
         let defaults = UserDefaults.standard
-        defaults.set(self.ipAdress, forKey: "ip")
-        defaults.set(self.port, forKey: "port")
-        defaults.set(self.magnetometer, forKey: "useM")
+        defaults.set(self.ipAdress, forKey: IP_USERDEFAULTS_KEY)
+        defaults.set(self.port, forKey: PORT_USERDEFAULTS_KEY)
+        defaults.set(self.magnetometer, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
     }
     
     func stop() {
@@ -93,8 +101,10 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         connectUI?.setMagnometerToggle(use: use)
     }
     
+    //handler for volume button push
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "outputVolume" {
+            logger.addEntry("Button Pushed")
             client?.provideButtonPushed()
         }
     }

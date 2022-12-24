@@ -7,6 +7,7 @@
 
 import UIKit
 
+//creates the fade effect on TextView to indicate more existing text
 class FadeTextView: UITextView, UITextViewDelegate {
 
     let fadePercentage: Double = 0.15

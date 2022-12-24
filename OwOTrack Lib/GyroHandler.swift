@@ -8,6 +8,7 @@
 import Foundation
 import CoreMotion
 
+//Singleton that queries and provides sensor data
 public class GyroHandler {
     
     var mmanager = CMMotionManager()

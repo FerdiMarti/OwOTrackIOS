@@ -7,6 +7,8 @@
 
 import Foundation
 
+//Singleton that is used in most classes to add log entries to the UI
+
 class Logger {
     
     private var logEntries = Array<String>()
@@ -17,10 +19,12 @@ class Logger {
         
     }
     
-    func attachVC(connectUI: ConnectUI) {
+    //attach the UI component that will be updated on new logs
+    func attachUI(connectUI: ConnectUI) {
         self.connectUI = connectUI
     }
     
+    //clear logs
     func reset() {
         logEntries.removeAll()
         connectUI?.updateLogs(text: get())

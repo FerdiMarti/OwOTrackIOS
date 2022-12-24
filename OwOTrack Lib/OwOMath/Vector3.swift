@@ -7,6 +7,8 @@
 
 import Foundation
 
+
+//Currently not in use
 public final class Vector3 {
     private var x: Double
     private var y: Double

@@ -30,26 +30,28 @@ class ConnectViewController: UIViewController, UITextFieldDelegate, ConnectUI {
         super.viewDidLoad()
         ipField.delegate = self
         portField.delegate = self
-        logger.attachVC(connectUI: self)
+        logger.attachUI(connectUI: self)
         setUnconnected()
         loadingIndicator.hidesWhenStopped = true
         self.navigationController?.title = "Connect"
-        if let ipTemp = defaults.object(forKey: "ip") as? String {
+        
+        //load last values from SserDefaults
+        if let ipTemp = defaults.object(forKey: IP_USERDEFAULTS_KEY) as? String {
             ipField.text = ipTemp
         } else {
             ipField.text = "192.168.0.10"
-            self.defaults.set(ipField.text, forKey: "ip")
+            self.defaults.set(ipField.text, forKey: IP_USERDEFAULTS_KEY)
         }
-        if let portTemp = defaults.object(forKey: "port") as? String {
+        if let portTemp = defaults.object(forKey: PORT_USERDEFAULTS_KEY) as? String {
             portField.text = portTemp
         } else {
             portField.text = "6969"
-            self.defaults.set(portField.text, forKey: "port")
+            self.defaults.set(portField.text, forKey: PORT_USERDEFAULTS_KEY)
         }
-        if let useMagnTemp = defaults.object(forKey: "useM") as? Bool {
+        if let useMagnTemp = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool {
             magnetometerToggle.isOn = useMagnTemp
         } else {
-            self.defaults.set(magnetometerToggle.isOn, forKey: "useM")
+            self.defaults.set(magnetometerToggle.isOn, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
         }
     }
     
@@ -148,6 +150,7 @@ class ConnectViewController: UIViewController, UITextFieldDelegate, ConnectUI {
         }
     }
     
+    //used if server triggers a change in magnetometer use
     func setMagnometerToggle(use: Bool) {
         DispatchQueue.main.async {
             self.magnetometerToggle.isOn = use
@@ -194,6 +197,7 @@ class ConnectViewController: UIViewController, UITextFieldDelegate, ConnectUI {
         return true
     }
     
+    //make keyboard dissapear if return is pressed
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         self.view.endEditing(true)
         return false

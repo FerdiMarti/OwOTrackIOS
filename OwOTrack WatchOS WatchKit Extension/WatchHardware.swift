@@ -12,6 +12,7 @@ import UIKit
 import CoreLocation
 import WatchKit
 
+//static functions for Apple Watch hardware stuff
 class WatchHardware: DeviceHardware {
     static let audioSession = AVAudioSession.sharedInstance()
     static let locationManager = CLLocationManager()
@@ -36,6 +37,7 @@ class WatchHardware: DeviceHardware {
         audioSession.addObserver(target, forKeyPath: "outputVolume", options: NSKeyValueObservingOptions.new, context: nil)
     }
     
+    //not sure if that is possible on Apple Watch, use normal vibrate
     static func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool  {
         vibrate()
         return true
@@ -45,6 +47,7 @@ class WatchHardware: DeviceHardware {
         WKInterfaceDevice.current().play(.click)
     }
     
+    //does not exist on Applw Watch
     static func startProximitySensor() {
         return
     }
@@ -71,6 +74,7 @@ class WatchHardware: DeviceHardware {
         }
     }
     
+    //uses background location to keep the app running in background
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
         locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -94,6 +98,7 @@ class WatchHardware: DeviceHardware {
         locationManager.stopUpdatingLocation()
     }
     
+    //generates a random MAC address for SlimeVR (if not already generated before) and saves it in UserDefaults, actual MAC address can not be accessed
     static func getPseudoMacAddress() -> [UInt8] {
         let defaults = UserDefaults.standard
         if let mac = defaults.object(forKey: "mac") as? [UInt8] {

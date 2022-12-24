@@ -8,6 +8,8 @@
 import Foundation
 import Network
 
+
+//Handles the autodiscovery feature for finding a running OwOTrack driver, uses UDPBroadcastConnection library
 class AutoDiscovery {
 
     var logger = Logger.getInstance()
@@ -23,6 +25,7 @@ class AutoDiscovery {
             broadcastConnection = try UDPBroadcastConnection(
                 port: 35903,
                 handler: { [weak self] (ipAddress: String, port: Int, response: Data) -> Void in
+                    //TODO response should be validated better to avoid crashes
                     let str = String(data: response, encoding: .ascii)!
                     let tPort = str.split(separator: ":")[0]
                     self!.logger.addEntry("Found Tracker: \(ipAddress):\(tPort)")

@@ -7,12 +7,14 @@
 
 import Foundation
 
+//Currently not in use
+
 public final class Quaternion {
     private var x : Double
     private var y : Double
     private var z : Double
     private var w : Double
-    //private float[] matrixs
+    //private float[] matrices
 
     public init(q: Quaternion) {
         self.x = q.x
@@ -37,7 +39,7 @@ public final class Quaternion {
     }
 
     public func set(q: Quaternion) {
-        //matrixs = null
+        //matrices = null
         x = q.x
         y = q.y
         z = q.z
@@ -64,13 +66,6 @@ public final class Quaternion {
         return z
     }
 
-    /**
-     * @param axis
-     *            rotation axis, unit vector
-     * @param angle
-     *            the rotation angle
-     * @return self
-     */
     public func set(axis: Vector3, angle: Double) {
         //matrixs = null
         let s = Double(sin(angle / 2))
@@ -167,10 +162,6 @@ public final class Quaternion {
         return quat
     }
 
-    /**
-     * Converts self Quaternion into a matrix, placing the values into the given array.
-     * @param matrixs 16-length float array.
-     */
     public final func toMatrix() {
         var matrixs = [Float].init(repeating: 0.0, count: 16)
         matrixs[3] = 0.0

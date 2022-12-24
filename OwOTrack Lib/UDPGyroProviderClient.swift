@@ -21,6 +21,7 @@ class PacketTypes {
     static let RECEIVE_VIBRATE = 2;
 }
 
+//Uses one of the UDP clients to send the applications data to the server
 class UDPGyroProviderClient {
 
     var connection: CompatibleUDPClient?
@@ -30,12 +31,13 @@ class UDPGyroProviderClient {
     
     private var packetId: Int64 = 0
     var isConnected: Bool = false
-    var isConnecting: Bool = false
-    var lastHeartbeat: Double = 0
+    var isConnecting: Bool = false //is true during handshake attempts
+    var lastHeartbeat: Double = 0   //last message from server
     var service: TrackingService
-    var connectionCheckTimer : Timer?
-    var receivingBigEndian = true
+    var connectionCheckTimer : Timer? //timer that regularly calls a method to check if connection is still valid
+    var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
     
+    //switch between hardware classes depending on device type (iPhone or Apple Watch)
     #if os(iOS)
     let hardware = IPhoneHardware.self
     #elseif os(watchOS)
@@ -59,6 +61,7 @@ class UDPGyroProviderClient {
     }
 
     func connectToUDP() {
+        //reset variables
         logger.reset()
         logger.addEntry("Attempting Connection")
         isConnected = false
@@ -66,6 +69,7 @@ class UDPGyroProviderClient {
         packetId = 0
         lastHeartbeat = 0
         
+        //Switch between UDPClient depending on OS version
         #if os(iOS)
         if #available(iOS 12.0, *) {
             self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
@@ -88,6 +92,7 @@ class UDPGyroProviderClient {
         }
     }
     
+    //builds the data header either for legacy OwOTrack driver or SlimeVR server
     func buildHeaderInfo(slime: Bool) -> Data {
         var len = 12
         if slime { len += 36 + 9 }
@@ -106,12 +111,12 @@ class UDPGyroProviderClient {
         var boardType = Int32(bigEndian: 0)
         var imuType = Int32(bigEndian: 0)
         var mcuType = Int32(bigEndian: 0)
-        var imuInfo : [Int32] = [0, 0, 0]
+        let imuInfo : [Int32] = [0, 0, 0]
         var firmwareBuild = Int32(bigEndian: 8)
-        var firmware = "owoTrack8" // 9 bytes
-        var firmwareData = Data(firmware.utf8)
-        var firmwareLength : UInt8 = UInt8(firmware.count)
-        var pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
+        let firmware = "owoTrack8" // 9 bytes
+        let firmwareData = Data(firmware.utf8)
+        let firmwareLength : UInt8 = UInt8(firmware.count)
+        let pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
         data.append(UnsafeBufferPointer(start: &boardType, count: 1))
         data.append(UnsafeBufferPointer(start: &imuType, count: 1))
         data.append(UnsafeBufferPointer(start: &mcuType, count: 1))
@@ -177,12 +182,15 @@ class UDPGyroProviderClient {
     func successfulHandshake() {
         self.isConnected = true
         self.isConnecting = false
-        self.lastHeartbeat = Date().timeIntervalSince1970;
+        self.lastHeartbeat = Date().timeIntervalSince1970
+        //start timer to check connection regularly
         DispatchQueue.main.async {
             self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
         }
     }
     
+    //listen for incoming data, keep running while connected or while attempting handshake
+    //Receive UDP runs in DispatchQueue
     func runListener() {
         self.connection?.receiveUDP(cb: { data in
             if data != nil {
@@ -194,7 +202,9 @@ class UDPGyroProviderClient {
         })
     }
     
+    
     func processReceivedData(data: Data, recursion: Bool) {
+        //if still connecting, the data could only be handshake
         if !isConnected && isConnecting {
             self.validateHandshakeResponse(data: data)
             return
@@ -208,35 +218,44 @@ class UDPGyroProviderClient {
             // Heartbeat
         } else if msgType == PacketTypes.RECEIVE_VIBRATE {
             // vibrate
-            let duration = readFloat(data: restData)
-            restData = restData.advanced(by: 4)
-            let frequency = readFloat(data: restData)
-            restData = restData.advanced(by: 4)
-            let amplitude = readFloat(data: restData)
-            if #available(iOS 13.0, *) {
-                if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                    hardware.vibrate()
-                }
-            } else {
-                hardware.vibrate()
-            }
+            handleVibration(restData)
         } else if msgType == PacketTypes.HANDSHAKE{
             //additional handshake messages
         } else if msgType == PacketTypes.PING_PONG {
+            //Ping, just send packet back
             self.connection?.sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
+            //let's the server switch the usage of the magnetometer, not used afaik
             let m = readString(data: restData, length: 1)
             self.service.toggleMagnetometerUse(use: m == "y")
         } else {
+            // if message type is a very high number, it's probably because the encoding is wrong
             if (msgType >= 2048 && !recursion) {
                 receivingBigEndian = !receivingBigEndian
-                processReceivedData(data: data, recursion: true)
+                processReceivedData(data: data, recursion: true) //recusrion is neccessary to check in case the high packet type was not because of encoding
+                return
             }
             print("Unknown message type \(msgType)")
             //print("Data \(String(data: data, encoding: .ascii))")
         }
     }
     
+    func handleVibration(_ data: Data) {
+        let duration = readFloat(data: data)
+        var restData = data.advanced(by: 4)
+        let frequency = readFloat(data: restData)
+        restData = restData.advanced(by: 4)
+        let amplitude = readFloat(data: restData)
+        if #available(iOS 13.0, *) {
+            if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
+                hardware.vibrate()
+            }
+        } else {
+            hardware.vibrate()
+        }
+    }
+    
+    //reads float depending on endian encoding
     func readFloat(data: Data) -> Float {
         if receivingBigEndian {
             return Float(bitPattern: UInt32(bigEndian: data.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
@@ -245,6 +264,7 @@ class UDPGyroProviderClient {
         }
     }
     
+    //reads UInt32 depending on endian encoding
     func readUInt32(data: Data) -> UInt32 {
         if receivingBigEndian {
             return UInt32(bigEndian: data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
@@ -253,6 +273,7 @@ class UDPGyroProviderClient {
         }
     }
     
+    //reads String depending on endian encoding
     func readString(data: Data, length: Int) -> String {
         var str = ""
         var restData = data
@@ -268,8 +289,8 @@ class UDPGyroProviderClient {
         }
         return str
     }
-
     
+    //checks if connection timed out
     @objc func checkConnection() {
         if !isConnected {
             return
@@ -316,6 +337,7 @@ class UDPGyroProviderClient {
         provideFloats(floats: accel, len: 3, msgType: Int32(PacketTypes.ACCEL));
     }
     
+    //send if the magnetometer is enabled, not used by server afaik
     public func provideMagnetometerUse(enabled: Bool) {
         if (!isConnected) {
             return
@@ -335,6 +357,7 @@ class UDPGyroProviderClient {
         packetId += 1
     }
     
+    //sends current device battery level
     public func provideBatteryLevel(level: Float) {
         if (!isConnected) {
             return
@@ -352,6 +375,7 @@ class UDPGyroProviderClient {
         packetId += 1
     }
     
+    //send that the volume button was pushed, not used by server afaik
     public func provideButtonPushed() {
         if (!isConnected) {
             return;
@@ -367,6 +391,5 @@ class UDPGyroProviderClient {
         
         self.connection?.sendUDP(data)
         packetId += 1;
-        logger.addEntry("Button Pushed")
     }
 }

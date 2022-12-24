@@ -8,13 +8,16 @@
 import Foundation
 import Network
 
+let RECEIVE_QUEUE_LABEL = "SwiftSocketReceive"
+
+//UDP Client that uses SwiftSocket library instead of NWConnection to support iOS 9 - iOS 11
 class SwiftSocketUDPClient: CompatibleUDPClient {
 
     var client: UDPClient?
     var logger = Logger.getInstance()
     var hostUDP = "192.168.0.10"
     var portUDP = 6969
-    var receiveQueue = DispatchQueue.init(label: "SwiftSocketReceive")
+    var receiveQueue = DispatchQueue.init(label: RECEIVE_QUEUE_LABEL)
     
     init(host: String, port: Int) {
         self.hostUDP = host
@@ -23,6 +26,7 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     }
     
     func open(cb: @escaping () -> Void) {
+        //no preparation needed, immediately call back
         cb()
     }
     
@@ -42,18 +46,19 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
     }
     
     func receiveUDP(cb: @escaping (Data?) -> Void) {
+        //run in DispatchQueue to keep app running
         receiveQueue.async {
-            guard let raw = self.client?.recv(1024*10)
+            guard let raw = self.client?.recv(1024*10) //not sure about the "expected size" argument, 1024*10 works fine
             else {
                 cb(nil)
                 return
             }
-            guard let data = raw.0 else {
+            guard let data = raw.0 else { //.0 contains actual data
                 print("data == nil")
                 cb(nil)
                 return
             }
-            let ip = raw.1
+            let ip = raw.1 //.1 contains sender's ip address
             if (ip != self.hostUDP) {
                 self.logger.addEntry("Received UDP packet from wrong host")
                 cb(nil)
