@@ -13,7 +13,7 @@
         <!--Sensor Status-->
         <scene sceneID="0Rq-1D-HsV">
             <objects>
-                <viewController title="Sensor Status" id="SoH-Nc-DUG" customClass="StatusViewController" customModule="OwOTrack" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Sensor Status" id="SoH-Nc-DUG" customClass="StatusViewController" customModule="OwOTrack_iOS" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="wcg-nG-xaz">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -103,7 +103,7 @@
         <!--Connect-->
         <scene sceneID="sZJ-xD-hJm">
             <objects>
-                <viewController id="f6V-EJ-gk0" customClass="ConnectViewController" customModule="OwOTrack" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="f6V-EJ-gk0" customClass="ConnectViewController" customModule="OwOTrack_iOS" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="oYn-6U-I6r">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -146,7 +146,7 @@
                                     <constraint firstAttribute="height" constant="21" id="2PB-Zz-3ng"/>
                                 </constraints>
                             </activityIndicatorView>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Logs" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="woP-Rl-emz" customClass="FadeTextView" customModule="OwOTrack" customModuleProvider="target">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" text="Logs" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="woP-Rl-emz" customClass="FadeTextView" customModule="OwOTrack_iOS" customModuleProvider="target">
                                 <rect key="frame" x="20" y="343" width="374" height="470"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <color key="textColor" systemColor="labelColor"/>
@@ -269,17 +269,14 @@
         <!--Information-->
         <scene sceneID="ilj-e6-k1b">
             <objects>
-                <viewController id="cwi-76-Lbg" customClass="InfoViewController" customModule="OwOTrack" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="cwi-76-Lbg" customClass="InfoViewController" customModule="OwOTrack_iOS" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="XIX-EH-Ufo">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" usesAttributedText="YES" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" editable="NO" selectable="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cuI-MH-mYI">
                                 <rect key="frame" x="20" y="88" width="374" height="725"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                                <attributedString key="attributedText">
-                                    <fragment>
-                                        <mutableString key="content">It is recommended to only use SlimeVR server since the OwOTrack driver is no longer maintained.
+                                <string key="text">It is recommended to only use SlimeVR server since the OwOTrack driver is no longer maintained.
 
 ----
 
@@ -291,36 +288,14 @@ Deactivating the magnetometer can improve latency, phone battery life and fix is
 
 ----
 
-</mutableString>
-                                        <attributes>
-                                            <font key="NSFont" size="13" name="HelveticaNeue"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
-                                                <tabStops/>
-                                            </paragraphStyle>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment content="Background Usage">
-                                        <attributes>
-                                            <font key="NSFont" size="19" name="HelveticaNeue"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
-                                                <tabStops/>
-                                            </paragraphStyle>
-                                        </attributes>
-                                    </fragment>
-                                    <fragment>
-                                        <mutableString key="content"> If you want the app to stay connected while running in the background or while the phone is turned off, you have to give the app permission to always use location data.  Your location data will not be used by the developer or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is open.
+Background Usage
+ If you want the app to stay connected while running in the background or while the phone is turned off, you have to give the app permission to always use location data.  Your location data will not be used by the developer or anyone else. It will never leave your device. Only the permission is required for the app to run in the background. If you deny the permission, the app will still work and stay connected as long as it is open.
 
 The app can not run in the background forever and might disconnect after 10 - 30 minutes depending on your circumstances. If you want to avoid this, leave the app open and your phone unlocked.
 
-You can make the screen of your iPhone turn off by covering the sensor on the top of the phone (next to the camera). This will turn the screen off to save battery life and the app will stay connected.</mutableString>
-                                        <attributes>
-                                            <font key="NSFont" size="13" name="HelveticaNeue"/>
-                                            <paragraphStyle key="NSParagraphStyle" alignment="left" lineBreakMode="wordWrapping" baseWritingDirection="leftToRight" lineSpacing="1" defaultTabInterval="28" tighteningFactorForTruncation="0.0" allowsDefaultTighteningForTruncation="NO">
-                                                <tabStops/>
-                                            </paragraphStyle>
-                                        </attributes>
-                                    </fragment>
-                                </attributedString>
+You can make the screen of your iPhone turn off by covering the sensor on the top of the phone (next to the camera). This will turn the screen off to save battery life and the app will stay connected.</string>
+                                <color key="textColor" systemColor="labelColor"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue" family="Helvetica Neue" pointSize="13"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
                         </subviews>
