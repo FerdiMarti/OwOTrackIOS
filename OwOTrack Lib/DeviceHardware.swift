@@ -30,8 +30,10 @@ protocol DeviceHardware {
     
     static func stopBatteryLevelMonitoring()
     
+    @available(watchOSApplicationExtension 4.0, *)
     static func startBackgroundUsage(target: CLLocationManagerDelegate)
     
+    @available(watchOSApplicationExtension 4.0, *)
     static func stopBackgroundUsage()
     
     static func getPseudoMacAddress() -> [UInt8]

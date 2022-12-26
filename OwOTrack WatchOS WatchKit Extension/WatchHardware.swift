@@ -12,6 +12,8 @@ import UIKit
 import CoreLocation
 import WatchKit
 
+let MAC_USERDEFAULTS_KEY = "mac"
+
 //static functions for Apple Watch hardware stuff
 class WatchHardware: DeviceHardware {
     static let audioSession = AVAudioSession.sharedInstance()
@@ -57,24 +59,37 @@ class WatchHardware: DeviceHardware {
     }
     
     static func getBatteryLevel() -> Float {
-        return abs(WKInterfaceDevice.current().batteryLevel)
+        if #available(watchOSApplicationExtension 4.0, *) {
+            return abs(WKInterfaceDevice.current().batteryLevel)
+        } else {
+            return 1.0
+        }
     }
     
     static func startBatteryLevelMonitoring() {
         //additionally non async to enable it immediately
-        WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
-        DispatchQueue.main.async {
+        if #available(watchOSApplicationExtension 4.0, *) {
             WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
+            DispatchQueue.main.async {
+                WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
+            }
+        } else {
+            // Fallback on earlier versions
         }
     }
     
     static func stopBatteryLevelMonitoring() {
-        DispatchQueue.main.async {
-            WKInterfaceDevice.current().isBatteryMonitoringEnabled = false
+        if #available(watchOSApplicationExtension 4.0, *) {
+            DispatchQueue.main.async {
+                WKInterfaceDevice.current().isBatteryMonitoringEnabled = false
+            }
+        } else {
+            // Fallback on earlier versions
         }
     }
     
     //uses background location to keep the app running in background
+    @available(watchOSApplicationExtension 4.0, *)
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
         locationManager.requestAlwaysAuthorization()
         if CLLocationManager.locationServicesEnabled() {
@@ -94,6 +109,7 @@ class WatchHardware: DeviceHardware {
         locationManager.startUpdatingLocation()
     }
     
+    @available(watchOSApplicationExtension 4.0, *)
     static func stopBackgroundUsage() {
         locationManager.stopUpdatingLocation()
     }
@@ -101,7 +117,7 @@ class WatchHardware: DeviceHardware {
     //generates a random MAC address for SlimeVR (if not already generated before) and saves it in UserDefaults, actual MAC address can not be accessed
     static func getPseudoMacAddress() -> [UInt8] {
         let defaults = UserDefaults.standard
-        if let mac = defaults.object(forKey: "mac") as? [UInt8] {
+        if let mac = defaults.object(forKey: MAC_USERDEFAULTS_KEY) as? [UInt8] {
             return mac
         } else {
             var mac : [UInt8] = []
@@ -109,7 +125,7 @@ class WatchHardware: DeviceHardware {
                 let rand = Int.random(in: 0..<255)
                 mac.append(UInt8(rand))
             }
-            defaults.set(mac, forKey: "mac")
+            defaults.set(mac, forKey: MAC_USERDEFAULTS_KEY)
             return mac
         }
     }

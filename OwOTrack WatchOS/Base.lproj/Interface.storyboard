@@ -12,17 +12,30 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModule="OwOTrack_WatchOS_WatchKit_Extension">
                     <items>
-                        <label alignment="left" text="Status" id="kbE-M2-hxt"/>
-                        <textField width="1" alignment="left" text="192.168.1.139" placeholder="IP" id="Aia-8N-cOw">
-                            <connections>
-                                <action selector="ipFieldValueChange:" destination="AgC-eL-Hgc" id="4pp-dK-zvE"/>
-                            </connections>
-                        </textField>
-                        <textField width="1" alignment="left" text="6969" placeholder="Port" id="nKI-me-1Vd">
-                            <connections>
-                                <action selector="portFieldValueChange:" destination="AgC-eL-Hgc" id="qet-ZZ-JdE"/>
-                            </connections>
-                        </textField>
+                        <label alignment="left" text="Status" numberOfLines="0" id="kbE-M2-hxt"/>
+                        <separator alignment="left" id="s99-le-XTx"/>
+                        <label width="1" alignment="left" text="IP Adress" id="xt8-6m-3By">
+                            <gestureRecognizers>
+                                <tapGestureRecognizer id="MOg-zY-PZo">
+                                    <connections>
+                                        <action selector="ipAddressTapped:" destination="AgC-eL-Hgc" id="Hq2-T7-gK1"/>
+                                    </connections>
+                                </tapGestureRecognizer>
+                            </gestureRecognizers>
+                            <fontDescription key="font" type="system" pointSize="20"/>
+                        </label>
+                        <separator alignment="left" id="zCz-eZ-U5L"/>
+                        <label width="1" alignment="left" text="Port" id="0de-Jl-8bU">
+                            <gestureRecognizers>
+                                <tapGestureRecognizer id="6Qn-Oe-xci">
+                                    <connections>
+                                        <action selector="portTapped:" destination="AgC-eL-Hgc" id="r0p-um-0Qe"/>
+                                    </connections>
+                                </tapGestureRecognizer>
+                            </gestureRecognizers>
+                            <fontDescription key="font" type="system" pointSize="20"/>
+                        </label>
+                        <separator alignment="left" id="Ry4-fM-Cm5"/>
                         <switch width="1" alignment="left" value="YES" title="Magnetometer" id="Whc-qN-lEx">
                             <connections>
                                 <action selector="magentometerToggleValueChange:" destination="AgC-eL-Hgc" id="RmZ-c1-jtQ"/>
@@ -37,10 +50,12 @@
                     </items>
                     <connections>
                         <outlet property="connectButton" destination="2qB-Gp-0wE" id="HKN-Gu-d83"/>
-                        <outlet property="ipField" destination="Aia-8N-cOw" id="bSf-mS-3WX"/>
+                        <outlet property="ipLabel" destination="xt8-6m-3By" id="fqX-6Q-Z42"/>
+                        <outlet property="ipTapRecognizer" destination="MOg-zY-PZo" id="EPg-pF-MHs"/>
                         <outlet property="loggingLabel" destination="Jvr-av-AmU" id="bNY-Zr-3ee"/>
                         <outlet property="magnetometerToggle" destination="Whc-qN-lEx" id="5MF-NH-Evv"/>
-                        <outlet property="portField" destination="nKI-me-1Vd" id="eXW-jS-Ezn"/>
+                        <outlet property="portLabel" destination="0de-Jl-8bU" id="Xsi-LE-Ous"/>
+                        <outlet property="portTapRecognizer" destination="6Qn-Oe-xci" id="wdN-NZ-Kns"/>
                         <outlet property="statusLabel" destination="kbE-M2-hxt" id="vk6-LF-kcq"/>
                     </connections>
                 </controller>

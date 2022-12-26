@@ -13,14 +13,16 @@ import UIKit
 class InterfaceController: WKInterfaceController, ConnectUI {
 
     @IBOutlet weak var statusLabel: WKInterfaceLabel!
-    @IBOutlet weak var ipField: WKInterfaceTextField!
-    @IBOutlet weak var portField: WKInterfaceTextField!
+    @IBOutlet var ipLabel: WKInterfaceLabel!
+    @IBOutlet var ipTapRecognizer: WKTapGestureRecognizer!
+    @IBOutlet var portTapRecognizer: WKTapGestureRecognizer!
+    @IBOutlet var portLabel: WKInterfaceLabel!
     @IBOutlet weak var magnetometerToggle: WKInterfaceSwitch!
     @IBOutlet weak var connectButton: WKInterfaceButton!
     @IBOutlet weak var loggingLabel: WKInterfaceLabel!
     
-    var ipFieldText : String? = ""
-    var portFieldText: String? = ""
+    var ipLabelText : String? = ""
+    var portLabelText: String? = ""
     var magnetometerToggleValue: Bool = true
     let defaults = UserDefaults.standard
     let tService = TrackingService()
@@ -28,37 +30,64 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     var isLoading = false
     let logger = Logger.getInstance()
     
-    //these are neccessare to track changes in textField values, only way to get text in fields
-    @IBAction func ipFieldValueChange(_ value: NSString?) {
-        ipFieldText = value as String?
-    }
-    
-    @IBAction func portFieldValueChange(_ value: NSString?) {
-        portFieldText = value as String?
-    }
-    
     @IBAction func magentometerToggleValueChange(_ value: Bool) {
         magnetometerToggleValue = value
+    }
+    
+    @IBAction func ipAddressTapped(_ sender: Any) {
+        presentTextInputController(withSuggestions: [], allowedInputMode: WKTextInputMode.plain) { (arr: [Any]?) in
+            self.ipChanged(to: arr?[0] as? String)
+        }
+    }
+    
+    @IBAction func portTapped(_ sender: Any) {
+        presentTextInputController(withSuggestions: [], allowedInputMode: WKTextInputMode.plain) { (arr: [Any]?) in
+            self.portChanged(to: arr?[0] as? String)
+        }
+    }
+    
+    func ipChanged(to: String?) {
+        ipLabelText = to
+        if to == "" {
+            ipLabelText = nil
+        }
+        if ipLabelText != nil {
+            ipLabel.setTextColor(.white)
+            ipLabel.setText(ipLabelText)
+        } else {
+            ipLabel.setTextColor(.gray)
+            ipLabel.setText("IP Address")
+        }
+    }
+    
+    func portChanged(to: String?) {
+        portLabelText = to
+        if to == "" {
+            portLabelText = nil
+        }
+        if portLabelText != nil {
+            portLabel.setTextColor(.white)
+            portLabel.setText(portLabelText)
+        } else {
+            portLabel.setTextColor(.gray)
+            portLabel.setText("Port")
+        }
     }
     
     override func awake(withContext context: Any?) {
         logger.attachUI(connectUI: self)
         setUnconnected()
         if let ipTemp = defaults.object(forKey: IP_USERDEFAULTS_KEY) as? String {
-            ipFieldText = ipTemp
-            ipField.setText(ipFieldText)
+            ipChanged(to: ipTemp)
         } else {
-            ipFieldText = "192.168.0.10"
-            ipField.setText(ipFieldText)
-            self.defaults.set(ipFieldText, forKey: IP_USERDEFAULTS_KEY)
+            ipChanged(to: "192.168.0.10")
+            self.defaults.set(ipLabelText, forKey: IP_USERDEFAULTS_KEY)
         }
         if let portTemp = defaults.object(forKey: PORT_USERDEFAULTS_KEY) as? String {
-            portFieldText = portTemp
-            portField.setText(portFieldText)
+            portChanged(to: portTemp)
         } else {
-            portFieldText = "6969"
-            portField.setText(portFieldText)
-            self.defaults.set(portFieldText, forKey: PORT_USERDEFAULTS_KEY)
+            portChanged(to: "6969")
+            self.defaults.set(portLabelText, forKey: PORT_USERDEFAULTS_KEY)
         }
         if let useMagnTemp = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool {
             magnetometerToggle.setOn(useMagnTemp)
@@ -78,16 +107,20 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     func updateLogs(text: String) {
         DispatchQueue.main.async {
             self.loggingLabel.setText(text)
-            self.scroll(to: self.loggingLabel, at: .bottom, animated: true)
+            if #available(watchOSApplicationExtension 4.0, *) {
+                self.scroll(to: self.loggingLabel, at: .bottom, animated: true)
+            } else {
+                // Fallback on earlier versions
+            }
         }
     }
     
     @IBAction func connectPushed(_ sender: Any) {
-        if !validatePort(port: self.portFieldText) {
+        if !validatePort(port: self.portLabelText) {
             setStatusError(text: "Please enter a valid port number")
             return
         }
-        if !validateIPAddress(ip: self.ipFieldText) {
+        if !validateIPAddress(ip: self.ipLabelText) {
             setStatusError(text: "Please enter a valid ip address")
             return
         }
@@ -96,7 +129,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
         } else if isLoading {
         
         } else {
-            tService.start(ipAdress: ipFieldText != nil ? ipFieldText! : "", port: portFieldText != nil ? portFieldText! : "", magnetometer: magnetometerToggleValue, connectUI: self)
+            tService.start(ipAdress: ipLabelText != nil ? ipLabelText! : "", port: portLabelText != nil ? portLabelText! : "", magnetometer: magnetometerToggleValue, connectUI: self)
         }
     }
     
@@ -111,8 +144,8 @@ class InterfaceController: WKInterfaceController, ConnectUI {
             self.isConnected = false
             self.statusLabel.setText("Loading...")
             self.statusLabel.setTextColor(.none)
-            self.ipField.setEnabled(false)
-            self.portField.setEnabled(false)
+            self.ipTapRecognizer.isEnabled = false
+            self.portTapRecognizer.isEnabled = false
             self.magnetometerToggle.setEnabled(false)
             self.connectButton.setEnabled(false)
             self.connectButton.setTitle("Connect")
@@ -126,8 +159,8 @@ class InterfaceController: WKInterfaceController, ConnectUI {
             self.isConnected = true
             self.statusLabel.setText("Connected")
             self.statusLabel.setTextColor(.green)
-            self.ipField.setEnabled(false)
-            self.portField.setEnabled(false)
+            self.ipTapRecognizer.isEnabled = false
+            self.portTapRecognizer.isEnabled = false
             self.magnetometerToggle.setEnabled(false)
             self.connectButton.setEnabled(true)
             self.connectButton.setTitle("Disconnect")
@@ -140,8 +173,8 @@ class InterfaceController: WKInterfaceController, ConnectUI {
             self.isConnected = false
             self.statusLabel.setText("Not Connected")
             self.statusLabel.setTextColor(.gray)
-            self.ipField.setEnabled(true)
-            self.portField.setEnabled(true)
+            self.ipTapRecognizer.isEnabled = true
+            self.portTapRecognizer.isEnabled = true
             self.magnetometerToggle.setEnabled(true)
             self.connectButton.setEnabled(true)
             self.connectButton.setTitle("Connect")
