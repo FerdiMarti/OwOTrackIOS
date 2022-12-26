@@ -48,10 +48,16 @@ class NWConnectionUDPClient: CompatibleUDPClient {
                 print("State: Cancelled\n")
             case .preparing:
                 print("State: Preparing\n")
-            default:
+            case .failed(let error):
+                print("State: error \(error)\n")
+            case .waiting(let error):
+                print("State: Waiting \(error)\n")
                 //the port we used last time might be bound already. Let's reset it
-                self.resetLastPort()
-                self.logger.addEntry("Please try again")
+                if error.debugDescription.contains("Address already in use") {
+                    self.resetLastPort()
+                    self.logger.addEntry("Please try again")
+                }
+            default:
                 print("ERROR! State not defined!\n")
             }
         }

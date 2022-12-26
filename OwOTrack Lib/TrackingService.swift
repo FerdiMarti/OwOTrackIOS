@@ -65,7 +65,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.client?.provideMagnetometerUse(enabled: self.magnetometer)
             } else {
                 self.logger.addEntry("Handshake Failed")
-                self.logger.addEntry("\n Connection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
+                self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
                 self.logger.addEntry("Connecting Failed")
                 self.stop()
             }
