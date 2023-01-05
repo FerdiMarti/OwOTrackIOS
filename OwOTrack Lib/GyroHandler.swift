@@ -13,10 +13,10 @@ public class GyroHandler {
     
     var mmanager = CMMotionManager()
     static var instance : GyroHandler?
-    var motionAvailable = true
-    var accelerometerAvailable = true
-    var gyroAvailable = true
-    var magnetometerAvailable = true
+    var motionAvailable = false
+    var accelerometerAvailable = false
+    var gyroAvailable = false
+    var magnetometerAvailable = false
     
     private init() {
         motionAvailable = mmanager.isDeviceMotionAvailable
