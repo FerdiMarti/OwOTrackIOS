@@ -297,7 +297,7 @@ class UDPGyroProviderClient {
         }
         let time = Date().timeIntervalSince1970
         let timeDiff = time - lastHeartbeat
-        if timeDiff > 5 {
+        if timeDiff > 10 {
             logger.addEntry("Connection with server lost")
             service.stop()
             return
