@@ -4,4 +4,4 @@ This application can be installed on an iOS devices to connect to [SlimeVR Serve
 
 ## Download
 You can install the app from the App Store: https://apps.apple.com/de/app/owotrack/id1563711037 <br/>
-The newest beta is available via TestFlight: https://testflight.apple.com/join/1DZAkuCX
+The newest beta is available via TestFlight: https://testflight.apple.com/join/vvn9jsT0
