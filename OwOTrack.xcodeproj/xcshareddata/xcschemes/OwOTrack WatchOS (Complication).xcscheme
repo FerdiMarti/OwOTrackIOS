@@ -54,7 +54,8 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "32">
+      launchAutomaticallySubstyle = "32"
+      notificationPayloadFile = "OwOTrack WatchOS WatchKit Extension/PushNotificationPayload.apns">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
