@@ -63,6 +63,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.gHandler = GyroHandler.getInstance()
                 self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
                 self.client?.provideMagnetometerUse(enabled: self.magnetometer)
+                self.client?.provideSensorInfo(magnetometerSupported: self.gHandler?.magnetometerCorrectionAvailable ?? false, magnetometerEnabled: self.magnetometer)
             } else {
                 self.logger.addEntry("Handshake Failed")
                 self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
@@ -100,6 +101,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
         connectUI?.setMagnometerToggle(use: use)
+        client?.sensorConfigChanged(magnetometerEnabled: use)
     }
     
     //handler for volume button push

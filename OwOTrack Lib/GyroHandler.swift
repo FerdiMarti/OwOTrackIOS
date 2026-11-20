@@ -17,12 +17,15 @@ public class GyroHandler {
     var accelerometerAvailable = false
     var gyroAvailable = false
     var magnetometerAvailable = false
-    
+    //whether the orientation can be corrected with the magnetometer (the mode "Use Magnetometer" switches on)
+    var magnetometerCorrectionAvailable = false
+
     private init() {
         motionAvailable = mmanager.isDeviceMotionAvailable
         accelerometerAvailable = mmanager.isAccelerometerAvailable
         gyroAvailable = mmanager.isGyroAvailable
         magnetometerAvailable = mmanager.isMagnetometerAvailable
+        magnetometerCorrectionAvailable = CMMotionManager.availableAttitudeReferenceFrames().contains(.xArbitraryCorrectedZVertical)
     }
     
     func startUpdates(client: UDPGyroProviderClient, useMagn: Bool) {

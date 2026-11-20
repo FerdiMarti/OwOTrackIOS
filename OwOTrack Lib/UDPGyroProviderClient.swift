@@ -14,11 +14,16 @@ class PacketTypes {
     static let ACCEL = 4;
     static let PING_PONG = 10;
     static let BATTERY_LEVEL = 12;
+    static let SENSOR_INFO = 15;            //SlimeVR: sensor description, and SlimeVR's acknowledgement of it
+    static let ROTATION_DATA = 17;          //SlimeVR: replaces ROTATION, which SlimeVR marks as deprecated
+    static let ACK_CONFIG_CHANGE = 24;      //SlimeVR: confirms a SET_CONFIG_FLAG
+    static let SET_CONFIG_FLAG = 25;        //SlimeVR: changes a sensor setting
     static let BUTTON_PUSHED = 60;
     static let SEND_MAG_STATUS = 61;
     static let CHANGE_MAG_STATUS = 62;
     static let RECEIVE_HEARTBEAT = 1;
     static let RECEIVE_VIBRATE = 2;
+    static let CONFIG_MAG_ENABLED = 1;      //SET_CONFIG_FLAG setting id of the magnetometer
 }
 
 //Uses one of the UDP clients to send the applications data to the server
@@ -41,6 +46,16 @@ class UDPGyroProviderClient {
     //pause before listening again after a failed receive: a broken connection fails instantly, retrying right away spun at full CPU
     private static let receiveRetryDelay: TimeInterval = 0.1
     private var lastProblem: String?    //last connection problem that was logged, to log each reason only once
+    //SlimeVR (protocol 9+) only accepts data after the app described its sensor. Only SlimeVR acknowledges that description,
+    //so the acknowledgement also tells the app it talks to SlimeVR and not the old owoTrack driver. All of these are only used on sendQueue
+    private var isSlimeVR = false
+    private var magnetometerSupported = false
+    private var magnetometerEnabled = false
+    private var sensorInfoPending = false       //description sent but not acknowledged yet
+    private var sensorInfoTries = 0
+    private var sensorInfoRound = 0             //a new description stops the resends of the previous one
+    private static let sensorInfoRetryInterval: TimeInterval = 1
+    private static let sensorInfoMaxTries = 30  //the old owoTrack driver never acknowledges, so stop after that
     var isConnected: Bool = false
     var isConnecting: Bool = false //is true during handshake attempts
     var lastHeartbeat: Double = 0   //last message from server
@@ -130,7 +145,7 @@ class UDPGyroProviderClient {
         let imuType: Int32 = 0
         let mcuType: Int32 = 0
         let imuInfo : [Int32] = [0, 0, 0]
-        let firmwareBuild: Int32 = 8
+        let firmwareBuild: Int32 = 9  //SlimeVR protocol version: since 9, the sensor is described by a SENSOR_INFO packet
         let firmware = "owoTrack8" // 9 bytes
         let firmwareData = Data(firmware.utf8)
         let firmwareLength : UInt8 = UInt8(firmware.count)
@@ -288,6 +303,11 @@ class UDPGyroProviderClient {
             if let c = readChar(data: restData) {
                 self.service.toggleMagnetometerUse(use: c == "y")
             }
+        } else if msgType == PacketTypes.SENSOR_INFO {
+            //SlimeVR acknowledges the sensor description
+            sensorInfoAcknowledged()
+        } else if msgType == PacketTypes.SET_CONFIG_FLAG {
+            handleSetConfigFlag(restData)
         } else {
             // if message type is a very high number, it's probably because the encoding is wrong
             if (msgType >= 2048 && !recursion) {
@@ -300,6 +320,24 @@ class UDPGyroProviderClient {
         }
     }
     
+    //SlimeVR changes a sensor setting: 8-byte packet number, sensor id, 2-byte setting id, new state (big-endian).
+    //the magnetometer is the only setting this app has. Every change is confirmed, like SlimeVR's own trackers do
+    func handleSetConfigFlag(_ data: Data) {
+        let bytes = [UInt8](data.prefix(12))
+        if bytes.count < 12 {
+            return
+        }
+        let sensorId = bytes[8]
+        let setting = UInt16(bytes[9]) << 8 | UInt16(bytes[10])
+        let enabled = bytes[11] != 0
+        if setting == PacketTypes.CONFIG_MAG_ENABLED && (sensorId == 0 || sensorId == 255) {   //255 means all sensors
+            service.toggleMagnetometerUse(use: enabled)
+        }
+        var payload = Data([sensorId])
+        payload.append(Data(bigEndian: setting))
+        sendPacket(msgType: Int32(PacketTypes.ACK_CONFIG_CHANGE), payload: payload)
+    }
+
     func handleVibration(_ data: Data) {
         //three floats: duration, frequency, amplitude
         if data.count < 12 {
@@ -367,12 +405,70 @@ class UDPGyroProviderClient {
     //runs on sendQueue so packet numbers go out strictly increasing
     private func sendPacket(msgType: Int32, payload: Data) {
         sendQueue.async {
-            var data = Data(capacity: 12 + payload.count)
-            data.append(Data(bigEndian: msgType))
-            data.append(Data(bigEndian: self.packetId))
-            data.append(payload)
-            self.connection?.sendUDP(data)
-            self.packetId += 1
+            self.sendNow(msgType: msgType, payload: payload)
+        }
+    }
+
+    //only call on sendQueue
+    private func sendNow(msgType: Int32, payload: Data) {
+        var data = Data(capacity: 12 + payload.count)
+        data.append(Data(bigEndian: msgType))
+        data.append(Data(bigEndian: self.packetId))
+        data.append(payload)
+        self.connection?.sendUDP(data)
+        self.packetId += 1
+    }
+
+    //SlimeVR: describes the sensor and its magnetometer, resent every second until SlimeVR acknowledges it
+    public func provideSensorInfo(magnetometerSupported: Bool, magnetometerEnabled: Bool) {
+        sendQueue.async {
+            self.magnetometerSupported = magnetometerSupported
+            self.magnetometerEnabled = magnetometerEnabled
+            self.startSensorInfo()
+        }
+    }
+
+    //the magnetometer was switched while connected. SlimeVR gets a new description; the owoTrack driver doesn't need one
+    public func sensorConfigChanged(magnetometerEnabled: Bool) {
+        sendQueue.async {
+            self.magnetometerEnabled = magnetometerEnabled
+            if self.isSlimeVR {
+                self.startSensorInfo()
+            }
+        }
+    }
+
+    //only call on sendQueue
+    private func startSensorInfo() {
+        sensorInfoPending = true
+        sensorInfoTries = 0
+        sensorInfoRound += 1
+        sendSensorInfo(round: sensorInfoRound)
+    }
+
+    //only call on sendQueue
+    private func sendSensorInfo(round: Int) {
+        if !isConnected || !sensorInfoPending || round != sensorInfoRound || sensorInfoTries >= UDPGyroProviderClient.sensorInfoMaxTries {
+            return
+        }
+        sensorInfoTries += 1
+        //sensor 0, status 1 (ok), IMU type 0 (unknown), then 2 bytes of settings: bit 1 = magnetometer supported, bit 0 = enabled
+        let config: UInt16 = magnetometerSupported ? (magnetometerEnabled ? 0b11 : 0b10) : 0
+        var payload = Data([0, 1, 0])
+        payload.append(Data(bigEndian: config))
+        sendNow(msgType: Int32(PacketTypes.SENSOR_INFO), payload: payload)
+        sendQueue.asyncAfter(deadline: .now() + UDPGyroProviderClient.sensorInfoRetryInterval) {
+            self.sendSensorInfo(round: round)
+        }
+    }
+
+    private func sensorInfoAcknowledged() {
+        sendQueue.async {
+            self.sensorInfoPending = false
+            if !self.isSlimeVR {
+                self.isSlimeVR = true
+                self.logger.addEntry("SlimeVR server detected")
+            }
         }
     }
 
@@ -388,11 +484,40 @@ class UDPGyroProviderClient {
     }
 
     public func provideRot(rot: [Data]) {
-        provideFloats(floats: rot, len: 4, msgType: Int32(PacketTypes.ROTATION));
+        if (!isConnected) {
+            return
+        }
+        var floats = Data(capacity: 16)
+        for elem in rot {
+            floats.append(elem)
+        }
+        sendQueue.async {
+            if self.isSlimeVR {
+                //rotation data: sensor 0, data type 1 (normal), x y z w, accuracy 0 (unknown)
+                var payload = Data([0, 1])
+                payload.append(floats)
+                payload.append(0)
+                self.sendNow(msgType: Int32(PacketTypes.ROTATION_DATA), payload: payload)
+            } else {
+                self.sendNow(msgType: Int32(PacketTypes.ROTATION), payload: floats)
+            }
+        }
     }
-    
+
     public func provideGyro(gyro: [Data]) {
-        provideFloats(floats: gyro, len: 3, msgType: Int32(PacketTypes.GYRO));
+        if (!isConnected) {
+            return
+        }
+        var floats = Data(capacity: 12)
+        for elem in gyro {
+            floats.append(elem)
+        }
+        sendQueue.async {
+            if self.isSlimeVR {
+                return  //SlimeVR doesn't use gyro packets
+            }
+            self.sendNow(msgType: Int32(PacketTypes.GYRO), payload: floats)
+        }
     }
     
     public func provideAccel(accel: [Data]) {
