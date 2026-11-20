@@ -14,6 +14,15 @@ let IP_USERDEFAULTS_KEY = "ip"
 let PORT_USERDEFAULTS_KEY = "port"
 let MAGNETOMETER_USERDEFAULTS_KEY = "useM"
 
+//how long connecting and reconnecting wait. The tests use shorter times
+struct ConnectionTiming {
+    var heartbeatTimeout: TimeInterval = 10     //no message from the server for that long: the connection is lost
+    var connectTimeout: TimeInterval = 5        //how long one attempt waits for the handshake
+    var reconnectPause: TimeInterval = 2        //pause between reconnect attempts
+    //after that, reconnecting gives up and the session ends, so a forgotten phone doesn't keep its screen on and keep trying
+    var reconnectTimeLimit: TimeInterval = 10 * 60
+}
+
 //manages connection, app and UI state
 public class TrackingService: NSObject, CLLocationManagerDelegate {
     var ipAdress = ""
@@ -32,17 +41,20 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     private var session = 0
     private var wantsConnection = false     //between start() and stop(): a lost connection is retried
     private var reconnecting = false
-    private static let connectTimeout: TimeInterval = 5     //how long one attempt waits for the handshake
-    private static let reconnectPause: TimeInterval = 2     //pause between reconnect attempts
-    //after that, reconnecting gives up and the session ends, so a forgotten phone doesn't keep its screen on and keep trying
-    private static let reconnectTimeLimit: TimeInterval = 10 * 60
+    var timing = ConnectionTiming()     //set before start()
 
-    //Switch between hardware class depending on device type
+    //the device's hardware (sensors aside): iPhone or Apple Watch, a fake in the tests
+    let hardware: any DeviceHardware.Type
     #if os(iOS)
-    let hardware = IPhoneHardware.self
+    static let deviceHardware: any DeviceHardware.Type = IPhoneHardware.self
     #elseif os(watchOS)
-    let hardware = WatchHardware.self
+    static let deviceHardware: any DeviceHardware.Type = WatchHardware.self
     #endif
+
+    init(hardware: any DeviceHardware.Type = TrackingService.deviceHardware) {
+        self.hardware = hardware
+        super.init()
+    }
 
     func start(ipAdress: String, port: String, magnetometer: Bool, connectUI: ConnectUI) {
         self.connectUI = connectUI
@@ -86,7 +98,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         client.lastProblem = lastProblem
         DispatchQueue.main.sync { self.client = client }
         client.connectToUDP()
-        let deadline = Date().addingTimeInterval(TrackingService.connectTimeout)
+        let deadline = Date().addingTimeInterval(timing.connectTimeout)
         while !client.isConnected && Date() < deadline && isActive(session) {
             Thread.sleep(forTimeInterval: 0.1)
         }
@@ -125,7 +137,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
 
     //tries to connect every few seconds until it works, the session ends or reconnectTimeLimit is up. Runs on trackingServiceQueue
     private func reconnect(session: Int) {
-        let giveUp = Date().addingTimeInterval(TrackingService.reconnectTimeLimit)
+        let giveUp = Date().addingTimeInterval(timing.reconnectTimeLimit)
         var lastProblem: String? = nil      //handed to the next attempt, so a reason is logged once and not on every attempt
         while let attempt = connect(session: session, quiet: true, lastProblem: lastProblem) {
             if attempt.isConnected {
@@ -145,17 +157,23 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             if Date() >= giveUp {
                 DispatchQueue.main.async {
                     if self.isActive(session) {     //not if the user disconnected in the meantime
-                        self.logger.addEntry("Couldn't reconnect for 10 minutes, stopped trying")
+                        self.logger.addEntry("Couldn't reconnect for \(self.describe(self.timing.reconnectTimeLimit)), stopped trying")
                         self.stop()
                     }
                 }
                 return
             }
-            let next = Date().addingTimeInterval(TrackingService.reconnectPause)
+            let next = Date().addingTimeInterval(timing.reconnectPause)
             while Date() < next && isActive(session) {
                 Thread.sleep(forTimeInterval: 0.1)
             }
         }
+    }
+
+    //"10 minutes", or "3 seconds" for the short limits in the tests
+    private func describe(_ duration: TimeInterval) -> String {
+        let seconds = Int(duration)
+        return seconds >= 60 && seconds % 60 == 0 ? "\(seconds / 60) minutes" : "\(seconds) seconds"
     }
 
     // MARK: session state

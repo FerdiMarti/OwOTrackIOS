@@ -64,6 +64,18 @@
 		B1000000000000000000000F /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* InfoView.swift */; };
 		B10000000000000000000010 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
 		B10000000000000000000011 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
+		C00000000000000000000002 /* FakeHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000001 /* FakeHardware.swift */; };
+		C00000000000000000000004 /* Recorders.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000003 /* Recorders.swift */; };
+		C00000000000000000000006 /* Packets.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000005 /* Packets.swift */; };
+		C00000000000000000000008 /* FakeServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000007 /* FakeServer.swift */; };
+		C0000000000000000000000A /* Tracking.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000009 /* Tracking.swift */; };
+		C0000000000000000000000C /* PacketFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000000B /* PacketFormatTests.swift */; };
+		C0000000000000000000000E /* ServerDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000000D /* ServerDataTests.swift */; };
+		C00000000000000000000010 /* OldDriverCompatibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000000F /* OldDriverCompatibilityTests.swift */; };
+		C00000000000000000000012 /* ConnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000011 /* ConnectionTests.swift */; };
+		C00000000000000000000014 /* ReconnectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000013 /* ReconnectTests.swift */; };
+		C00000000000000000000016 /* ConnectScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000015 /* ConnectScreenTests.swift */; };
+		C00000000000000000000018 /* LiveSlimeVRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000017 /* LiveSlimeVRTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +85,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 9AE20DFF2954901D001B0874;
 			remoteInfo = "OwOTrack WatchOS";
+		};
+		C0000000000000000000001D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9AE6EBED2619FBFB007C6BBA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9AE6EBF42619FBFB007C6BBA;
+			remoteInfo = "OwOTrack iOS";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -123,6 +142,20 @@
 		B10000000000000000000007 /* ConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000A /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000D /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
+		C00000000000000000000001 /* FakeHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeHardware.swift; sourceTree = "<group>"; };
+		C00000000000000000000003 /* Recorders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorders.swift; sourceTree = "<group>"; };
+		C00000000000000000000005 /* Packets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Packets.swift; sourceTree = "<group>"; };
+		C00000000000000000000007 /* FakeServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeServer.swift; sourceTree = "<group>"; };
+		C00000000000000000000009 /* Tracking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tracking.swift; sourceTree = "<group>"; };
+		C0000000000000000000000B /* PacketFormatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PacketFormatTests.swift; sourceTree = "<group>"; };
+		C0000000000000000000000D /* ServerDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerDataTests.swift; sourceTree = "<group>"; };
+		C0000000000000000000000F /* OldDriverCompatibilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OldDriverCompatibilityTests.swift; sourceTree = "<group>"; };
+		C00000000000000000000011 /* ConnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionTests.swift; sourceTree = "<group>"; };
+		C00000000000000000000013 /* ReconnectTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectTests.swift; sourceTree = "<group>"; };
+		C00000000000000000000015 /* ConnectScreenTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectScreenTests.swift; sourceTree = "<group>"; };
+		C00000000000000000000017 /* LiveSlimeVRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSlimeVRTests.swift; sourceTree = "<group>"; };
+		C00000000000000000000019 /* Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Tests.xcconfig; sourceTree = "<group>"; };
+		C0000000000000000000001A /* OwOTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +174,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B0000000000000000000000E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C00000000000000000000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -209,6 +249,7 @@
 				9AE20DE629547BE2001B0874 /* OwOTrack Lib */,
 				9AE6EBF72619FBFB007C6BBA /* OwOTrack iOS */,
 				9AE20E012954901D001B0874 /* OwOTrack WatchOS */,
+				C0000000000000000000001B /* OwOTrackTests */,
 				9AE6EBF62619FBFB007C6BBA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -219,6 +260,7 @@
 				9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */,
 				B0000000000000000000000C /* OwOTrack iOS.app */,
 				9AE20E002954901D001B0874 /* OwOTrack.app */,
+				C0000000000000000000001A /* OwOTrackTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -248,8 +290,36 @@
 			children = (
 				B00000000000000000000002 /* Version.xcconfig */,
 				B00000000000000000000003 /* iOS-App.xcconfig */,
+				C00000000000000000000019 /* Tests.xcconfig */,
 			);
 			path = Config;
+			sourceTree = "<group>";
+		};
+		C0000000000000000000001B /* OwOTrackTests */ = {
+			isa = PBXGroup;
+			children = (
+				C0000000000000000000000B /* PacketFormatTests.swift */,
+				C0000000000000000000000D /* ServerDataTests.swift */,
+				C0000000000000000000000F /* OldDriverCompatibilityTests.swift */,
+				C00000000000000000000011 /* ConnectionTests.swift */,
+				C00000000000000000000013 /* ReconnectTests.swift */,
+				C00000000000000000000015 /* ConnectScreenTests.swift */,
+				C00000000000000000000017 /* LiveSlimeVRTests.swift */,
+				C0000000000000000000001C /* Helpers */,
+			);
+			path = OwOTrackTests;
+			sourceTree = "<group>";
+		};
+		C0000000000000000000001C /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				C00000000000000000000001 /* FakeHardware.swift */,
+				C00000000000000000000003 /* Recorders.swift */,
+				C00000000000000000000005 /* Packets.swift */,
+				C00000000000000000000007 /* FakeServer.swift */,
+				C00000000000000000000009 /* Tracking.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -308,6 +378,24 @@
 			productReference = B0000000000000000000000C /* OwOTrack iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
+		C00000000000000000000022 /* OwOTrackTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C00000000000000000000023 /* Build configuration list for PBXNativeTarget "OwOTrackTests" */;
+			buildPhases = (
+				C0000000000000000000001F /* Sources */,
+				C00000000000000000000020 /* Frameworks */,
+				C00000000000000000000021 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C0000000000000000000001E /* PBXTargetDependency */,
+			);
+			name = OwOTrackTests;
+			productName = OwOTrackTests;
+			productReference = C0000000000000000000001A /* OwOTrackTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -327,6 +415,10 @@
 					B0000000000000000000000B = {
 						CreatedOnToolsVersion = 27.2;
 					};
+					C00000000000000000000022 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = 9AE6EBF42619FBFB007C6BBA;
+					};
 				};
 			};
 			buildConfigurationList = 9AE6EBF02619FBFB007C6BBA /* Build configuration list for PBXProject "OwOTrack" */;
@@ -345,6 +437,7 @@
 				9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */,
 				B0000000000000000000000B /* OwOTrack iOS (with Watch) */,
 				9AE20DFF2954901D001B0874 /* OwOTrack WatchOS */,
+				C00000000000000000000022 /* OwOTrackTests */,
 			);
 		};
 /* End PBXProject section */
@@ -376,6 +469,13 @@
 				B0000000000000000000002B /* LaunchScreen.storyboard in Resources */,
 				B0000000000000000000002C /* PrivacyInfo.xcprivacy in Resources */,
 				B0000000000000000000002D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C00000000000000000000021 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -451,6 +551,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C0000000000000000000001F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C00000000000000000000002 /* FakeHardware.swift in Sources */,
+				C00000000000000000000004 /* Recorders.swift in Sources */,
+				C00000000000000000000006 /* Packets.swift in Sources */,
+				C00000000000000000000008 /* FakeServer.swift in Sources */,
+				C0000000000000000000000A /* Tracking.swift in Sources */,
+				C0000000000000000000000C /* PacketFormatTests.swift in Sources */,
+				C0000000000000000000000E /* ServerDataTests.swift in Sources */,
+				C00000000000000000000010 /* OldDriverCompatibilityTests.swift in Sources */,
+				C00000000000000000000012 /* ConnectionTests.swift in Sources */,
+				C00000000000000000000014 /* ReconnectTests.swift in Sources */,
+				C00000000000000000000016 /* ConnectScreenTests.swift in Sources */,
+				C00000000000000000000018 /* LiveSlimeVRTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -458,6 +577,11 @@
 			isa = PBXTargetDependency;
 			target = 9AE20DFF2954901D001B0874 /* OwOTrack WatchOS */;
 			targetProxy = B00000000000000000000013 /* PBXContainerItemProxy */;
+		};
+		C0000000000000000000001E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */;
+			targetProxy = C0000000000000000000001D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -668,6 +792,20 @@
 			};
 			name = Release;
 		};
+		C00000000000000000000024 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C00000000000000000000019 /* Tests.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		C00000000000000000000025 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = C00000000000000000000019 /* Tests.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -703,6 +841,15 @@
 			buildConfigurations = (
 				B00000000000000000000011 /* Debug */,
 				B00000000000000000000012 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C00000000000000000000023 /* Build configuration list for PBXNativeTarget "OwOTrackTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C00000000000000000000024 /* Debug */,
+				C00000000000000000000025 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

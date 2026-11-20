@@ -1,0 +1,18 @@
+// Settings of the unit test target "OwOTrackTests".
+// The tests run inside the App Store iPhone app ("OwOTrack iOS") in the simulator: Product → Test (⌘U) with the "OwOTrack" scheme.
+
+PRODUCT_NAME = OwOTrackTests
+PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.tests
+GENERATE_INFOPLIST_FILE = YES
+
+TEST_HOST = $(BUILT_PRODUCTS_DIR)/OwOTrack iOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OwOTrack iOS
+BUNDLE_LOADER = $(TEST_HOST)
+
+// higher than the app's iOS 15: the tests only run in a current simulator and use newer test APIs
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+TARGETED_DEVICE_FAMILY = 1,2
+
+DEVELOPMENT_TEAM = QG96Y277J7
+CODE_SIGN_STYLE = Automatic
+SWIFT_VERSION = 5.0
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks @loader_path/Frameworks

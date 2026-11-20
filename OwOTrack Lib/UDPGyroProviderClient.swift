@@ -81,12 +81,10 @@ class UDPGyroProviderClient {
     var connectionCheckTimer : Timer? //timer that regularly calls a method to check if connection is still valid
     var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
     
-    //switch between hardware classes depending on device type (iPhone or Apple Watch)
-    #if os(iOS)
-    let hardware = IPhoneHardware.self
-    #elseif os(watchOS)
-    let hardware = WatchHardware.self
-    #endif
+    //the device's hardware, from TrackingService (a fake in the tests)
+    var hardware: any DeviceHardware.Type {
+        return service.hardware
+    }
     
     public static var CURRENT_VERSION = 5
     
@@ -440,7 +438,7 @@ class UDPGyroProviderClient {
         }
         let time = Date().timeIntervalSince1970
         let timeDiff = time - lastHeartbeat
-        if timeDiff > 10 {
+        if timeDiff > service.timing.heartbeatTimeout {
             logger.addEntry("Connection with server lost")
             service.connectionLost(client: self)
             return
