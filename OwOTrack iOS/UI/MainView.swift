@@ -18,6 +18,9 @@ struct MainView: View {
     @State private var sheet: Sheet?
     @State private var selectedSensor: Sensor?
     @Environment(\.dynamicTypeSize) private var typeSize
+    //room for the status in every state (up to three lines: reconnecting, or a failure message that wraps),
+    //so the controls below don't move when the status text changes
+    @ScaledMetric(relativeTo: .subheadline) private var statusHeight: CGFloat = 88
 
     private let sensors = GyroHandler.getInstance()
     private let isPad = UIDevice.current.userInterfaceIdiom == .pad
@@ -35,30 +38,45 @@ struct MainView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
-                Text("OwOTrack")
-                    .font(.largeTitle.bold())
-                    .accessibilityAddTraits(.isHeader)
-                status
-                settings
-                connectButton
-                if isPad && showsVolumeButtons {
-                    volumeButtonLegend
+        GeometryReader { screen in
+            ScrollView {
+                //the connection controls at the top, the overview at the bottom, room in between.
+                //When everything doesn't fit (large text, keyboard), the screen scrolls instead
+                VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 24) {
+                        Text("OwOTrack")
+                            .font(.largeTitle.bold())
+                            .accessibilityAddTraits(.isHeader)
+                        status
+                            .frame(minHeight: statusHeight, alignment: .topLeading)
+                        //the address, magnetometer and port belong to the button that connects with them
+                        VStack(alignment: .leading, spacing: 16) {
+                            settings
+                            connectButton
+                        }
+                        if isPad && showsVolumeButtons {
+                            volumeButtonLegend
+                        }
+                    }
+                    Spacer(minLength: 32)
+                    VStack(alignment: .leading, spacing: 20) {
+                        sensorRow
+                        permissionRow
+                        if model.isConnected {
+                            screenRow
+                        }
+                        logRow
+                        footer
+                    }
                 }
-                sensorRow
-                permissionRow
-                if model.isConnected {
-                    screenRow
-                }
-                logRow
-                footer
+                .padding(.horizontal, 32)   //leaves a gap to the volume button labels at the left edge
+                .padding(.vertical, 12)
+                .frame(maxWidth: 560)       //a readable width on iPad
+                //fills the screen so the overview sits at the bottom; on a big iPad screen only up to a height
+                //where the two parts still belong together
+                .frame(minHeight: isPad ? min(screen.size.height, 820) : screen.size.height, alignment: .top)
+                .frame(maxWidth: .infinity)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 70)       //room for the dimming banner
-            .frame(maxWidth: 560)       //a readable width on iPad
-            .frame(maxWidth: .infinity)
         }
         .overlay(alignment: .topLeading) {
             if !isPad && showsVolumeButtons {
@@ -89,14 +107,20 @@ struct MainView: View {
     // MARK: status
 
     private var status: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 10) {
-            if model.isConnecting || model.isReconnecting {
-                ProgressView()
-            } else {
-                Image(systemName: statusSymbol)
-                    .foregroundColor(statusColor)
-                    .font(.title2)
+        //the spinner and the symbols sit in the same box, one title line high, so they're centered on the
+        //title's first line in every state (also when a failure message wraps to two lines)
+        let lineHeight = UIFont.preferredFont(forTextStyle: .title2).lineHeight
+        return HStack(alignment: .top, spacing: 10) {
+            Group {
+                if model.isConnecting || model.isReconnecting {
+                    ProgressView()
+                } else {
+                    Image(systemName: statusSymbol)
+                        .foregroundColor(statusColor)
+                        .font(.title2)
+                }
             }
+            .frame(width: lineHeight, height: lineHeight)
             VStack(alignment: .leading, spacing: 4) {
                 Text(statusTitle)
                     .font(.title2.weight(.semibold))
@@ -337,7 +361,7 @@ struct MainView: View {
 
     private var screenRow: some View {
         HStack(spacing: 12) {
-            Label("Screen dims after 30 s without a touch", systemImage: "moon")
+            Label("Screen dims after 30 s", systemImage: "moon")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
@@ -483,7 +507,7 @@ enum Sensor: CaseIterable, Identifiable {
 }
 
 //slim tabs at the left screen edge, next to the volume buttons, inside the content's margin so they don't cover anything.
-//The buttons sit at slightly different heights on different iPhones, so the tabs are placed where they are on most of them
+//The buttons sit at slightly different heights on different iPhones; the positions are checked on an iPhone 17
 private struct VolumeButtonLabels: View {
     let onTap: () -> Void
     private let width: CGFloat = 18
@@ -492,9 +516,9 @@ private struct VolumeButtonLabels: View {
     var body: some View {
         GeometryReader { geometry in
             label(sign: "+", action: "Yaw reset", spoken: "Volume up")
-                .position(x: width / 2, y: geometry.size.height * 0.285)
+                .position(x: width / 2, y: geometry.size.height * 0.315)
             label(sign: "−", action: "Full reset", spoken: "Volume down")
-                .position(x: width / 2, y: geometry.size.height * 0.385)
+                .position(x: width / 2, y: geometry.size.height * 0.415)
         }
         .ignoresSafeArea()
     }
