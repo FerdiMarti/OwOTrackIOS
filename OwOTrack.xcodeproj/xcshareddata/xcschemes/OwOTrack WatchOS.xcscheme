@@ -60,7 +60,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE20DFF2954901D001B0874"
             BuildableName = "OwOTrack.app"
-            BlueprintName = "OwOTrack WatchOS"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -77,7 +76,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE20DFF2954901D001B0874"
             BuildableName = "OwOTrack.app"
-            BlueprintName = "OwOTrack WatchOS"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
