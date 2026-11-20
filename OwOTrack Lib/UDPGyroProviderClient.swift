@@ -81,20 +81,7 @@ class UDPGyroProviderClient {
         sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
         
-        //Switch between UDPClient depending on OS version
-        #if os(iOS)
-        if #available(iOS 12.0, *) {
-            self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
-        } else {
-            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
-        }
-        #elseif os(watchOS)
-        if #available(watchOS 5.0, *) {
-            self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
-        } else {
-            self.connection = SwiftSocketUDPClient(host: hostUDP, port: portUDP)
-        }
-        #endif
+        self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
         
         self.connection?.open(cb: {
             self.logger.addEntry("Connection Ready")

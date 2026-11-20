@@ -5,15 +5,13 @@
 //  Created by Ferdinand Martini on 12.12.22.
 //
 
-//This class handles the UDP communication with the server on iOS 12.0+ and watchOS 5.0+. NWConnection is not supported in lower OSs. The advantage over SwiftSocket is that the bound UDP port of the device can be set programatically.
+//This class handles the UDP communication with the server using NWConnection, which also lets the app choose the device's bound UDP port.
 
 import Foundation
 import Network
 
 let BIND_PORT_USERDEFAULTS_KEY = "bindport"
 
-@available(iOS 12.0, *)
-@available(watchOS 5.0, *)
 class NWConnectionUDPClient: CompatibleUDPClient {
 
     var connection: NWConnection?
