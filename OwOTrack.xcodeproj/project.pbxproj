@@ -506,8 +506,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "OwOTrack WatchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
@@ -538,8 +536,6 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "OwOTrack WatchOS/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
 				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;

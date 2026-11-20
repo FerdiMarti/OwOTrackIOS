@@ -2,9 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>UIBackgroundModes</key>
+	<key>WKBackgroundModes</key>
 	<array>
-		<string>location</string>
+		<string>workout-processing</string>
 	</array>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>OwOTrack starts a workout session while connected, so your Apple Watch keeps tracking when you lower your wrist or the screen turns off. No workouts are saved to Health.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>OwOTrack doesn't read any health data. It only needs to start a workout session while connected, so tracking continues when the screen turns off.</string>
 </dict>
 </plist>

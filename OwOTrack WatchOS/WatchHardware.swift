@@ -8,13 +8,18 @@
 
 import Foundation
 import CoreLocation
+import HealthKit
 import WatchKit
 
 let MAC_USERDEFAULTS_KEY = "mac"
 
 //static functions for Apple Watch hardware stuff
 class WatchHardware: DeviceHardware {
-    static let locationManager = CLLocationManager()
+    static let healthStore = HKHealthStore()
+    static let workoutDelegate = WorkoutSessionDelegate()
+    //only used on the main thread
+    static var workoutSession: HKWorkoutSession?
+    static var workoutWanted = false    //false once tracking stopped, so a late permission answer doesn't start a session
 
     //Apple Watch has no volume buttons, so there is nothing to listen for
     static func unregisterVolButtonListener(target: NSObject) {
@@ -68,18 +73,46 @@ class WatchHardware: DeviceHardware {
         }
     }
 
-    //uses background location to keep the app running in background
+    //watchOS keeps an app with an active workout session running, also when the wrist is lowered or the screen is off.
+    //the session only runs while tracking and is ended afterwards; nothing is saved to Health
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
-        locationManager.requestAlwaysAuthorization()
-        locationManager.allowsBackgroundLocationUpdates = true
-        locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        locationManager.distanceFilter = 99999
-        locationManager.delegate = target
-        locationManager.startUpdatingLocation()
+        DispatchQueue.main.async {
+            workoutWanted = true
+            guard HKHealthStore.isHealthDataAvailable() else {
+                return
+            }
+            //starting a workout session needs permission to share workouts, watchOS only asks the first time
+            healthStore.requestAuthorization(toShare: [HKObjectType.workoutType()], read: nil) { _, _ in
+                DispatchQueue.main.async {
+                    startWorkoutSession()
+                }
+            }
+        }
+    }
+
+    private static func startWorkoutSession() {
+        if !workoutWanted || workoutSession != nil {
+            return
+        }
+        let configuration = HKWorkoutConfiguration()
+        configuration.activityType = .fitnessGaming
+        configuration.locationType = .indoor
+        do {
+            let session = try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
+            session.delegate = workoutDelegate
+            session.startActivity(with: Date())
+            workoutSession = session
+        } catch {
+            Logger.getInstance().addEntry("Couldn't start the workout session, tracking will stop when the screen turns off: \(error.localizedDescription)")
+        }
     }
 
     static func stopBackgroundUsage() {
-        locationManager.stopUpdatingLocation()
+        DispatchQueue.main.async {
+            workoutWanted = false
+            workoutSession?.end()
+            workoutSession = nil
+        }
     }
 
     //generates a random MAC address for SlimeVR (if not already generated before) and saves it in UserDefaults, actual MAC address can not be accessed
@@ -96,6 +129,16 @@ class WatchHardware: DeviceHardware {
             defaults.set(mac, forKey: MAC_USERDEFAULTS_KEY)
             return mac
         }
+    }
+}
+
+//reports a workout session that fails while tracking
+final class WorkoutSessionDelegate: NSObject, HKWorkoutSessionDelegate {
+    func workoutSession(_ workoutSession: HKWorkoutSession, didChangeTo toState: HKWorkoutSessionState, from fromState: HKWorkoutSessionState, date: Date) {
+    }
+
+    func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+        Logger.getInstance().addEntry("Workout session failed, tracking may stop when the screen turns off: \(error.localizedDescription)")
     }
 }
 #endif
