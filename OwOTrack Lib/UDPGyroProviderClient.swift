@@ -16,6 +16,7 @@ class PacketTypes {
     static let BATTERY_LEVEL = 12;
     static let SENSOR_INFO = 15;            //SlimeVR: sensor description, and SlimeVR's acknowledgement of it
     static let ROTATION_DATA = 17;          //SlimeVR: replaces ROTATION, which SlimeVR marks as deprecated
+    static let USER_ACTION = 21;            //SlimeVR: asks the server for a reset, see the USER_ACTION_ ids
     static let ACK_CONFIG_CHANGE = 24;      //SlimeVR: confirms a SET_CONFIG_FLAG
     static let SET_CONFIG_FLAG = 25;        //SlimeVR: changes a sensor setting
     static let BUTTON_PUSHED = 60;
@@ -24,6 +25,8 @@ class PacketTypes {
     static let RECEIVE_HEARTBEAT = 1;
     static let RECEIVE_VIBRATE = 2;
     static let CONFIG_MAG_ENABLED = 1;      //SET_CONFIG_FLAG setting id of the magnetometer
+    static let USER_ACTION_RESET_FULL = 2;
+    static let USER_ACTION_RESET_YAW = 3;
 }
 
 //Uses one of the UDP clients to send the applications data to the server
@@ -141,14 +144,23 @@ class UDPGyroProviderClient {
             return data
         }
 
-        let boardType: Int32 = 0
+        //SlimeVR's ids for this app, shown in its tracker settings: board "owoTrack" (13) and MCU "owoTrack iOS" (5).
+        //SlimeVR has no id for watchOS; the firmware text tells the two apart
+        let boardType: Int32 = 13
         let imuType: Int32 = 0
-        let mcuType: Int32 = 0
+        let mcuType: Int32 = 5
         let imuInfo : [Int32] = [0, 0, 0]
         let firmwareBuild: Int32 = 9  //SlimeVR protocol version: since 9, the sensor is described by a SENSOR_INFO packet
-        let firmware = "owoTrack8" // 9 bytes
+        //shown as the tracker's firmware version in SlimeVR, e.g. "owoTrack iOS 1.12".
+        //not a bare version number like "1.12.0": SlimeVR compares those with its own firmware releases
+        let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        #if os(watchOS)
+        let firmware = "owoTrack watchOS \(appVersion)"
+        #else
+        let firmware = "owoTrack iOS \(appVersion)"
+        #endif
         let firmwareData = Data(firmware.utf8)
-        let firmwareLength : UInt8 = UInt8(firmware.count)
+        let firmwareLength : UInt8 = UInt8(firmwareData.count)
         let pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
         data.append(Data(bigEndian: boardType))
         data.append(Data(bigEndian: imuType))
@@ -544,13 +556,24 @@ class UDPGyroProviderClient {
         sendPacket(msgType: Int32(PacketTypes.BATTERY_LEVEL), payload: Data(bigEndian: level))
     }
     
-    //send that the volume button was pushed, not used by server afaik
-    public func provideButtonPushed() {
+    //a volume button press. SlimeVR ignores the owoTrack button packet, so it gets a reset instead:
+    //volume up asks for a yaw reset, volume down for a full reset (SlimeVR applies its reset delays).
+    //the owoTrack driver gets the button packet as before
+    public func provideButtonPushed(volumeUp: Bool) {
         if (!isConnected) {
             return;
         }
-        
-        sendPacket(msgType: Int32(PacketTypes.BUTTON_PUSHED), payload: Data())
+
+        sendQueue.async {
+            if self.isSlimeVR {
+                let action = volumeUp ? PacketTypes.USER_ACTION_RESET_YAW : PacketTypes.USER_ACTION_RESET_FULL
+                self.sendNow(msgType: Int32(PacketTypes.USER_ACTION), payload: Data([UInt8(action)]))
+                self.logger.addEntry(volumeUp ? "Yaw reset sent to SlimeVR" : "Full reset sent to SlimeVR")
+            } else {
+                self.sendNow(msgType: Int32(PacketTypes.BUTTON_PUSHED), payload: Data())
+                self.logger.addEntry("Button Pushed")
+            }
+        }
     }
 }
 

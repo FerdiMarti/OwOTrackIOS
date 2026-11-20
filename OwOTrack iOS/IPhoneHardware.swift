@@ -40,7 +40,8 @@ class IPhoneHardware: DeviceHardware {
         } catch {
             print("audioSession could not be initialized")
         }
-        audioSession.addObserver(target, forKeyPath: "outputVolume", options: NSKeyValueObservingOptions.new, context: nil)
+        //old and new value tell volume up from volume down
+        audioSession.addObserver(target, forKeyPath: "outputVolume", options: [.old, .new], context: nil)
     }
     
     //one haptic engine for the whole app, created on first use (nil if the device has no haptics).

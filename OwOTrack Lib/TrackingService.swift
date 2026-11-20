@@ -106,11 +106,13 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         client?.sensorConfigChanged(magnetometerEnabled: use)
     }
     
-    //handler for volume button push
+    //handler for volume button presses, which show up as changes of the output volume.
+    //the old and new volume tell which button it was; if they're missing, it counts as volume up
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "outputVolume" {
-            logger.addEntry("Button Pushed")
-            client?.provideButtonPushed()
+            let oldVolume = (change?[.oldKey] as? NSNumber)?.floatValue ?? 0
+            let newVolume = (change?[.newKey] as? NSNumber)?.floatValue ?? 0
+            client?.provideButtonPushed(volumeUp: newVolume >= oldVolume)
         }
     }
     

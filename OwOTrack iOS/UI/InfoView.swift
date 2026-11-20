@@ -30,6 +30,12 @@ struct InfoView: View {
 
         ----
 
+        Volume Buttons
+
+        While connected to SlimeVR, the volume buttons trigger a reset: volume up for a yaw reset, volume down for a full reset. SlimeVR's reset delays apply. Volume up doesn't register when the volume is already at the maximum, and volume down doesn't at the minimum.
+
+        ----
+
         Background Usage
 
         If you want the app to stay connected while running in the background or while the phone is turned off, you have to give the app permission to always use location data.
