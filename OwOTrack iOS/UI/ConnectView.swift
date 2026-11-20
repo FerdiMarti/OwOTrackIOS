@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-//server address, magnetometer switch, Discover/Connect and the connection log
+//server address, magnetometer switch, Connect button and the connection log
 struct ConnectView: View {
     @ObservedObject var model: ConnectionModel
 
@@ -24,18 +24,11 @@ struct ConnectView: View {
             addressField("Port", text: $model.port)
             Toggle("Use Magnetometer", isOn: $model.useMagnetometer)
                 .disabled(!model.canEdit)
-            HStack {
-                Button("Discover") {
-                    model.discoverPressed()
-                }
-                .frame(maxWidth: .infinity)
-                .disabled(!model.canEdit)
-                Button(model.isConnected ? "Disconnect" : "Connect") {
-                    model.connectPressed()
-                }
-                .frame(maxWidth: .infinity)
-                .disabled(model.isConnecting)
+            Button(model.isConnected ? "Disconnect" : "Connect") {
+                model.connectPressed()
             }
+            .frame(maxWidth: .infinity)
+            .disabled(model.isConnecting)
             LogView(text: model.log, placeholder: "Logs")
         }
         .padding(.horizontal, 20)

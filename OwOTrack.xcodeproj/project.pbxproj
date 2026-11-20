@@ -7,14 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
-		9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		9A5EFF2A2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		9A5EFF2B2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		9A728BE0263E139800E8605D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* LaunchScreen.storyboard */; };
 		9A8DFBA3294729CD00C01721 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
-		9AE20DD329539D4E001B0874 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
 		9AE20DD429539D4E001B0874 /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
 		9AE20DD529539D4E001B0874 /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
 		9AE20DD629539D4E001B0874 /* IPhoneHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB07CE72950733A006CD79F /* IPhoneHardware.swift */; };
@@ -26,15 +23,12 @@
 		9AE20E2729549045001B0874 /* WatchHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DDF29539ED2001B0874 /* WatchHardware.swift */; };
 		9AE20E29295490B6001B0874 /* TrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC4C261A369D007C6BBA /* TrackingService.swift */; };
 		9AE20E2A295490B6001B0874 /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
-		9AE20E2B295490B6001B0874 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
 		9AE20E2C295490B6001B0874 /* ConnectUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DF029548C17001B0874 /* ConnectUI.swift */; };
 		9AE20E2D295490B6001B0874 /* DeviceHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DE32953A114001B0874 /* DeviceHardware.swift */; };
 		9AE20E2E295490B6001B0874 /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
 		9AE20E2F295490B6001B0874 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
 		9AE20E30295490BB001B0874 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		9AE20E31295490BB001B0874 /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
-		9AE20E33295490BF001B0874 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
-		9AE20E34295490BF001B0874 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		9AE20E3B295490CB001B0874 /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
 		9AE20E3C295490CB001B0874 /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
 		9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
@@ -44,10 +38,7 @@
 		B00000000000000000000009 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* ConnectView.swift */; };
 		B0000000000000000000000A /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
 		B00000000000000000000015 /* OwOTrack.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 9AE20E002954901D001B0874 /* OwOTrack.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		B00000000000000000000016 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		B00000000000000000000017 /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
-		B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
-		B00000000000000000000019 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
 		B0000000000000000000001B /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
 		B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
 		B0000000000000000000001E /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
@@ -101,9 +92,6 @@
 
 /* Begin PBXFileReference section */
 		9A08069C261B565400F92566 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoDiscovery.swift; sourceTree = "<group>"; };
-		9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnection.swift; sourceTree = "<group>"; };
-		9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnectionError.swift; sourceTree = "<group>"; };
 		9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		9A728BDF263E139800E8605D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWConnectionUDPClient.swift; sourceTree = "<group>"; };
@@ -175,15 +163,6 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
-		9A8DFB8F2946BBC500C01721 /* UDPBroadcastConnection */ = {
-			isa = PBXGroup;
-			children = (
-				9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */,
-				9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */,
-			);
-			path = UDPBroadcastConnection;
-			sourceTree = "<group>";
-		};
 		9A8DFBA8294AD9CE00C01721 /* UDPClient */ = {
 			isa = PBXGroup;
 			children = (
@@ -197,13 +176,11 @@
 			isa = PBXGroup;
 			children = (
 				9AE6EC262619FCA0007C6BBA /* OwOMath */,
-				9A8DFB8F2946BBC500C01721 /* UDPBroadcastConnection */,
 				9A8DFBA8294AD9CE00C01721 /* UDPClient */,
 				9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */,
 				9AE6EC4C261A369D007C6BBA /* TrackingService.swift */,
 				9AE6EC51261A3755007C6BBA /* GyroHandler.swift */,
 				9A08069C261B565400F92566 /* Logger.swift */,
-				9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */,
 				9AE20DE32953A114001B0874 /* DeviceHardware.swift */,
 				9AE20DF029548C17001B0874 /* ConnectUI.swift */,
 				B00000000000000000000007 /* ConnectionModel.swift */,
@@ -413,8 +390,6 @@
 				B00000000000000000000009 /* ConnectView.swift in Sources */,
 				B0000000000000000000000A /* ConnectionModel.swift in Sources */,
 				9AE20E2729549045001B0874 /* WatchHardware.swift in Sources */,
-				9AE20E34295490BF001B0874 /* UDPBroadcastConnectionError.swift in Sources */,
-				9AE20E33295490BF001B0874 /* UDPBroadcastConnection.swift in Sources */,
 				9AE20E3B295490CB001B0874 /* Quaternion.swift in Sources */,
 				9AE20E29295490B6001B0874 /* TrackingService.swift in Sources */,
 				9AE20E3C295490CB001B0874 /* Vector3.swift in Sources */,
@@ -425,7 +400,6 @@
 				9AE20E30295490BB001B0874 /* NWConnectionUDPClient.swift in Sources */,
 				9AE20E2A295490B6001B0874 /* GyroHandler.swift in Sources */,
 				9AE20E2E295490B6001B0874 /* UDPGyroProviderClient.swift in Sources */,
-				9AE20E2B295490B6001B0874 /* AutoDiscovery.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -433,10 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */,
 				9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */,
-				9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */,
-				9AE20DD329539D4E001B0874 /* AutoDiscovery.swift in Sources */,
 				9AE20DD729539D4E001B0874 /* Logger.swift in Sources */,
 				9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */,
 				9AE20DD529539D4E001B0874 /* GyroHandler.swift in Sources */,
@@ -460,10 +431,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B00000000000000000000016 /* UDPBroadcastConnectionError.swift in Sources */,
 				B00000000000000000000017 /* Quaternion.swift in Sources */,
-				B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */,
-				B00000000000000000000019 /* AutoDiscovery.swift in Sources */,
 				B0000000000000000000001B /* Logger.swift in Sources */,
 				B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */,
 				B0000000000000000000001E /* GyroHandler.swift in Sources */,

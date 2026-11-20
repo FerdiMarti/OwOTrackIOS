@@ -24,10 +24,6 @@ struct InfoView: View {
 
         ----
 
-        The "discover" feature tries to find the ip address of a running OwOTrack driver automatically. It only works with the OwOTrack Driver and not with SlimeVR.
-
-        ----
-
         Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.
 
         When connected to SlimeVR, SlimeVR controls the magnetometer and the switch in the app follows: turn on "Use magnetometer on all IMU trackers that support it" in SlimeVR's settings, and "Allow magnetometer" in the tracker's settings. The switch in the app sets the starting value and controls the magnetometer when using the OwOTrack driver.

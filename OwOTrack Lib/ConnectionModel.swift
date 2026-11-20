@@ -24,7 +24,6 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     @Published private(set) var log = ""
 
     private let service = TrackingService()
-    private let discoverer = AutoDiscovery()
 
     init() {
         let defaults = UserDefaults.standard
@@ -67,24 +66,6 @@ final class ConnectionModel: ObservableObject, ConnectUI {
             return
         }
         service.start(ipAdress: ip, port: port, magnetometer: useMagnetometer, connectUI: self)
-    }
-
-    //looks for a running owoTrack driver on the network and fills in its address (doesn't work with SlimeVR)
-    func discoverPressed() {
-        if !canEdit {
-            return
-        }
-        status = .connecting
-        log = ""
-        discoverer.sendDiscovery(cb: { error, ip, port in
-            self.onMain {
-                if !error {
-                    self.ip = ip
-                    self.port = port
-                }
-                self.status = .notConnected
-            }
-        })
     }
 
     // MARK: ConnectUI, called from any thread
