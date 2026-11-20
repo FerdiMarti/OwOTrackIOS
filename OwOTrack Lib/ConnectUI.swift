@@ -17,6 +17,8 @@ protocol ConnectUI {
     func setUnconnected()
     
     func setMagnometerToggle(use: Bool)
-    
+
+    //called from any thread while the Logger holds its lock:
+    //dispatch the UI update to the main queue and never call the Logger from here
     func updateLogs(text: String)
 }
