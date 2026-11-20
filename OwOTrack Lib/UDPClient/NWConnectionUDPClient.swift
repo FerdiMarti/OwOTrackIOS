@@ -125,12 +125,13 @@ class NWConnectionUDPClient: CompatibleUDPClient {
         }
     }
 
-    //saves last used port n UserDefaults
+    //saves last used port in UserDefaults. read from the endpoint itself, not its debug text, so it can't crash and works for IPv4 and IPv6.
+    //saved as text like before, so a port saved by an older version still loads
     func setLastPort() {
-        guard let bPort = self.connection?.currentPath?.localEndpoint?.debugDescription.split(separator: ":")[1] else {
+        guard case .hostPort(_, let port) = self.connection?.currentPath?.localEndpoint else {
             return
         }
-        self.defaults.set(bPort, forKey: BIND_PORT_USERDEFAULTS_KEY)
+        self.defaults.set(String(port.rawValue), forKey: BIND_PORT_USERDEFAULTS_KEY)
     }
     
     //Deletes last used port from UserDefaults so that the port is chosen automatically on next connection
