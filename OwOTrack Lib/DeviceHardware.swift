@@ -24,7 +24,8 @@ protocol DeviceHardware {
     
     static func stopProximitySensor()
     
-    static func getBatteryLevel() -> Float
+    //battery level from 0 to 1, or nil while it's unknown
+    static func getBatteryLevel() -> Float?
     
     static func startBatteryLevelMonitoring()
     

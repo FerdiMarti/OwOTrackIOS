@@ -119,16 +119,19 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     }
     
     func startSendingBattery() {
-        hardware.startBatteryLevelMonitoring()
-        sendBatteryLevel()
+        //all on the main thread, where the battery level is read: monitoring has to be enabled before the first read
         DispatchQueue.main.async {
+            self.hardware.startBatteryLevelMonitoring()
+            self.sendBatteryLevel()
             self.batteryTimer = Timer.scheduledTimer(timeInterval: 10, target: self, selector: #selector(self.sendBatteryLevel), userInfo: nil, repeats: true)
         }
     }
-    
+
+    //skipped while the level is unknown, instead of reporting a full battery
     @objc func sendBatteryLevel() {
-        let level = hardware.getBatteryLevel()
-        self.client?.provideBatteryLevel(level: level)
+        if let level = hardware.getBatteryLevel() {
+            self.client?.provideBatteryLevel(level: level)
+        }
     }
     
     func stopSendingBattery() {

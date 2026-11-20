@@ -20,7 +20,7 @@ public class GyroHandler {
     
     private init() {
         motionAvailable = mmanager.isDeviceMotionAvailable
-        accelerometerAvailable = mmanager.isDeviceMotionAvailable
+        accelerometerAvailable = mmanager.isAccelerometerAvailable
         gyroAvailable = mmanager.isGyroAvailable
         magnetometerAvailable = mmanager.isMagnetometerAvailable
     }

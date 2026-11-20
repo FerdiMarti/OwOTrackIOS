@@ -41,37 +41,33 @@ class IPhoneHardware: DeviceHardware {
         audioSession.addObserver(target, forKeyPath: "outputVolume", options: NSKeyValueObservingOptions.new, context: nil)
     }
     
+    //one haptic engine for the whole app, created on first use (nil if the device has no haptics).
+    //creating a new engine for every vibration leaked each of them: its reset handler kept it alive
+    static let hapticEngine: CHHapticEngine? = {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics,
+              let engine = try? CHHapticEngine() else {
+            return nil
+        }
+        // If something goes wrong, attempt to restart the engine immediately
+        engine.resetHandler = { [weak engine] in
+            print("The haptic engine reset")
+            try? engine?.start()
+        }
+        return engine
+    }()
+
     @available(iOS 13.0, *)
     static func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return false }
-        var engine: CHHapticEngine?
-        do {
-            engine = try CHHapticEngine()
-            try engine?.start()
-        } catch {
-            print("There was an error creating the engine: \(error.localizedDescription)")
-            return false
-        }
-
-        // If something goes wrong, attempt to restart the engine immediately
-        engine?.resetHandler = { 
-            print("The engine reset")
-
-            do {
-                try engine?.start()
-            } catch {
-                print("Failed to restart the engine: \(error)")
-            }
-        }
+        guard let engine = hapticEngine else { return false }
         let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: a)
         let sharpness = CHHapticEventParameter(parameterID: .hapticSharpness, value: f)
         let event = CHHapticEvent(eventType: .hapticContinuous, parameters: [intensity, sharpness], relativeTime: 0, duration: TimeInterval(d))
 
         do {
+            try engine.start()  //start before each use: the system stops the engine, e.g. while the app is in the background
             let pattern = try CHHapticPattern(events: [event], parameters: [])
-            let player = try engine?.makePlayer(with: pattern)
-            try player?.start(atTime: 1)
-            print("Vibration Done")
+            let player = try engine.makePlayer(with: pattern)
+            try player.start(atTime: CHHapticTimeImmediate)
             return true
         } catch {
             print("Failed to play pattern: \(error.localizedDescription).")
@@ -96,8 +92,9 @@ class IPhoneHardware: DeviceHardware {
         }
     }
     
-    static func getBatteryLevel() -> Float {
-        return abs(UIDevice.current.batteryLevel)
+    static func getBatteryLevel() -> Float? {
+        let level = UIDevice.current.batteryLevel
+        return level < 0 ? nil : level  //iOS reports -1 while the level is unknown
     }
     
     static func startBatteryLevelMonitoring() {

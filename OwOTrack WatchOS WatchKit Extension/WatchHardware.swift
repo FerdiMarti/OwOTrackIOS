@@ -58,11 +58,12 @@ class WatchHardware: DeviceHardware {
         return
     }
     
-    static func getBatteryLevel() -> Float {
+    static func getBatteryLevel() -> Float? {
         if #available(watchOSApplicationExtension 4.0, *) {
-            return abs(WKInterfaceDevice.current().batteryLevel)
+            let level = WKInterfaceDevice.current().batteryLevel
+            return level < 0 ? nil : level  //watchOS reports -1 while the level is unknown
         } else {
-            return 1.0
+            return nil
         }
     }
     
