@@ -29,7 +29,10 @@ class UDPGyroProviderClient {
     var hostUDP = "192.168.0.10"
     var portUDP = 6969
     
-    private var packetId: Int64 = 0
+    private var packetId: Int64 = 0     //only read or modified on sendQueue
+    //SlimeVR drops every packet whose number isn't higher than the last one it received.
+    //Sensor data arrives on several threads at once, so numbering and sending happen together on this serial queue.
+    private let sendQueue = DispatchQueue(label: "UDPGyroProviderClient.send")
     var isConnected: Bool = false
     var isConnecting: Bool = false //is true during handshake attempts
     var lastHeartbeat: Double = 0   //last message from server
@@ -66,7 +69,7 @@ class UDPGyroProviderClient {
         logger.addEntry("Attempting Connection")
         isConnected = false
         isConnecting = false
-        packetId = 0
+        sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
         
         //Switch between UDPClient depending on OS version
@@ -305,24 +308,28 @@ class UDPGyroProviderClient {
         return
     }
     
+    //adds the header (message type + next packet number) and sends the packet
+    //runs on sendQueue so packet numbers go out strictly increasing
+    private func sendPacket(msgType: Int32, payload: Data) {
+        sendQueue.async {
+            var data = Data(capacity: 12 + payload.count)
+            withUnsafeBytes(of: msgType.bigEndian) { data.append(contentsOf: $0) }
+            withUnsafeBytes(of: self.packetId.bigEndian) { data.append(contentsOf: $0) }
+            data.append(payload)
+            self.connection?.sendUDP(data)
+            self.packetId += 1
+        }
+    }
+
     private func provideFloats(floats: [Data], len: Int, msgType: Int32) {
         if (!isConnected) {
             return;
         }
-        var type = Int32(bigEndian: msgType)
-        var id = Int64(bigEndian: packetId)
-
-        let bytes = 12 + len * 4;
-
-        var data = Data(capacity: bytes)
-        data.append(UnsafeBufferPointer(start: &type, count: 1))
-        data.append(UnsafeBufferPointer(start: &id, count: 1))
+        var payload = Data(capacity: len * 4)
         for elem in floats {
-            data.append(elem)
+            payload.append(elem)
         }
-
-        self.connection?.sendUDP(data)
-        packetId += 1;
+        sendPacket(msgType: msgType, payload: payload)
     }
 
     public func provideRot(rot: [Data]) {
@@ -343,18 +350,8 @@ class UDPGyroProviderClient {
             return
         }
         
-        let len = 12 + 2;
-        var type = Int32(bigEndian: Int32(PacketTypes.SEND_MAG_STATUS))
-        var id = Int64(bigEndian: packetId)
         let mstr = enabled ? "y" : "n"
-        
-        var data = Data(capacity: len)
-        data.append(UnsafeBufferPointer(start: &type, count: 1))
-        data.append(UnsafeBufferPointer(start: &id, count: 1))
-        data.append(Data(mstr.utf8))
-        
-        self.connection?.sendUDP(data)
-        packetId += 1
+        sendPacket(msgType: Int32(PacketTypes.SEND_MAG_STATUS), payload: Data(mstr.utf8))
     }
     
     //sends current device battery level
@@ -363,16 +360,8 @@ class UDPGyroProviderClient {
             return
         }
         
-        let len = 12 + 4;
-        var type = Int32(bigEndian: Int32(PacketTypes.BATTERY_LEVEL))
-        var id = Int64(bigEndian: packetId)
-        var bat = level.bitPattern.bigEndian
-        var data = Data(capacity: len)
-        data.append(UnsafeBufferPointer(start: &type, count: 1))
-        data.append(UnsafeBufferPointer(start: &id, count: 1))
-        data.append(UnsafeBufferPointer(start: &bat, count: 1))
-        self.connection?.sendUDP(data)
-        packetId += 1
+        let bat = withUnsafeBytes(of: level.bitPattern.bigEndian) { Data($0) }
+        sendPacket(msgType: Int32(PacketTypes.BATTERY_LEVEL), payload: bat)
     }
     
     //send that the volume button was pushed, not used by server afaik
@@ -381,15 +370,6 @@ class UDPGyroProviderClient {
             return;
         }
         
-        let len = 12 + 1;
-        var type = Int32(bigEndian: Int32(PacketTypes.BUTTON_PUSHED))
-        var id = Int64(bigEndian: packetId)
-        
-        var data = Data(capacity: len)
-        data.append(UnsafeBufferPointer(start: &type, count: 1))
-        data.append(UnsafeBufferPointer(start: &id, count: 1))
-        
-        self.connection?.sendUDP(data)
-        packetId += 1;
+        sendPacket(msgType: Int32(PacketTypes.BUTTON_PUSHED), payload: Data())
     }
 }

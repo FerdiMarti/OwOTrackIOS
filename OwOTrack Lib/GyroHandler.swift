@@ -28,6 +28,7 @@ public class GyroHandler {
     func startUpdates(client: UDPGyroProviderClient, useMagn: Bool) {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
+        sensorQueue.maxConcurrentOperationCount = 1 //OperationQueue is concurrent by default; handle sensor updates one at a time, in order
         mmanager.deviceMotionUpdateInterval = 0.01
         mmanager.gyroUpdateInterval = 0.01
         mmanager.accelerometerUpdateInterval = 0.01
