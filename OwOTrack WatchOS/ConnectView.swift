@@ -16,12 +16,8 @@ struct ConnectView: View {
                     Text(statusText)
                         .font(.headline)
                         .foregroundColor(statusColor)
-                    TextField("IP Address", text: $model.ip)
-                        .disabled(!model.canEdit)
-                    TextField("Port", text: $model.port)
-                        .disabled(!model.canEdit)
-                    Toggle("Magnetometer", isOn: $model.useMagnetometer)
-                        .disabled(!model.canEdit)
+                        .id("top")
+                    //right below the status, so it's visible without scrolling
                     Button(model.isConnected ? "Disconnect" : "Connect") {
                         model.connectPressed()
                     }
@@ -30,15 +26,29 @@ struct ConnectView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     }
+                    TextField("IP Address", text: $model.ip)
+                        .disabled(!model.canEdit)
+                    TextField("Port", text: $model.port)
+                        .disabled(!model.canEdit)
+                    Toggle("Magnetometer", isOn: $model.useMagnetometer)
+                        .disabled(!model.canEdit)
                     Text(model.log)
                         .font(.footnote)
                         .foregroundColor(.secondary)
                         .id("log")
                 }
             }
-            //keep the newest log line visible
+            //while connecting, follow the newest log line (the progress, or why it failed)
             .onChange(of: model.log) { _ in
-                proxy.scrollTo("log", anchor: .bottom)
+                if model.isConnecting {
+                    proxy.scrollTo("log", anchor: .bottom)
+                }
+            }
+            //once connected, go back up to the status and the Disconnect button
+            .onChange(of: model.isConnected) { connected in
+                if connected {
+                    proxy.scrollTo("top", anchor: .top)
+                }
             }
         }
     }

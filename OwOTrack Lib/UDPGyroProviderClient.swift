@@ -208,7 +208,7 @@ class UDPGyroProviderClient {
                             + "\nPlease make sure everything is up to date.")
             return
         }
-        self.logger.addEntry("Handshake Succeded")
+        self.logger.addEntry("Handshake Succeeded")
         self.successfulHandshake()
     }
 
