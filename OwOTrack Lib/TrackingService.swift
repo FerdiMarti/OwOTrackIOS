@@ -104,6 +104,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         if client == nil {
             return
         }
+        self.magnetometer = use
         gHandler?.stopUpdates()
         gHandler?.startUpdates(client: client!, useMagn: use)
         connectUI?.setMagnometerToggle(use: use)

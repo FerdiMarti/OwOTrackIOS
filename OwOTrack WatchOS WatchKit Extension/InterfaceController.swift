@@ -184,6 +184,7 @@ class InterfaceController: WKInterfaceController, ConnectUI {
     //used if server triggers a change in magnetometer use
     func setMagnometerToggle(use: Bool) {
         DispatchQueue.main.async {
+            self.magnetometerToggleValue = use  //setOn doesn't trigger the switch's action, so keep the value used on the next connect in sync
             self.magnetometerToggle.setOn(use)
         }
     }

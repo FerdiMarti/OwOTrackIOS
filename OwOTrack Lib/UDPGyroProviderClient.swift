@@ -228,9 +228,10 @@ class UDPGyroProviderClient {
             //Ping, just send packet back
             self.connection?.sendUDP(data)
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
-            //let's the server switch the usage of the magnetometer, not used afaik
-            let m = readString(data: restData, length: 1)
-            self.service.toggleMagnetometerUse(use: m == "y")
+            //lets the server (owoTrack driver overlay) turn the magnetometer on or off, payload is a 2-byte char 'y' or 'n'
+            if let c = readChar(data: restData) {
+                self.service.toggleMagnetometerUse(use: c == "y")
+            }
         } else {
             // if message type is a very high number, it's probably because the encoding is wrong
             if (msgType >= 2048 && !recursion) {
@@ -276,21 +277,20 @@ class UDPGyroProviderClient {
         }
     }
     
-    //reads String depending on endian encoding
-    func readString(data: Data, length: Int) -> String {
-        var str = ""
-        var restData = data
-        while str.count < length {
-            var char = ""
-            if receivingBigEndian {
-                char = String(UInt32(bigEndian: restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-            } else {
-                char = String(UInt32(restData.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-            }
-            str += char
-            restData = data.advanced(by: 1)
+    //reads a 2-byte character (a Java char, as in the owoTrack protocol) depending on endian encoding
+    //returns nil if the data is too short or not a valid character
+    func readChar(data: Data) -> Character? {
+        let bytes = [UInt8](data.prefix(2))
+        if bytes.count < 2 {
+            return nil
         }
-        return str
+        let value = receivingBigEndian
+            ? UInt16(bytes[0]) << 8 | UInt16(bytes[1])
+            : UInt16(bytes[1]) << 8 | UInt16(bytes[0])
+        guard let scalar = Unicode.Scalar(value) else {
+            return nil
+        }
+        return Character(scalar)
     }
     
     //checks if connection timed out
@@ -344,14 +344,16 @@ class UDPGyroProviderClient {
         provideFloats(floats: accel, len: 3, msgType: Int32(PacketTypes.ACCEL));
     }
     
-    //send if the magnetometer is enabled, not used by server afaik
+    //sends whether the magnetometer is enabled, as a 2-byte big-endian char 'y' or 'n' like the owoTrack Android app
+    //only used by the owoTrack driver, SlimeVR ignores it
     public func provideMagnetometerUse(enabled: Bool) {
         if (!isConnected) {
             return
         }
-        
-        let mstr = enabled ? "y" : "n"
-        sendPacket(msgType: Int32(PacketTypes.SEND_MAG_STATUS), payload: Data(mstr.utf8))
+
+        let c = UInt16(UInt8(ascii: enabled ? "y" : "n"))
+        let payload = withUnsafeBytes(of: c.bigEndian) { Data($0) }
+        sendPacket(msgType: Int32(PacketTypes.SEND_MAG_STATUS), payload: payload)
     }
     
     //sends current device battery level
