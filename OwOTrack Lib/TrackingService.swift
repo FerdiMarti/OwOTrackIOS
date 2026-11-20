@@ -42,11 +42,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         connectUI.setLoading()
         hardware.startProximitySensor()
         hardware.registerVolButtonListener(target: self)
-        if #available(watchOSApplicationExtension 4.0, *) {
-            hardware.startBackgroundUsage(target: self)
-        } else {
-            // Fallback on earlier versions
-        }
+        hardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
             //start connection
             self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
@@ -86,11 +82,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     func stop() {
         hardware.stopProximitySensor()
         hardware.unregisterVolButtonListener(target: self)
-        if #available(watchOSApplicationExtension 4.0, *) {
-            hardware.stopBackgroundUsage()
-        } else {
-            // Fallback on earlier versions
-        }
+        hardware.stopBackgroundUsage()
         stopSendingBattery()
         gHandler?.stopUpdates()
         client?.disconnectUDP()

@@ -56,7 +56,6 @@ class IPhoneHardware: DeviceHardware {
         return engine
     }()
 
-    @available(iOS 13.0, *)
     static func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool {
         guard let engine = hapticEngine else { return false }
         let intensity = CHHapticEventParameter(parameterID: .hapticIntensity, value: a)
@@ -114,16 +113,6 @@ class IPhoneHardware: DeviceHardware {
     //uses background location to keep the app running in background
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
         locationManager.requestAlwaysAuthorization()
-        if CLLocationManager.locationServicesEnabled() {
-            switch CLLocationManager.authorizationStatus() {
-                case .notDetermined, .restricted, .denied:
-                    print("no loaction access")
-                case .authorizedAlways, .authorizedWhenInUse:
-                    print("location access")
-                @unknown default:
-                break
-            }
-        }
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         locationManager.distanceFilter = 99999

@@ -1,0 +1,20 @@
+// Settings shared by the two iPhone app targets:
+//   "OwOTrack iOS"              -> App Store build, without the watch app
+//   "OwOTrack iOS (with Watch)" -> TestFlight build that embeds the watch app
+// Change shared settings here, not in a target's Build Settings, so both targets stay identical.
+
+PRODUCT_NAME = OwOTrack iOS
+PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker
+INFOPLIST_FILE = $(SRCROOT)/OwOTrack iOS/Info.plist
+IPHONEOS_DEPLOYMENT_TARGET = 15.0
+TARGETED_DEVICE_FAMILY = 1,2
+
+DEVELOPMENT_TEAM = QG96Y277J7
+CODE_SIGN_STYLE = Automatic
+
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon
+ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor
+CLANG_ENABLE_MODULES = YES
+ENABLE_BITCODE = NO
+LD_RUNPATH_SEARCH_PATHS = $(inherited) @executable_path/Frameworks
+SWIFT_VERSION = 5.0

@@ -268,7 +268,7 @@ class UDPGyroProviderClient {
         }
         var msgType : UInt32 = 0
         msgType = readUInt32(data: data)
-        var restData = data.advanced(by: 4)
+        let restData = data.advanced(by: 4)
         if msgType == PacketTypes.RECEIVE_HEARTBEAT {
             // Heartbeat
         } else if msgType == PacketTypes.RECEIVE_VIBRATE {
@@ -302,11 +302,7 @@ class UDPGyroProviderClient {
         let frequency = readFloat(data: restData)
         restData = restData.advanced(by: 4)
         let amplitude = readFloat(data: restData)
-        if #available(iOS 13.0, *) {
-            if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
-                hardware.vibrate()
-            }
-        } else {
+        if hardware.vibrateAdvanced(f: frequency, a: amplitude, d: duration) == false {
             hardware.vibrate()
         }
     }

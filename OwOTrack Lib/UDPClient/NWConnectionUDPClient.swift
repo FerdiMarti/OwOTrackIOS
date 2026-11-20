@@ -72,10 +72,8 @@ class NWConnectionUDPClient: CompatibleUDPClient {
 
     //a readable reason why the connection is waiting instead of ready
     private func waitingReason(_ error: NWError) -> String {
-        if #available(iOS 14.0, watchOS 7.0, *) {
-            if connection?.currentPath?.unsatisfiedReason == .localNetworkDenied {
-                return "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack"
-            }
+        if connection?.currentPath?.unsatisfiedReason == .localNetworkDenied {
+            return "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack"
         }
         return "Can't reach the server: \(describe(error))"
     }

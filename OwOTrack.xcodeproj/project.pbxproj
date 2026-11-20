@@ -11,7 +11,6 @@
 		9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		9A5EFF2A2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		9A5EFF2B2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
-		9A5EFF2C2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
 		9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
 		9A728BDC263E018400E8605D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
@@ -22,8 +21,6 @@
 		9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
 		9A8DFBA3294729CD00C01721 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
-		9ABF62222955BF0B006AC30D /* InterfaceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20E3D295491B2001B0874 /* InterfaceController.swift */; };
-		9ABF62252955C26F006AC30D /* Interface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9AE20DA829539712001B0874 /* Interface.storyboard */; };
 		9AE20DD329539D4E001B0874 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
 		9AE20DD429539D4E001B0874 /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
 		9AE20DD529539D4E001B0874 /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
@@ -33,11 +30,6 @@
 		9AE20DE42953A114001B0874 /* DeviceHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DE32953A114001B0874 /* DeviceHardware.swift */; };
 		9AE20DF129548C17001B0874 /* ConnectUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DF029548C17001B0874 /* ConnectUI.swift */; };
 		9AE20E062954901F001B0874 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE20E052954901F001B0874 /* Assets.xcassets */; };
-		9AE20E0C2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		9AE20E132954901F001B0874 /* ExtensionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20E122954901F001B0874 /* ExtensionDelegate.swift */; };
-		9AE20E152954901F001B0874 /* NotificationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20E142954901F001B0874 /* NotificationController.swift */; };
-		9AE20E172954901F001B0874 /* ComplicationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20E162954901F001B0874 /* ComplicationController.swift */; };
-		9AE20E1929549020001B0874 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE20E1829549020001B0874 /* Assets.xcassets */; };
 		9AE20E2729549045001B0874 /* WatchHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DDF29539ED2001B0874 /* WatchHardware.swift */; };
 		9AE20E29295490B6001B0874 /* TrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC4C261A369D007C6BBA /* TrackingService.swift */; };
 		9AE20E2A295490B6001B0874 /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
@@ -55,36 +47,54 @@
 		9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
 		9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
 		9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
+		B00000000000000000000008 /* OwOTrackWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000005 /* OwOTrackWatchApp.swift */; };
+		B00000000000000000000009 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000006 /* ConnectView.swift */; };
+		B0000000000000000000000A /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
+		B00000000000000000000015 /* OwOTrack.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 9AE20E002954901D001B0874 /* OwOTrack.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B00000000000000000000016 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
+		B00000000000000000000017 /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
+		B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
+		B00000000000000000000019 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
+		B0000000000000000000001A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
+		B0000000000000000000001B /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
+		B0000000000000000000001C /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BDD263E020E00E8605D /* ConnectViewController.swift */; };
+		B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
+		B0000000000000000000001E /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
+		B0000000000000000000001F /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
+		B00000000000000000000020 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE4263E144A00E8605D /* StatusViewController.swift */; };
+		B00000000000000000000021 /* DeviceHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DE32953A114001B0874 /* DeviceHardware.swift */; };
+		B00000000000000000000022 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
+		B00000000000000000000023 /* IPhoneHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB07CE72950733A006CD79F /* IPhoneHardware.swift */; };
+		B00000000000000000000024 /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
+		B00000000000000000000025 /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE2263E143F00E8605D /* InfoViewController.swift */; };
+		B00000000000000000000026 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
+		B00000000000000000000027 /* ConnectUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DF029548C17001B0874 /* ConnectUI.swift */; };
+		B00000000000000000000028 /* TrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC4C261A369D007C6BBA /* TrackingService.swift */; };
+		B00000000000000000000029 /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
+		B0000000000000000000002A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
+		B0000000000000000000002B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* LaunchScreen.storyboard */; };
+		B0000000000000000000002C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
+		B0000000000000000000002D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		9AE20E0D2954901F001B0874 /* PBXContainerItemProxy */ = {
+		B00000000000000000000013 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 9AE6EBED2619FBFB007C6BBA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 9AE20E0A2954901F001B0874;
-			remoteInfo = "OwOTrack WatchOS WatchKit Extension";
+			remoteGlobalIDString = 9AE20DFF2954901D001B0874;
+			remoteInfo = "OwOTrack WatchOS";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		9AE20E2229549020001B0874 /* Embed App Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				9AE20E0C2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex in Embed App Extensions */,
-			);
-			name = "Embed App Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		9AE20E2629549020001B0874 /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
+				B00000000000000000000015 /* OwOTrack.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -109,20 +119,11 @@
 		9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleUDPClient.swift; sourceTree = "<group>"; };
 		9AB07CE72950733A006CD79F /* IPhoneHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPhoneHardware.swift; sourceTree = "<group>"; };
 		9ABF62212955BE7F006AC30D /* OwOTrack WatchOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "OwOTrack WatchOS.entitlements"; sourceTree = "<group>"; };
-		9AE20DA929539712001B0874 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Interface.storyboard; sourceTree = "<group>"; };
 		9AE20DDF29539ED2001B0874 /* WatchHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchHardware.swift; sourceTree = "<group>"; };
 		9AE20DE32953A114001B0874 /* DeviceHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceHardware.swift; sourceTree = "<group>"; };
 		9AE20DF029548C17001B0874 /* ConnectUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectUI.swift; sourceTree = "<group>"; };
 		9AE20E002954901D001B0874 /* OwOTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OwOTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE20E052954901F001B0874 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "OwOTrack WatchOS WatchKit Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AE20E122954901F001B0874 /* ExtensionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionDelegate.swift; sourceTree = "<group>"; };
-		9AE20E142954901F001B0874 /* NotificationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationController.swift; sourceTree = "<group>"; };
-		9AE20E162954901F001B0874 /* ComplicationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplicationController.swift; sourceTree = "<group>"; };
-		9AE20E1829549020001B0874 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		9AE20E1B29549020001B0874 /* PushNotificationPayload.apns */ = {isa = PBXFileReference; lastKnownFileType = text; path = PushNotificationPayload.apns; sourceTree = "<group>"; };
-		9AE20E3D295491B2001B0874 /* InterfaceController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InterfaceController.swift; sourceTree = "<group>"; };
-		9AE20E3F295491C0001B0874 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OwOTrack iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9AE6EC012619FBFD007C6BBA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -131,6 +132,13 @@
 		9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UDPGyroProviderClient.swift; sourceTree = "<group>"; };
 		9AE6EC4C261A369D007C6BBA /* TrackingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingService.swift; sourceTree = "<group>"; };
 		9AE6EC51261A3755007C6BBA /* GyroHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GyroHandler.swift; sourceTree = "<group>"; };
+		B00000000000000000000002 /* Version.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Version.xcconfig; sourceTree = "<group>"; };
+		B00000000000000000000003 /* iOS-App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "iOS-App.xcconfig"; sourceTree = "<group>"; };
+		B00000000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B00000000000000000000005 /* OwOTrackWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackWatchApp.swift; sourceTree = "<group>"; };
+		B00000000000000000000006 /* ConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectView.swift; sourceTree = "<group>"; };
+		B00000000000000000000007 /* ConnectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionModel.swift; sourceTree = "<group>"; };
+		B0000000000000000000000C /* OwOTrack iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OwOTrack iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -148,21 +156,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0000000000000000000000E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		9A728BB6263DD06100E8605D /* SwiftUI */ = {
-			isa = PBXGroup;
-			children = (
-				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
-			);
-			path = SwiftUI;
-			sourceTree = "<group>";
-		};
 		9A728BE1263E13C000E8605D /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				9A728BB6263DD06100E8605D /* SwiftUI */,
 				9A728BDD263E020E00E8605D /* ConnectViewController.swift */,
 				9A728BE6263E3DF900E8605D /* FadeTextView.swift */,
 				9A728BE2263E143F00E8605D /* InfoViewController.swift */,
@@ -170,6 +176,7 @@
 				9A728BDF263E139800E8605D /* LaunchScreen.storyboard */,
 				9A728BDB263E018400E8605D /* Main.storyboard */,
 				9A728BB7263DFFBD00E8605D /* AppDelegate.swift */,
+				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -205,6 +212,7 @@
 				9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */,
 				9AE20DE32953A114001B0874 /* DeviceHardware.swift */,
 				9AE20DF029548C17001B0874 /* ConnectUI.swift */,
+				B00000000000000000000007 /* ConnectionModel.swift */,
 			);
 			path = "OwOTrack Lib";
 			sourceTree = "<group>";
@@ -212,36 +220,24 @@
 		9AE20E012954901D001B0874 /* OwOTrack WatchOS */ = {
 			isa = PBXGroup;
 			children = (
-				9ABF62212955BE7F006AC30D /* OwOTrack WatchOS.entitlements */,
-				9AE20DA829539712001B0874 /* Interface.storyboard */,
+				B00000000000000000000005 /* OwOTrackWatchApp.swift */,
+				B00000000000000000000006 /* ConnectView.swift */,
+				9AE20DDF29539ED2001B0874 /* WatchHardware.swift */,
 				9AE20E052954901F001B0874 /* Assets.xcassets */,
+				B00000000000000000000004 /* Info.plist */,
+				9ABF62212955BE7F006AC30D /* OwOTrack WatchOS.entitlements */,
 			);
 			path = "OwOTrack WatchOS";
-			sourceTree = "<group>";
-		};
-		9AE20E0F2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */ = {
-			isa = PBXGroup;
-			children = (
-				9AE20E3D295491B2001B0874 /* InterfaceController.swift */,
-				9AE20E122954901F001B0874 /* ExtensionDelegate.swift */,
-				9AE20E142954901F001B0874 /* NotificationController.swift */,
-				9AE20E162954901F001B0874 /* ComplicationController.swift */,
-				9AE20DDF29539ED2001B0874 /* WatchHardware.swift */,
-				9AE20E1829549020001B0874 /* Assets.xcassets */,
-				9AE20E3F295491C0001B0874 /* Info.plist */,
-				9AE20E1B29549020001B0874 /* PushNotificationPayload.apns */,
-			);
-			path = "OwOTrack WatchOS WatchKit Extension";
 			sourceTree = "<group>";
 		};
 		9AE6EBEC2619FBFB007C6BBA = {
 			isa = PBXGroup;
 			children = (
 				9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */,
+				B00000000000000000000001 /* Config */,
 				9AE20DE629547BE2001B0874 /* OwOTrack Lib */,
 				9AE6EBF72619FBFB007C6BBA /* OwOTrack iOS */,
 				9AE20E012954901D001B0874 /* OwOTrack WatchOS */,
-				9AE20E0F2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */,
 				9AE6EBF62619FBFB007C6BBA /* Products */,
 			);
 			sourceTree = "<group>";
@@ -250,8 +246,8 @@
 			isa = PBXGroup;
 			children = (
 				9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */,
+				B0000000000000000000000C /* OwOTrack iOS.app */,
 				9AE20E002954901D001B0874 /* OwOTrack.app */,
-				9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -276,6 +272,15 @@
 			path = OwOMath;
 			sourceTree = "<group>";
 		};
+		B00000000000000000000001 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				B00000000000000000000002 /* Version.xcconfig */,
+				B00000000000000000000003 /* iOS-App.xcconfig */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -283,35 +288,18 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9AE20E2329549020001B0874 /* Build configuration list for PBXNativeTarget "OwOTrack WatchOS" */;
 			buildPhases = (
+				9AE20E072954901F001B0874 /* Sources */,
+				9AE20E082954901F001B0874 /* Frameworks */,
 				9AE20DFE2954901D001B0874 /* Resources */,
-				9AE20E2229549020001B0874 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				9AE20E0E2954901F001B0874 /* PBXTargetDependency */,
 			);
 			name = "OwOTrack WatchOS";
 			productName = "OwOTrack WatchOS";
 			productReference = 9AE20E002954901D001B0874 /* OwOTrack.app */;
-			productType = "com.apple.product-type.application.watchapp2";
-		};
-		9AE20E0A2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 9AE20E1F29549020001B0874 /* Build configuration list for PBXNativeTarget "OwOTrack WatchOS WatchKit Extension" */;
-			buildPhases = (
-				9AE20E072954901F001B0874 /* Sources */,
-				9AE20E082954901F001B0874 /* Frameworks */,
-				9AE20E092954901F001B0874 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "OwOTrack WatchOS WatchKit Extension";
-			productName = "OwOTrack WatchOS WatchKit Extension";
-			productReference = 9AE20E0B2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension.appex */;
-			productType = "com.apple.product-type.watchkit2-extension";
+			productType = "com.apple.product-type.application";
 		};
 		9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */ = {
 			isa = PBXNativeTarget;
@@ -320,7 +308,6 @@
 				9AE6EBF12619FBFB007C6BBA /* Sources */,
 				9AE6EBF22619FBFB007C6BBA /* Frameworks */,
 				9AE6EBF32619FBFB007C6BBA /* Resources */,
-				9AE20E2629549020001B0874 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
@@ -329,6 +316,25 @@
 			name = "OwOTrack iOS";
 			productName = OwOTracker;
 			productReference = 9AE6EBF52619FBFB007C6BBA /* OwOTrack iOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B0000000000000000000000B /* OwOTrack iOS (with Watch) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B00000000000000000000010 /* Build configuration list for PBXNativeTarget "OwOTrack iOS (with Watch)" */;
+			buildPhases = (
+				B0000000000000000000000D /* Sources */,
+				B0000000000000000000000E /* Frameworks */,
+				B0000000000000000000000F /* Resources */,
+				9AE20E2629549020001B0874 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B00000000000000000000014 /* PBXTargetDependency */,
+			);
+			name = "OwOTrack iOS (with Watch)";
+			productName = "OwOTrack iOS";
+			productReference = B0000000000000000000000C /* OwOTrack iOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -343,12 +349,12 @@
 					9AE20DFF2954901D001B0874 = {
 						CreatedOnToolsVersion = 13.2.1;
 					};
-					9AE20E0A2954901F001B0874 = {
-						CreatedOnToolsVersion = 13.2.1;
-					};
 					9AE6EBF42619FBFB007C6BBA = {
 						CreatedOnToolsVersion = 12.4;
 						LastSwiftMigration = 1320;
+					};
+					B0000000000000000000000B = {
+						CreatedOnToolsVersion = 27.2;
 					};
 				};
 			};
@@ -366,8 +372,8 @@
 			projectRoot = "";
 			targets = (
 				9AE6EBF42619FBFB007C6BBA /* OwOTrack iOS */,
+				B0000000000000000000000B /* OwOTrack iOS (with Watch) */,
 				9AE20DFF2954901D001B0874 /* OwOTrack WatchOS */,
-				9AE20E0A2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -378,17 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9A5EFF2B2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */,
-				9ABF62252955C26F006AC30D /* Interface.storyboard in Resources */,
 				9AE20E062954901F001B0874 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		9AE20E092954901F001B0874 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				9A5EFF2C2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */,
-				9AE20E1929549020001B0874 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,6 +399,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0000000000000000000000F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B0000000000000000000002A /* Main.storyboard in Resources */,
+				B0000000000000000000002B /* LaunchScreen.storyboard in Resources */,
+				B0000000000000000000002C /* PrivacyInfo.xcprivacy in Resources */,
+				B0000000000000000000002D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -410,20 +417,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B00000000000000000000008 /* OwOTrackWatchApp.swift in Sources */,
+				B00000000000000000000009 /* ConnectView.swift in Sources */,
+				B0000000000000000000000A /* ConnectionModel.swift in Sources */,
+				9AE20E2729549045001B0874 /* WatchHardware.swift in Sources */,
 				9AE20E34295490BF001B0874 /* UDPBroadcastConnectionError.swift in Sources */,
-				9AE20E152954901F001B0874 /* NotificationController.swift in Sources */,
-				9AE20E172954901F001B0874 /* ComplicationController.swift in Sources */,
 				9AE20E33295490BF001B0874 /* UDPBroadcastConnection.swift in Sources */,
 				9AE20E3B295490CB001B0874 /* Quaternion.swift in Sources */,
-				9ABF62222955BF0B006AC30D /* InterfaceController.swift in Sources */,
-				9AE20E132954901F001B0874 /* ExtensionDelegate.swift in Sources */,
 				9AE20E29295490B6001B0874 /* TrackingService.swift in Sources */,
 				9AE20E3C295490CB001B0874 /* Vector3.swift in Sources */,
 				9AE20E2D295490B6001B0874 /* DeviceHardware.swift in Sources */,
 				9AE20E2C295490B6001B0874 /* ConnectUI.swift in Sources */,
 				9AE20E2F295490B6001B0874 /* Logger.swift in Sources */,
 				9AE20E31295490BB001B0874 /* CompatibleUDPClient.swift in Sources */,
-				9AE20E2729549045001B0874 /* WatchHardware.swift in Sources */,
 				9AE20E30295490BB001B0874 /* NWConnectionUDPClient.swift in Sources */,
 				9AE20E2A295490B6001B0874 /* GyroHandler.swift in Sources */,
 				9AE20E2E295490B6001B0874 /* UDPGyroProviderClient.swift in Sources */,
@@ -458,114 +464,65 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0000000000000000000000D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B00000000000000000000016 /* UDPBroadcastConnectionError.swift in Sources */,
+				B00000000000000000000017 /* Quaternion.swift in Sources */,
+				B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */,
+				B00000000000000000000019 /* AutoDiscovery.swift in Sources */,
+				B0000000000000000000001A /* AppDelegate.swift in Sources */,
+				B0000000000000000000001B /* Logger.swift in Sources */,
+				B0000000000000000000001C /* ConnectViewController.swift in Sources */,
+				B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */,
+				B0000000000000000000001E /* GyroHandler.swift in Sources */,
+				B0000000000000000000001F /* Vector3.swift in Sources */,
+				B00000000000000000000020 /* StatusViewController.swift in Sources */,
+				B00000000000000000000021 /* DeviceHardware.swift in Sources */,
+				B00000000000000000000022 /* SceneDelegate.swift in Sources */,
+				B00000000000000000000023 /* IPhoneHardware.swift in Sources */,
+				B00000000000000000000024 /* FadeTextView.swift in Sources */,
+				B00000000000000000000025 /* InfoViewController.swift in Sources */,
+				B00000000000000000000026 /* NWConnectionUDPClient.swift in Sources */,
+				B00000000000000000000027 /* ConnectUI.swift in Sources */,
+				B00000000000000000000028 /* TrackingService.swift in Sources */,
+				B00000000000000000000029 /* UDPGyroProviderClient.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		9AE20E0E2954901F001B0874 /* PBXTargetDependency */ = {
+		B00000000000000000000014 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 9AE20E0A2954901F001B0874 /* OwOTrack WatchOS WatchKit Extension */;
-			targetProxy = 9AE20E0D2954901F001B0874 /* PBXContainerItemProxy */;
+			target = 9AE20DFF2954901D001B0874 /* OwOTrack WatchOS */;
+			targetProxy = B00000000000000000000013 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
-/* Begin PBXVariantGroup section */
-		9AE20DA829539712001B0874 /* Interface.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				9AE20DA929539712001B0874 /* Base */,
-			);
-			name = Interface.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
-		9AE20E2029549020001B0874 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "OwOTrack WatchOS WatchKit Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
-				INFOPLIST_KEY_CLKComplicationPrincipalClass = OwOTrack_WatchOS_WatchKit_Extension.ComplicationController;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_WKExtensionDelegateClassName = OwOTrack_WatchOS_WatchKit_Extension.ExtensionDelegate;
-				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.11;
-				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.0;
-			};
-			name = Debug;
-		};
-		9AE20E2129549020001B0874 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_COMPLICATION_NAME = Complication;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "OwOTrack WatchOS WatchKit Extension/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
-				INFOPLIST_KEY_CLKComplicationPrincipalClass = OwOTrack_WatchOS_WatchKit_Extension.ComplicationController;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
-				INFOPLIST_KEY_WKExtensionDelegateClassName = OwOTrack_WatchOS_WatchKit_Extension.ExtensionDelegate;
-				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 1.11;
-				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp.watchkitextension;
-				PRODUCT_NAME = "${TARGET_NAME}";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.0;
-			};
-			name = Release;
-		};
 		9AE20E2429549020001B0874 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "OwOTrack WatchOS/OwOTrack WatchOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				IBSC_MODULE = OwOTrack_WatchOS_WatchKit_Extension;
+				INFOPLIST_FILE = "OwOTrack WatchOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
-				MARKETING_VERSION = 1.11;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp;
 				PRODUCT_NAME = OwOTrack;
 				SDKROOT = watchos;
@@ -573,26 +530,31 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
 		9AE20E2529549020001B0874 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CODE_SIGN_ENTITLEMENTS = "OwOTrack WatchOS/OwOTrack WatchOS.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QG96Y277J7;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				IBSC_MODULE = OwOTrack_WatchOS_WatchKit_Extension;
+				INFOPLIST_FILE = "OwOTrack WatchOS/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = OwOTrack;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This permission is needed to stay connected when the app is running in the background or the phone is locked. Your locations data does not leave your network and is not used by the developer in any way.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = de.ferdinandmartini.owotracker;
-				MARKETING_VERSION = 1.11;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker.watchkitapp;
 				PRODUCT_NAME = OwOTrack;
 				SDKROOT = watchos;
@@ -600,12 +562,13 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 3.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
 		9AE6EC182619FBFD007C6BBA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000002 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -667,6 +630,7 @@
 		};
 		9AE6EC192619FBFD007C6BBA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000002 /* Version.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -722,65 +686,35 @@
 		};
 		9AE6EC1B2619FBFD007C6BBA /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000003 /* iOS-App.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = "$(SRCROOT)/OwOTrack iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.11;
-				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
 		9AE6EC1C2619FBFD007C6BBA /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000003 /* iOS-App.xcconfig */;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = QG96Y277J7;
-				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = "$(SRCROOT)/OwOTrack iOS/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.11;
-				PRODUCT_BUNDLE_IDENTIFIER = de.ferdinandmartini.owotracker;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B00000000000000000000011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000003 /* iOS-App.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		B00000000000000000000012 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B00000000000000000000003 /* iOS-App.xcconfig */;
+			buildSettings = {
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9AE20E1F29549020001B0874 /* Build configuration list for PBXNativeTarget "OwOTrack WatchOS WatchKit Extension" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				9AE20E2029549020001B0874 /* Debug */,
-				9AE20E2129549020001B0874 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		9AE20E2329549020001B0874 /* Build configuration list for PBXNativeTarget "OwOTrack WatchOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -804,6 +738,15 @@
 			buildConfigurations = (
 				9AE6EC1B2619FBFD007C6BBA /* Debug */,
 				9AE6EC1C2619FBFD007C6BBA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B00000000000000000000010 /* Build configuration list for PBXNativeTarget "OwOTrack iOS (with Watch)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B00000000000000000000011 /* Debug */,
+				B00000000000000000000012 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -15,7 +15,6 @@ protocol DeviceHardware {
     
     static func registerVolButtonListener(target: NSObject)
     
-    @available(iOS 13.0, *)
     static func vibrateAdvanced(f: Float, a: Float, d: Float) -> Bool
     
     static func vibrate()
@@ -31,10 +30,8 @@ protocol DeviceHardware {
     
     static func stopBatteryLevelMonitoring()
     
-    @available(watchOSApplicationExtension 4.0, *)
     static func startBackgroundUsage(target: CLLocationManagerDelegate)
     
-    @available(watchOSApplicationExtension 4.0, *)
     static func stopBackgroundUsage()
     
     static func getPseudoMacAddress() -> [UInt8]

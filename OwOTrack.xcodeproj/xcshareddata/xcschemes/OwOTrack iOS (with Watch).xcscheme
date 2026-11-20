@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1320"
-   version = "2.0">
+   LastUpgradeVersion = "1250"
+   version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -14,23 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9AE20DFF2954901D001B0874"
-               BuildableName = "OwOTrack.app"
-               BlueprintName = "OwOTrack WatchOS"
-               ReferencedContainer = "container:OwOTrack.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9AE6EBF42619FBFB007C6BBA"
+               BlueprintIdentifier = "B0000000000000000000000B"
                BuildableName = "OwOTrack iOS.app"
-               BlueprintName = "OwOTrack iOS"
+               BlueprintName = "OwOTrack iOS (with Watch)"
                ReferencedContainer = "container:OwOTrack.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -53,15 +39,14 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      allowLocationSimulation = "YES"
-      launchAutomaticallySubstyle = "32"
-      notificationPayloadFile = "OwOTrack WatchOS WatchKit Extension/PushNotificationPayload.apns">
+      allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9AE20DFF2954901D001B0874"
-            BuildableName = "OwOTrack.app"
+            BlueprintIdentifier = "B0000000000000000000000B"
+            BuildableName = "OwOTrack iOS.app"
+            BlueprintName = "OwOTrack iOS (with Watch)"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -71,14 +56,14 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
-      debugDocumentVersioning = "YES"
-      launchAutomaticallySubstyle = "32">
+      debugDocumentVersioning = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9AE20DFF2954901D001B0874"
-            BuildableName = "OwOTrack.app"
+            BlueprintIdentifier = "B0000000000000000000000B"
+            BuildableName = "OwOTrack iOS.app"
+            BlueprintName = "OwOTrack iOS (with Watch)"
             ReferencedContainer = "container:OwOTrack.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

@@ -1,0 +1,7 @@
+// App version and build number for every target: the iPhone app, the watch app
+// and the TestFlight build with the watch app. The watch app's version must match the iPhone app's.
+//
+// Change them here, not in a target's General tab: that would set them on that one target only.
+
+MARKETING_VERSION = 1.11
+CURRENT_PROJECT_VERSION = 1

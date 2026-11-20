@@ -20,20 +20,6 @@
                ReferencedContainer = "container:OwOTrack.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9AE6EBF42619FBFB007C6BBA"
-               BuildableName = "OwOTrack iOS.app"
-               BlueprintName = "OwOTrack iOS"
-               ReferencedContainer = "container:OwOTrack.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
