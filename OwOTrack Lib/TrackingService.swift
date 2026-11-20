@@ -41,6 +41,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         self.setDefaults()
         connectUI.setLoading()
         hardware.startProximitySensor()
+        hardware.preventAutoLock()
         hardware.registerVolButtonListener(target: self)
         hardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
@@ -82,6 +83,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     
     func stop() {
         hardware.stopProximitySensor()
+        hardware.allowAutoLock()
         hardware.unregisterVolButtonListener(target: self)
         hardware.stopBackgroundUsage()
         stopSendingBattery()

@@ -42,6 +42,13 @@ class WatchHardware: DeviceHardware {
         return
     }
 
+    //the watch screen sleeps when the wrist is lowered; keeping the app running there needs a workout session instead
+    static func preventAutoLock() {
+    }
+
+    static func allowAutoLock() {
+    }
+
     static func getBatteryLevel() -> Float? {
         let level = WKInterfaceDevice.current().batteryLevel
         return level < 0 ? nil : level  //watchOS reports -1 while the level is unknown

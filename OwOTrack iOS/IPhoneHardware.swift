@@ -17,6 +17,8 @@ import CoreLocation
 class IPhoneHardware: DeviceHardware {
     static let audioSession = AVAudioSession.sharedInstance()
     static let locationManager = CLLocationManager()
+    //iOS 17+: keeps the app "in use" while in the background. AnyObject because the class only exists since iOS 17
+    static var backgroundActivitySession: AnyObject?
     
     static func unregisterVolButtonListener(target: NSObject) {
         if audioSession.observationInfo != nil {
@@ -90,6 +92,20 @@ class IPhoneHardware: DeviceHardware {
             UIDevice.current.isProximityMonitoringEnabled = false
         }
     }
+
+    //a locked phone puts the app in the background, so keep it from locking automatically while tracking.
+    //covering the proximity sensor still turns the screen off, and the app stays in the foreground then
+    static func preventAutoLock() {
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+    }
+
+    static func allowAutoLock() {
+        DispatchQueue.main.async {
+            UIApplication.shared.isIdleTimerDisabled = false
+        }
+    }
     
     static func getBatteryLevel() -> Float? {
         let level = UIDevice.current.batteryLevel
@@ -114,14 +130,26 @@ class IPhoneHardware: DeviceHardware {
     static func startBackgroundUsage(target: CLLocationManagerDelegate) {
         locationManager.requestAlwaysAuthorization()
         locationManager.allowsBackgroundLocationUpdates = true
+        //iOS pauses location updates while the phone doesn't move (e.g. strapped to the body in one room),
+        //and a background app whose updates are paused gets suspended
+        locationManager.pausesLocationUpdatesAutomatically = false
+        locationManager.showsBackgroundLocationIndicator = true
         locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         locationManager.distanceFilter = 99999
         locationManager.delegate = target
         locationManager.startUpdatingLocation()
+        //only becomes active when started while the app is in the foreground, which it is when Connect is pressed
+        if #available(iOS 17.0, *), backgroundActivitySession == nil {
+            backgroundActivitySession = CLBackgroundActivitySession()
+        }
     }
-    
+
     static func stopBackgroundUsage() {
         locationManager.stopUpdatingLocation()
+        if #available(iOS 17.0, *) {
+            (backgroundActivitySession as? CLBackgroundActivitySession)?.invalidate()
+        }
+        backgroundActivitySession = nil
     }
     
     //generates a random MAC address for SlimeVR (if not already generated before) and saves it in UserDefaults, actual MAC address can not be accessed

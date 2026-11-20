@@ -40,7 +40,7 @@ struct InfoView: View {
         Your location data will not be used by the developer or anyone else. It will never leave your device. Only the permission is required for the app to run in the background.
         If you deny the permission, the app will still work and stay connected as long as it is open.
 
-        The app can not run in the background forever and might disconnect after 10 - 30 minutes depending on your circumstances. If you want to avoid this, leave the app open and your phone unlocked.
+        The app can not run in the background forever and might disconnect after 10 - 30 minutes depending on your circumstances. If you want to avoid this, leave the app open: while connected, the app keeps your iPhone from locking automatically.
 
         You can make the screen of your iPhone turn off by covering the sensor on the top of the phone (next to the camera). This will turn the screen off to save battery life and the app will stay connected.
         """

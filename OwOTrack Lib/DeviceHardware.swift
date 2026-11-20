@@ -22,6 +22,11 @@ protocol DeviceHardware {
     static func startProximitySensor()
     
     static func stopProximitySensor()
+
+    //keeps the device from locking automatically while tracking
+    static func preventAutoLock()
+
+    static func allowAutoLock()
     
     //battery level from 0 to 1, or nil while it's unknown
     static func getBatteryLevel() -> Float?
