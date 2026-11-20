@@ -266,6 +266,10 @@ class UDPGyroProviderClient {
         if handshakeReplyText(data)?.hasPrefix("Hey OVR =D") == true {
             return
         }
+        //every packet starts with a 4-byte message type, anything shorter is broken
+        if data.count < 4 {
+            return
+        }
         var msgType : UInt32 = 0
         msgType = readUInt32(data: data)
         let restData = data.advanced(by: 4)
@@ -297,6 +301,10 @@ class UDPGyroProviderClient {
     }
     
     func handleVibration(_ data: Data) {
+        //three floats: duration, frequency, amplitude
+        if data.count < 12 {
+            return
+        }
         let duration = readFloat(data: data)
         var restData = data.advanced(by: 4)
         let frequency = readFloat(data: restData)
@@ -309,20 +317,19 @@ class UDPGyroProviderClient {
     
     //reads float depending on endian encoding
     func readFloat(data: Data) -> Float {
-        if receivingBigEndian {
-            return Float(bitPattern: UInt32(bigEndian: data.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-        } else {
-            return Float(bitPattern: UInt32(data.prefix(4).withUnsafeBytes { $0.load(as: UInt32.self) }))
-        }
+        return Float(bitPattern: readUInt32(data: data))
     }
-    
-    //reads UInt32 depending on endian encoding
+
+    //reads UInt32 from the first 4 bytes depending on endian encoding, 0 if there are fewer.
+    //built byte by byte: loading a UInt32 straight from the buffer needs 4-byte aligned memory,
+    //which received data doesn't guarantee (debug builds stopped with a misaligned load)
     func readUInt32(data: Data) -> UInt32 {
-        if receivingBigEndian {
-            return UInt32(bigEndian: data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
-        } else {
-            return UInt32(data.prefix(4).withUnsafeBytes{ $0.load(as: UInt32.self) })
+        let bytes = [UInt8](data.prefix(4))
+        if bytes.count < 4 {
+            return 0
         }
+        let bigEndianValue = bytes.reduce(UInt32(0)) { $0 << 8 | UInt32($1) }
+        return receivingBigEndian ? bigEndianValue : bigEndianValue.byteSwapped
     }
     
     //reads a 2-byte character (a Java char, as in the owoTrack protocol) depending on endian encoding
