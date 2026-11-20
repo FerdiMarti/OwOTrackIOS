@@ -15,7 +15,10 @@ protocol ConnectUI {
     func setConnected()
     
     func setUnconnected()
-    
+
+    //a working connection was lost and the app is trying to connect again
+    func setReconnecting()
+
     func setMagnometerToggle(use: Bool)
 
     //called from any thread while the Logger holds its lock:

@@ -18,11 +18,11 @@ struct ConnectView: View {
                         .foregroundColor(statusColor)
                         .id("top")
                     //right below the status, so it's visible without scrolling
-                    Button(model.isConnected ? "Disconnect" : "Connect") {
+                    Button(model.canDisconnect ? "Disconnect" : "Connect") {
                         model.connectPressed()
                     }
                     .disabled(model.isConnecting)
-                    if model.isConnecting {
+                    if model.isConnecting || model.isReconnecting {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     }
@@ -58,6 +58,7 @@ struct ConnectView: View {
         case .notConnected: return "Not Connected"
         case .connecting: return "Loading..."
         case .connected: return "Connected"
+        case .reconnecting: return "Reconnecting..."
         case .error(let message): return message
         }
     }
@@ -67,6 +68,7 @@ struct ConnectView: View {
         case .notConnected: return .gray
         case .connecting: return .primary
         case .connected: return .green
+        case .reconnecting: return .orange
         case .error: return .red
         }
     }

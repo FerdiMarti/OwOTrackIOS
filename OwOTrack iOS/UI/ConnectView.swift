@@ -12,7 +12,7 @@ struct ConnectView: View {
     var body: some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
-                if model.isConnecting {
+                if model.isConnecting || model.isReconnecting {
                     ProgressView()
                 }
                 Text(statusText)
@@ -24,7 +24,7 @@ struct ConnectView: View {
             addressField("Port", text: $model.port)
             Toggle("Use Magnetometer", isOn: $model.useMagnetometer)
                 .disabled(!model.canEdit)
-            Button(model.isConnected ? "Disconnect" : "Connect") {
+            Button(model.canDisconnect ? "Disconnect" : "Connect") {
                 model.connectPressed()
             }
             .frame(maxWidth: .infinity)
@@ -53,6 +53,7 @@ struct ConnectView: View {
         case .notConnected: return "Not Connected"
         case .connecting: return "Loading..."
         case .connected: return "Connected"
+        case .reconnecting: return "Reconnecting..."
         case .error(let message): return message
         }
     }
@@ -62,6 +63,7 @@ struct ConnectView: View {
         case .notConnected: return .gray
         case .connecting: return .primary
         case .connected: return .green
+        case .reconnecting: return .orange
         case .error: return .red
         }
     }

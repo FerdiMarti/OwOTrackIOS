@@ -14,6 +14,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         case notConnected
         case connecting
         case connected
+        case reconnecting   //the connection was lost, the app keeps trying until it's back or the user disconnects
         case error(String)
     }
 
@@ -43,14 +44,24 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         return false
     }
 
-    //address and magnetometer can only be changed while not connected
-    var canEdit: Bool {
-        return !isConnected && !isConnecting
+    var isReconnecting: Bool {
+        if case .reconnecting = status { return true }
+        return false
     }
 
-    //connects, or disconnects if already connected
+    //while connected or reconnecting, the button disconnects
+    var canDisconnect: Bool {
+        return isConnected || isReconnecting
+    }
+
+    //address and magnetometer can only be changed while not connected
+    var canEdit: Bool {
+        return !isConnected && !isConnecting && !isReconnecting
+    }
+
+    //connects, or disconnects if connected or reconnecting
     func connectPressed() {
-        if isConnected {
+        if canDisconnect {
             service.stop()
             return
         }
@@ -83,6 +94,10 @@ final class ConnectionModel: ObservableObject, ConnectUI {
 
     func setUnconnected() {
         onMain { self.status = .notConnected }
+    }
+
+    func setReconnecting() {
+        onMain { self.status = .reconnecting }
     }
 
     //used if server triggers a change in magnetometer use

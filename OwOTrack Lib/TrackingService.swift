@@ -22,56 +22,187 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     var connectUI: ConnectUI?  // the UI component that needs to be updated when status changes
     let logger = Logger.getInstance()
     var gHandler: GyroHandler?
-    var client: UDPGyroProviderClient?
+    var client: UDPGyroProviderClient?  //the current connection attempt or connection, only assigned on the main thread
     var batteryTimer : Timer?   //timer that triggers sending of current battery level ever 10s
     var trackingServiceQueue = DispatchQueue.init(label: TRACKING_SERVICE_QUEUE_LABEL)
-    
+
+    //session state, also read by the reconnect loop on trackingServiceQueue, so guarded by a lock.
+    //session counts start() and stop() calls: a reconnect loop of an earlier session sees it's outdated and ends
+    private let stateLock = NSLock()
+    private var session = 0
+    private var wantsConnection = false     //between start() and stop(): a lost connection is retried
+    private var reconnecting = false
+    private static let connectTimeout: TimeInterval = 5     //how long one attempt waits for the handshake
+    private static let reconnectPause: TimeInterval = 2     //pause between reconnect attempts
+    //after that, reconnecting gives up and the session ends, so a forgotten phone doesn't keep its screen on and keep trying
+    private static let reconnectTimeLimit: TimeInterval = 10 * 60
+
     //Switch between hardware class depending on device type
     #if os(iOS)
     let hardware = IPhoneHardware.self
     #elseif os(watchOS)
     let hardware = WatchHardware.self
     #endif
-    
+
     func start(ipAdress: String, port: String, magnetometer: Bool, connectUI: ConnectUI) {
         self.connectUI = connectUI
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
         self.setDefaults()
+        let session = beginSession()
         connectUI.setLoading()
         hardware.startProximitySensor()
         hardware.preventAutoLock()
         hardware.registerVolButtonListener(target: self)
         hardware.startBackgroundUsage(target: self)
         trackingServiceQueue.async {
-            //start connection
-            self.client = UDPGyroProviderClient(host: self.ipAdress, port: self.port, service: self)
-            if self.client == nil {
-                self.logger.addEntry("Initializing Connection Failed")
+            guard let client = self.connect(session: session, quiet: false, lastProblem: nil) else {
                 return
             }
-            self.client!.connectToUDP()
-            var waited = 0
-            while(!self.client!.isConnected && waited < 5) {
-                waited += 1
-                sleep(1)
-            }
-            if (self.client!.isConnected) {
+            if client.isConnected {
                 self.logger.addEntry("Connection established")
                 connectUI.setConnected()
-                self.startSendingBattery()
-                self.gHandler = GyroHandler.getInstance()
-                self.gHandler?.startUpdates(client: self.client!, useMagn: magnetometer)
-                self.client?.provideMagnetometerUse(enabled: self.magnetometer)
-                self.client?.provideSensorInfo(magnetometerSupported: self.gHandler?.magnetometerCorrectionAvailable ?? false, magnetometerEnabled: self.magnetometer)
+                self.startStreaming(client: client)
             } else {
+                //only a connection that worked is retried: if the first try fails, the address or the setup is likely wrong
                 self.logger.addEntry("Handshake Failed")
                 self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
                 self.logger.addEntry("Connecting Failed")
                 self.stop()
             }
         }
+    }
+
+    //one connection attempt with a new client, so nothing of an earlier connection carries over (packet numbers,
+    //SlimeVR detection, sensor description). Connects, sends the handshake and waits up to connectTimeout for a reply.
+    //runs on trackingServiceQueue. Returns the client, connected or not, or nil if the session ended before the attempt
+    private func connect(session: Int, quiet: Bool, lastProblem: String?) -> UDPGyroProviderClient? {
+        if !isActive(session) {
+            return nil
+        }
+        let client = UDPGyroProviderClient(host: ipAdress, port: port, service: self)
+        client.quiet = quiet
+        client.lastProblem = lastProblem
+        DispatchQueue.main.sync { self.client = client }
+        client.connectToUDP()
+        let deadline = Date().addingTimeInterval(TrackingService.connectTimeout)
+        while !client.isConnected && Date() < deadline && isActive(session) {
+            Thread.sleep(forTimeInterval: 0.1)
+        }
+        return client
+    }
+
+    //sends sensor data, battery level and the sensor description over a connected client
+    private func startStreaming(client: UDPGyroProviderClient) {
+        startSendingBattery()
+        gHandler = GyroHandler.getInstance()
+        gHandler?.startUpdates(client: client, useMagn: magnetometer)
+        client.provideMagnetometerUse(enabled: magnetometer)
+        client.provideSensorInfo(magnetometerSupported: gHandler?.magnetometerCorrectionAvailable ?? false, magnetometerEnabled: magnetometer)
+    }
+
+    private func stopStreaming() {
+        stopSendingBattery()
+        gHandler?.stopUpdates()
+    }
+
+    //a working connection was lost: no message from the server for 10 s, or the network failed. Called by the client on the main thread.
+    //instead of ending the session, keep it (background running, no auto-lock, volume buttons) and connect again
+    //until that works or the user presses Disconnect. Helps when SlimeVR restarts or the Wi-Fi drops for a moment
+    func connectionLost(client lostClient: UDPGyroProviderClient) {
+        guard lostClient === client, let session = beginReconnecting() else {
+            return
+        }
+        stopStreaming()
+        lostClient.disconnectUDP(logIt: false)
+        logger.addEntry("Reconnecting...")
+        connectUI?.setReconnecting()
+        trackingServiceQueue.async {
+            self.reconnect(session: session)
+        }
+    }
+
+    //tries to connect every few seconds until it works, the session ends or reconnectTimeLimit is up. Runs on trackingServiceQueue
+    private func reconnect(session: Int) {
+        let giveUp = Date().addingTimeInterval(TrackingService.reconnectTimeLimit)
+        var lastProblem: String? = nil      //handed to the next attempt, so a reason is logged once and not on every attempt
+        while let attempt = connect(session: session, quiet: true, lastProblem: lastProblem) {
+            if attempt.isConnected {
+                DispatchQueue.main.async {
+                    guard attempt === self.client, self.finishReconnecting(session) else {
+                        attempt.disconnectUDP(logIt: false)
+                        return
+                    }
+                    self.logger.addEntry("Reconnected")
+                    self.connectUI?.setConnected()
+                    self.startStreaming(client: attempt)
+                }
+                return
+            }
+            lastProblem = attempt.lastProblem
+            attempt.disconnectUDP(logIt: false)
+            if Date() >= giveUp {
+                DispatchQueue.main.async {
+                    if self.isActive(session) {     //not if the user disconnected in the meantime
+                        self.logger.addEntry("Couldn't reconnect for 10 minutes, stopped trying")
+                        self.stop()
+                    }
+                }
+                return
+            }
+            let next = Date().addingTimeInterval(TrackingService.reconnectPause)
+            while Date() < next && isActive(session) {
+                Thread.sleep(forTimeInterval: 0.1)
+            }
+        }
+    }
+
+    // MARK: session state
+
+    private func beginSession() -> Int {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        session += 1
+        wantsConnection = true
+        reconnecting = false
+        return session
+    }
+
+    private func endSession() {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        session += 1
+        wantsConnection = false
+        reconnecting = false
+    }
+
+    private func isActive(_ session: Int) -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return wantsConnection && self.session == session
+    }
+
+    //returns the session to reconnect, or nil if the user disconnected or a reconnect is already running
+    private func beginReconnecting() -> Int? {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if !wantsConnection || reconnecting {
+            return nil
+        }
+        reconnecting = true
+        return session
+    }
+
+    //false if the session ended while the last attempt connected
+    private func finishReconnecting(_ session: Int) -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if !wantsConnection || self.session != session {
+            return false
+        }
+        reconnecting = false
+        return true
     }
     
     func setDefaults() {
@@ -81,13 +212,14 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         defaults.set(self.magnetometer, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
     }
     
+    //ends the session: the user pressed Disconnect (also while reconnecting), or the first connection attempt failed
     func stop() {
+        endSession()
         hardware.stopProximitySensor()
         hardware.allowAutoLock()
         hardware.unregisterVolButtonListener(target: self)
         hardware.stopBackgroundUsage()
-        stopSendingBattery()
-        gHandler?.stopUpdates()
+        stopStreaming()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
             connectUI?.setUnconnected()

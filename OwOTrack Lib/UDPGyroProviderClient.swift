@@ -48,7 +48,8 @@ class UDPGyroProviderClient {
     private let handshakeQueue = DispatchQueue(label: "UDPGyroProviderClient.handshake")
     //pause before listening again after a failed receive: a broken connection fails instantly, retrying right away spun at full CPU
     private static let receiveRetryDelay: TimeInterval = 0.1
-    private var lastProblem: String?    //last connection problem that was logged, to log each reason only once
+    var lastProblem: String?    //last connection problem that was logged, to log each reason only once. Handed on between reconnect attempts
+    var quiet = false           //reconnect attempts: don't log the routine steps (connecting, handshake) on every attempt
     //SlimeVR (protocol 9+) only accepts data after the app described its sensor. Only SlimeVR acknowledges that description,
     //so the acknowledgement also tells the app it talks to SlimeVR and not the old owoTrack driver. All of these are only used on sendQueue
     private var isSlimeVR = false
@@ -59,9 +60,23 @@ class UDPGyroProviderClient {
     private var sensorInfoRound = 0             //a new description stops the resends of the previous one
     private static let sensorInfoRetryInterval: TimeInterval = 1
     private static let sensorInfoMaxTries = 30  //the old owoTrack driver never acknowledges, so stop after that
-    var isConnected: Bool = false
-    var isConnecting: Bool = false //is true during handshake attempts
-    var lastHeartbeat: Double = 0   //last message from server
+    //written by the network thread, read by the main thread, the sensor threads and TrackingService's connect loop, so guarded by a lock
+    private let stateLock = NSLock()
+    private var _isConnected = false
+    private var _isConnecting = false
+    private var _lastHeartbeat: Double = 0
+    var isConnected: Bool {
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _isConnected }
+        set { stateLock.lock(); _isConnected = newValue; stateLock.unlock() }
+    }
+    var isConnecting: Bool {   //is true during handshake attempts
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _isConnecting }
+        set { stateLock.lock(); _isConnecting = newValue; stateLock.unlock() }
+    }
+    var lastHeartbeat: Double {   //last message from server
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _lastHeartbeat }
+        set { stateLock.lock(); _lastHeartbeat = newValue; stateLock.unlock() }
+    }
     var service: TrackingService
     var connectionCheckTimer : Timer? //timer that regularly calls a method to check if connection is still valid
     var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
@@ -81,29 +96,37 @@ class UDPGyroProviderClient {
         self.service = service
     }
     
-    func disconnectUDP() {
-        logger.addEntry("Disconnecting Client")
+    //logIt is false when the user didn't ask for it: a lost connection or a failed reconnect attempt
+    func disconnectUDP(logIt: Bool = true) {
+        if logIt {
+            logStep("Disconnecting Client")
+        }
         //clear the flags before closing, so the listener knows the connection was closed on purpose
         isConnected = false
         isConnecting = false
         self.connection?.close()
-        connectionCheckTimer?.invalidate()
+        //the timer runs on the main thread and must be invalidated there
+        DispatchQueue.main.async {
+            self.connectionCheckTimer?.invalidate()
+        }
     }
 
     func connectToUDP() {
         //reset variables
-        logger.reset()
-        logger.addEntry("Attempting Connection")
+        if !quiet {
+            logger.reset()
+        }
+        logStep("Attempting Connection")
         isConnected = false
         isConnecting = false
         sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
-        
+
         self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
-        
+
         self.connection?.open(cb: {
-            self.logger.addEntry("Connection Ready")
-            self.logger.addEntry("Attempting Handshake")
+            self.logStep("Connection Ready")
+            self.logStep("Attempting Handshake")
             self.runListener()
             self.handshake()
         }, onProblem: { reason, fatal in
@@ -111,13 +134,25 @@ class UDPGyroProviderClient {
         })
     }
 
-    //the network layer reported why the connection can't be used. log the reason, so the user sees it and not only a timeout.
-    //a fatal problem won't recover: stop the handshake, and if connected, disconnect now instead of after the heartbeat timeout
-    func connectionProblem(reason: String, fatal: Bool) {
+    //routine connection steps, not logged on reconnect attempts
+    private func logStep(_ entry: String) {
+        if !quiet {
+            logger.addEntry(entry)
+        }
+    }
+
+    //logs why connecting doesn't work, but not the same reason twice in a row
+    private func logProblem(_ reason: String) {
         if reason != lastProblem {
             lastProblem = reason
             logger.addEntry(reason)
         }
+    }
+
+    //the network layer reported why the connection can't be used. log the reason, so the user sees it and not only a timeout.
+    //a fatal problem won't recover: stop the handshake, and if connected, report the lost connection now instead of after the heartbeat timeout
+    func connectionProblem(reason: String, fatal: Bool) {
+        logProblem(reason)
         if !fatal {
             return
         }
@@ -125,7 +160,7 @@ class UDPGyroProviderClient {
         if isConnected {
             logger.addEntry("Connection with server lost")
             DispatchQueue.main.async {
-                self.service.stop()     //on the main thread like the heartbeat timeout, stop() invalidates timers that run there
+                self.service.connectionLost(client: self)     //on the main thread like the heartbeat timeout
             }
         }
     }
@@ -235,15 +270,15 @@ class UDPGyroProviderClient {
                             + "\nPlease make sure everything is up to date.")
             return
         }
-        self.logger.addEntry("Handshake Succeeded")
+        self.logStep("Handshake Succeeded")
         self.successfulHandshake()
     }
 
     //the server answered but isn't compatible: log why and stop sending handshakes, TrackingService then reports the failed connection
     private func handshakeFailed(_ reason: String) {
         isConnecting = false
-        logger.addEntry("Handshake Failed")
-        logger.addEntry(reason)
+        logStep("Handshake Failed")
+        logProblem(reason)
     }
     
     func successfulHandshake() {
@@ -407,7 +442,7 @@ class UDPGyroProviderClient {
         let timeDiff = time - lastHeartbeat
         if timeDiff > 10 {
             logger.addEntry("Connection with server lost")
-            service.stop()
+            service.connectionLost(client: self)
             return
         }
         return

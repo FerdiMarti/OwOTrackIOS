@@ -36,6 +36,12 @@ struct InfoView: View {
 
         ----
 
+        Reconnecting
+
+        If a working connection drops, for example because SlimeVR restarted or the Wi-Fi was gone for a moment, the app keeps trying to reconnect for up to 10 minutes. Press Disconnect to stop it earlier.
+
+        ----
+
         Background Usage
 
         If you want the app to stay connected while running in the background or while the phone is turned off, you have to give the app permission to always use location data.
