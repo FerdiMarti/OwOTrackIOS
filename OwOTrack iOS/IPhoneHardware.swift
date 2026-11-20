@@ -23,14 +23,17 @@ class IPhoneHardware: DeviceHardware {
             audioSession.removeObserver(target, forKeyPath: "outputVolume")
         }
         do {
-            try audioSession.setActive(false)
+            try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
         } catch {
             print("audioSession could not be deinitialized")
         }
     }
-    
+
+    //the audio session is only active so that volume button presses show up as outputVolume changes.
+    //ambient mixes with other apps' audio, so music keeps playing (the default category would stop it)
     static func registerVolButtonListener(target: NSObject) {
         do {
+            try audioSession.setCategory(.ambient)
             try audioSession.setActive(true)
         } catch {
             print("audioSession could not be initialized")
