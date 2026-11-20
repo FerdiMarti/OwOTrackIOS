@@ -26,7 +26,7 @@ struct ConnectView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     }
-                    TextField("IP Address", text: $model.ip)
+                    TextField("IP or Computer Name", text: $model.ip)
                         .disabled(!model.canEdit)
                     TextField("Port", text: $model.port)
                         .disabled(!model.canEdit)

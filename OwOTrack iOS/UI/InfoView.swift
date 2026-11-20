@@ -24,6 +24,12 @@ struct InfoView: View {
 
         ----
 
+        Server Address
+
+        Enter the IP address of the computer running SlimeVR or the OwOTrack driver, or the computer's name. A name keeps working when the computer gets a new IP address. On Windows 10/11 PCs and Macs, the name followed by .local usually works, for example DESKTOP-AB12CD.local. On Windows, the name is shown under Settings → System → About → Device name.
+
+        ----
+
         Deactivating the magnetometer can improve latency, phone battery life and fix issues with nearby magnets. It will however increase yaw drift.
 
         When connected to SlimeVR, SlimeVR controls the magnetometer and the switch in the app follows: turn on "Use magnetometer on all IMU trackers that support it" in SlimeVR's settings, and "Allow magnetometer" in the tracker's settings. The switch in the app sets the starting value and controls the magnetometer when using the OwOTrack driver.

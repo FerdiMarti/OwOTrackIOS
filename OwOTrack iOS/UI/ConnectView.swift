@@ -20,7 +20,7 @@ struct ConnectView: View {
             }
             .frame(maxWidth: .infinity, minHeight: 21)
             .padding(.top, 40)
-            addressField("IP Address", text: $model.ip)
+            addressField("IP Address or Computer Name", text: $model.ip)
             addressField("Port", text: $model.port)
             Toggle("Use Magnetometer", isOn: $model.useMagnetometer)
                 .disabled(!model.canEdit)

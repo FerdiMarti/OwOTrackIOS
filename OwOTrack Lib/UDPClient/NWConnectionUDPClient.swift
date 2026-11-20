@@ -25,10 +25,15 @@ class NWConnectionUDPClient: CompatibleUDPClient {
         self.portUDP = NWEndpoint.Port(String(port)) ?? NWEndpoint.Port("6969")!
     }
     
-    //opens the connection to specified ip and port
+    //opens the connection to specified ip (or computer name) and port
     func open(cb: @escaping () -> Void, onProblem: @escaping (_ reason: String, _ fatal: Bool) -> Void) {
         loadLastPort()  // if a connection has been established before, the app tries to bind the same UDP port again because of weird behaviour of SlimeVR server.
         let params = NWParameters.udp
+        //IPv4 only: a computer name can also resolve to IPv6 addresses, which the old owoTrack driver doesn't listen on
+        //and the rest of the app doesn't use (the local port is bound to the IPv4 address 0.0.0.0)
+        if let ip = params.defaultProtocolStack.internetProtocol as? NWProtocolIP.Options {
+            ip.version = .v4
+        }
         if bindPort != nil {
             params.requiredLocalEndpoint = NWEndpoint.hostPort(host: NWEndpoint.Host("0.0.0.0"), port: self.bindPort!)
         }
@@ -53,7 +58,7 @@ class NWConnectionUDPClient: CompatibleUDPClient {
                 print("State: Preparing\n")
             case .failed(let error):
                 print("State: error \(error)\n")
-                onProblem("Connection failed: \(self.describe(error))", true)
+                onProblem(self.unknownNameReason(error) ?? "Connection failed: \(self.describe(error))", true)
             case .waiting(let error):
                 print("State: Waiting \(error)\n")
                 //the port we used last time might be bound already. Let's reset it
@@ -75,7 +80,15 @@ class NWConnectionUDPClient: CompatibleUDPClient {
         if connection?.currentPath?.unsatisfiedReason == .localNetworkDenied {
             return "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack"
         }
-        return "Can't reach the server: \(describe(error))"
+        return unknownNameReason(error) ?? "Can't reach the server: \(describe(error))"
+    }
+
+    //a computer name that couldn't be looked up (else iOS only gives an error number)
+    private func unknownNameReason(_ error: NWError) -> String? {
+        if case .dns = error {
+            return "Can't find a computer named \"\(hostUDP)\" on the network. Check the name, or enter its IP address instead"
+        }
+        return nil
     }
 
     private func describe(_ error: NWError) -> String {

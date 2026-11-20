@@ -72,11 +72,13 @@ final class ConnectionModel: ObservableObject, ConnectUI {
             status = .error("Please enter a valid port number")
             return
         }
-        if !ConnectionModel.isValidIPAddress(ip) {
-            status = .error("Please enter a valid ip address")
+        let address = ip.trimmingCharacters(in: .whitespaces)
+        if !ConnectionModel.isValidAddress(address) {
+            status = .error("Please enter a valid IP address or computer name")
             return
         }
-        service.start(ipAdress: ip, port: port, magnetometer: useMagnetometer, connectUI: self)
+        ip = address
+        service.start(ipAdress: address, port: port, magnetometer: useMagnetometer, connectUI: self)
     }
 
     // MARK: ConnectUI, called from any thread
@@ -122,16 +124,38 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         return nr >= 0 && nr <= 65535
     }
 
+    //the server's address: an IPv4 address like 192.168.1.20, or a computer name like DESKTOP-AB12CD.local
+    static func isValidAddress(_ address: String) -> Bool {
+        return isValidIPAddress(address) || isValidComputerName(address)
+    }
+
     static func isValidIPAddress(_ ip: String) -> Bool {
         let parts = ip.split(separator: ".", omittingEmptySubsequences: false)
         if parts.count != 4 {
             return false
         }
         return parts.allSatisfy { part in
-            guard let nr = Int(part) else {
+            guard !part.isEmpty, part.count <= 3, part.allSatisfy(isDigit), let nr = Int(part) else {
                 return false
             }
-            return nr >= 0 && nr <= 255
+            return nr <= 255
         }
+    }
+
+    //a host name: labels of letters, digits and hyphens separated by dots, a label not starting or ending with a hyphen.
+    //only digits and dots is a mistyped IP address (e.g. 192.168.1), not a name
+    static func isValidComputerName(_ name: String) -> Bool {
+        if name.isEmpty || name.count > 253 || name.allSatisfy({ isDigit($0) || $0 == "." }) {
+            return false
+        }
+        return name.split(separator: ".", omittingEmptySubsequences: false).allSatisfy { label in
+            return (1...63).contains(label.count)
+                && label.first != "-" && label.last != "-"
+                && label.allSatisfy { ($0.isASCII && $0.isLetter) || isDigit($0) || $0 == "-" }
+        }
+    }
+
+    private static func isDigit(_ c: Character) -> Bool {
+        return ("0"..."9").contains(c)
     }
 }

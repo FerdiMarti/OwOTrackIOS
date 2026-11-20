@@ -87,6 +87,28 @@ extension OwOTrackTests {
             }
         }
 
+        @Test("connects by computer name, over IPv4")
+        func connectsByName() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            //localhost also means ::1 (IPv6), where the fake server doesn't listen: this only connects over IPv4
+            try await withTracking(host: "localhost", port: server.port) { _, ui in
+                #expect(await waitUntil { ui.lastState == "connected" })
+                #expect(await waitUntil { appLog.contains("SlimeVR server detected") })
+            }
+        }
+
+        @Test("an unknown computer name is reported clearly")
+        func unknownName() async throws {
+            var timing = ConnectionTiming()
+            timing.connectTimeout = 3
+            //.invalid never resolves (RFC 2606)
+            try await withTracking(host: "owotrack-test.invalid", port: 6969, timing: timing) { _, ui in
+                #expect(await waitUntil(5) { ui.lastState == "not connected" })
+                #expect(appLog.contains("Can't find a computer named \"owotrack-test.invalid\" on the network"))
+            }
+        }
+
         //the app saves the local port and asks for it on the next connection (old SlimeVR versions told trackers apart by port).
         //this checks the app's part only: in the simulator, iOS ignores the asked-for port (tried with 0.0.0.0, any and 127.0.0.1)
         @Test("the local port is saved and asked for on the next connection")
