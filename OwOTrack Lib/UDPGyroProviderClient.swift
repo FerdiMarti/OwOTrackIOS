@@ -101,33 +101,30 @@ class UDPGyroProviderClient {
         if slime { len += 36 + 9 }
         
         var data = Data(capacity: len)
-        
-        var first = Int32(bigEndian: 3)
-        var second = Int64(bigEndian: 0)
-        data.append(UnsafeBufferPointer(start: &first, count: 1))
-        data.append(UnsafeBufferPointer(start: &second, count: 1))
-        
+
+        data.append(Data(bigEndian: Int32(PacketTypes.HANDSHAKE)))
+        data.append(Data(bigEndian: Int64(0)))  //packet number
+
         if !slime {
             return data
         }
-        
-        var boardType = Int32(bigEndian: 0)
-        var imuType = Int32(bigEndian: 0)
-        var mcuType = Int32(bigEndian: 0)
+
+        let boardType: Int32 = 0
+        let imuType: Int32 = 0
+        let mcuType: Int32 = 0
         let imuInfo : [Int32] = [0, 0, 0]
-        var firmwareBuild = Int32(bigEndian: 8)
+        let firmwareBuild: Int32 = 8
         let firmware = "owoTrack8" // 9 bytes
         let firmwareData = Data(firmware.utf8)
         let firmwareLength : UInt8 = UInt8(firmware.count)
         let pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
-        data.append(UnsafeBufferPointer(start: &boardType, count: 1))
-        data.append(UnsafeBufferPointer(start: &imuType, count: 1))
-        data.append(UnsafeBufferPointer(start: &mcuType, count: 1))
+        data.append(Data(bigEndian: boardType))
+        data.append(Data(bigEndian: imuType))
+        data.append(Data(bigEndian: mcuType))
         for i in imuInfo {
-            var d = i
-            data.append(UnsafeBufferPointer(start: &d, count: 1))
+            data.append(Data(bigEndian: i))
         }
-        data.append(UnsafeBufferPointer(start: &firmwareBuild, count: 1))
+        data.append(Data(bigEndian: firmwareBuild))
         data.append(firmwareLength)
         data.append(firmwareData)
         for i in pseudoMac {
@@ -313,8 +310,8 @@ class UDPGyroProviderClient {
     private func sendPacket(msgType: Int32, payload: Data) {
         sendQueue.async {
             var data = Data(capacity: 12 + payload.count)
-            withUnsafeBytes(of: msgType.bigEndian) { data.append(contentsOf: $0) }
-            withUnsafeBytes(of: self.packetId.bigEndian) { data.append(contentsOf: $0) }
+            data.append(Data(bigEndian: msgType))
+            data.append(Data(bigEndian: self.packetId))
             data.append(payload)
             self.connection?.sendUDP(data)
             self.packetId += 1
@@ -352,8 +349,7 @@ class UDPGyroProviderClient {
         }
 
         let c = UInt16(UInt8(ascii: enabled ? "y" : "n"))
-        let payload = withUnsafeBytes(of: c.bigEndian) { Data($0) }
-        sendPacket(msgType: Int32(PacketTypes.SEND_MAG_STATUS), payload: payload)
+        sendPacket(msgType: Int32(PacketTypes.SEND_MAG_STATUS), payload: Data(bigEndian: c))
     }
     
     //sends current device battery level
@@ -362,8 +358,7 @@ class UDPGyroProviderClient {
             return
         }
         
-        let bat = withUnsafeBytes(of: level.bitPattern.bigEndian) { Data($0) }
-        sendPacket(msgType: Int32(PacketTypes.BATTERY_LEVEL), payload: bat)
+        sendPacket(msgType: Int32(PacketTypes.BATTERY_LEVEL), payload: Data(bigEndian: level))
     }
     
     //send that the volume button was pushed, not used by server afaik
@@ -373,5 +368,18 @@ class UDPGyroProviderClient {
         }
         
         sendPacket(msgType: Int32(PacketTypes.BUTTON_PUSHED), payload: Data())
+    }
+}
+
+extension Data {
+    //the big-endian bytes of an integer, the byte order of every number the app sends to the server
+    //copies the value's bytes safely; a buffer pointer made from &variable is only valid during that one call
+    init<T: FixedWidthInteger>(bigEndian value: T) {
+        self = Swift.withUnsafeBytes(of: value.bigEndian) { Data($0) }
+    }
+
+    //the big-endian bytes of a float (its IEEE 754 bit pattern)
+    init(bigEndian value: Float) {
+        self.init(bigEndian: value.bitPattern)
     }
 }

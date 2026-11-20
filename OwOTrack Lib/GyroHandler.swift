@@ -35,39 +35,21 @@ public class GyroHandler {
         mmanager.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
             if let md = MotionData {
                 let quat = md.attitude.quaternion
-                var xi = Float(quat.x).bitPattern.bigEndian
-                var yi = Float(quat.y).bitPattern.bigEndian
-                var zi = Float(quat.z).bitPattern.bigEndian
-                var wi = Float(quat.w).bitPattern.bigEndian
-                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
-                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
-                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
-                let w = Data(buffer: UnsafeBufferPointer(start: &wi, count: 1))
-                let data = [x, y, z, w]
+                let data = [Data(bigEndian: Float(quat.x)), Data(bigEndian: Float(quat.y)), Data(bigEndian: Float(quat.z)), Data(bigEndian: Float(quat.w))]
                 client.provideRot(rot: data)
             }
         })
         mmanager.startGyroUpdates(to: sensorQueue, withHandler: { (gyroData, Error) in
             if let gd = gyroData {
-                var xi = Float(gd.rotationRate.x).bitPattern.bigEndian
-                var yi = Float(gd.rotationRate.y).bitPattern.bigEndian
-                var zi = Float(gd.rotationRate.z).bitPattern.bigEndian
-                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
-                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
-                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
-                let data = [x, y, z]
+                let rate = gd.rotationRate
+                let data = [Data(bigEndian: Float(rate.x)), Data(bigEndian: Float(rate.y)), Data(bigEndian: Float(rate.z))]
                 client.provideGyro(gyro: data)
             }
         })
         mmanager.startAccelerometerUpdates(to: sensorQueue, withHandler: { (accelData, Error) in
             if let ad = accelData {
-                var xi = Float(ad.acceleration.x).bitPattern.bigEndian
-                var yi = Float(ad.acceleration.y).bitPattern.bigEndian
-                var zi = Float(ad.acceleration.z).bitPattern.bigEndian
-                let x = Data(buffer: UnsafeBufferPointer(start: &xi, count: 1))
-                let y = Data(buffer: UnsafeBufferPointer(start: &yi, count: 1))
-                let z = Data(buffer: UnsafeBufferPointer(start: &zi, count: 1))
-                let data = [x, y, z]
+                let accel = ad.acceleration
+                let data = [Data(bigEndian: Float(accel.x)), Data(bigEndian: Float(accel.y)), Data(bigEndian: Float(accel.z))]
                 client.provideAccel(accel: data)
             }
         })
