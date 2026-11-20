@@ -11,14 +11,7 @@
 		9A4EF2B2293046C70060FE20 /* UDPBroadcastConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */; };
 		9A5EFF2A2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		9A5EFF2B2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
-		9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
-		9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
-		9A728BDC263E018400E8605D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
-		9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BDD263E020E00E8605D /* ConnectViewController.swift */; };
 		9A728BE0263E139800E8605D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* LaunchScreen.storyboard */; };
-		9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE2263E143F00E8605D /* InfoViewController.swift */; };
-		9A728BE5263E144A00E8605D /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE4263E144A00E8605D /* StatusViewController.swift */; };
-		9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
 		9A8DFBA3294729CD00C01721 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
 		9AE20DD329539D4E001B0874 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
@@ -55,26 +48,31 @@
 		B00000000000000000000017 /* Quaternion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC272619FCC9007C6BBA /* Quaternion.swift */; };
 		B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */; };
 		B00000000000000000000019 /* AutoDiscovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4EF2AC29302C7E0060FE20 /* AutoDiscovery.swift */; };
-		B0000000000000000000001A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BB7263DFFBD00E8605D /* AppDelegate.swift */; };
 		B0000000000000000000001B /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A08069C261B565400F92566 /* Logger.swift */; };
-		B0000000000000000000001C /* ConnectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BDD263E020E00E8605D /* ConnectViewController.swift */; };
 		B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */; };
 		B0000000000000000000001E /* GyroHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC51261A3755007C6BBA /* GyroHandler.swift */; };
 		B0000000000000000000001F /* Vector3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC2F2619FEC9007C6BBA /* Vector3.swift */; };
-		B00000000000000000000020 /* StatusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE4263E144A00E8605D /* StatusViewController.swift */; };
 		B00000000000000000000021 /* DeviceHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DE32953A114001B0874 /* DeviceHardware.swift */; };
-		B00000000000000000000022 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BD9263E00BB00E8605D /* SceneDelegate.swift */; };
 		B00000000000000000000023 /* IPhoneHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB07CE72950733A006CD79F /* IPhoneHardware.swift */; };
-		B00000000000000000000024 /* FadeTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE6263E3DF900E8605D /* FadeTextView.swift */; };
-		B00000000000000000000025 /* InfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A728BE2263E143F00E8605D /* InfoViewController.swift */; };
 		B00000000000000000000026 /* NWConnectionUDPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */; };
 		B00000000000000000000027 /* ConnectUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE20DF029548C17001B0874 /* ConnectUI.swift */; };
 		B00000000000000000000028 /* TrackingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC4C261A369D007C6BBA /* TrackingService.swift */; };
 		B00000000000000000000029 /* UDPGyroProviderClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE6EC47261A3472007C6BBA /* UDPGyroProviderClient.swift */; };
-		B0000000000000000000002A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDB263E018400E8605D /* Main.storyboard */; };
 		B0000000000000000000002B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9A728BDF263E139800E8605D /* LaunchScreen.storyboard */; };
 		B0000000000000000000002C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */; };
 		B0000000000000000000002D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
+		B10000000000000000000002 /* OwOTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* OwOTrackApp.swift */; };
+		B10000000000000000000003 /* OwOTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* OwOTrackApp.swift */; };
+		B10000000000000000000005 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* StatusView.swift */; };
+		B10000000000000000000006 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* StatusView.swift */; };
+		B10000000000000000000008 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* ConnectView.swift */; };
+		B10000000000000000000009 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* ConnectView.swift */; };
+		B1000000000000000000000B /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* LogView.swift */; };
+		B1000000000000000000000C /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* LogView.swift */; };
+		B1000000000000000000000E /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* InfoView.swift */; };
+		B1000000000000000000000F /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* InfoView.swift */; };
+		B10000000000000000000010 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
+		B10000000000000000000011 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -107,14 +105,7 @@
 		9A4EF2AF293046C60060FE20 /* UDPBroadcastConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnection.swift; sourceTree = "<group>"; };
 		9A4EF2B0293046C60060FE20 /* UDPBroadcastConnectionError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UDPBroadcastConnectionError.swift; sourceTree = "<group>"; };
 		9A5EFF292C4441AC00487724 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		9A728BB7263DFFBD00E8605D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		9A728BD9263E00BB00E8605D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		9A728BDB263E018400E8605D /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
-		9A728BDD263E020E00E8605D /* ConnectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectViewController.swift; sourceTree = "<group>"; };
 		9A728BDF263E139800E8605D /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9A728BE2263E143F00E8605D /* InfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoViewController.swift; sourceTree = "<group>"; };
-		9A728BE4263E144A00E8605D /* StatusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusViewController.swift; sourceTree = "<group>"; };
-		9A728BE6263E3DF900E8605D /* FadeTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FadeTextView.swift; sourceTree = "<group>"; };
 		9A8DFBA2294729CD00C01721 /* NWConnectionUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NWConnectionUDPClient.swift; sourceTree = "<group>"; };
 		9A8DFBA6294ACBC700C01721 /* CompatibleUDPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibleUDPClient.swift; sourceTree = "<group>"; };
 		9AB07CE72950733A006CD79F /* IPhoneHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPhoneHardware.swift; sourceTree = "<group>"; };
@@ -139,6 +130,11 @@
 		B00000000000000000000006 /* ConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectView.swift; sourceTree = "<group>"; };
 		B00000000000000000000007 /* ConnectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionModel.swift; sourceTree = "<group>"; };
 		B0000000000000000000000C /* OwOTrack iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OwOTrack iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000001 /* OwOTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* ConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000D /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,14 +165,12 @@
 		9A728BE1263E13C000E8605D /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				9A728BDD263E020E00E8605D /* ConnectViewController.swift */,
-				9A728BE6263E3DF900E8605D /* FadeTextView.swift */,
-				9A728BE2263E143F00E8605D /* InfoViewController.swift */,
-				9A728BE4263E144A00E8605D /* StatusViewController.swift */,
 				9A728BDF263E139800E8605D /* LaunchScreen.storyboard */,
-				9A728BDB263E018400E8605D /* Main.storyboard */,
-				9A728BB7263DFFBD00E8605D /* AppDelegate.swift */,
-				9A728BD9263E00BB00E8605D /* SceneDelegate.swift */,
+				B10000000000000000000001 /* OwOTrackApp.swift */,
+				B10000000000000000000004 /* StatusView.swift */,
+				B10000000000000000000007 /* ConnectView.swift */,
+				B1000000000000000000000A /* LogView.swift */,
+				B1000000000000000000000D /* InfoView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -392,7 +386,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9A728BDC263E018400E8605D /* Main.storyboard in Resources */,
 				9A728BE0263E139800E8605D /* LaunchScreen.storyboard in Resources */,
 				9A5EFF2A2C4441AC00487724 /* PrivacyInfo.xcprivacy in Resources */,
 				9AE6EBFD2619FBFD007C6BBA /* Assets.xcassets in Resources */,
@@ -403,7 +396,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0000000000000000000002A /* Main.storyboard in Resources */,
 				B0000000000000000000002B /* LaunchScreen.storyboard in Resources */,
 				B0000000000000000000002C /* PrivacyInfo.xcprivacy in Resources */,
 				B0000000000000000000002D /* Assets.xcassets in Resources */,
@@ -445,22 +437,22 @@
 				9AE6EC282619FCC9007C6BBA /* Quaternion.swift in Sources */,
 				9A4EF2B1293046C70060FE20 /* UDPBroadcastConnection.swift in Sources */,
 				9AE20DD329539D4E001B0874 /* AutoDiscovery.swift in Sources */,
-				9A728BB8263DFFBD00E8605D /* AppDelegate.swift in Sources */,
 				9AE20DD729539D4E001B0874 /* Logger.swift in Sources */,
-				9A728BDE263E020E00E8605D /* ConnectViewController.swift in Sources */,
 				9A8DFBA7294ACBC700C01721 /* CompatibleUDPClient.swift in Sources */,
 				9AE20DD529539D4E001B0874 /* GyroHandler.swift in Sources */,
 				9AE6EC302619FEC9007C6BBA /* Vector3.swift in Sources */,
-				9A728BE5263E144A00E8605D /* StatusViewController.swift in Sources */,
 				9AE20DE42953A114001B0874 /* DeviceHardware.swift in Sources */,
-				9A728BDA263E00BB00E8605D /* SceneDelegate.swift in Sources */,
 				9AE20DD629539D4E001B0874 /* IPhoneHardware.swift in Sources */,
-				9A728BE7263E3DF900E8605D /* FadeTextView.swift in Sources */,
-				9A728BE3263E143F00E8605D /* InfoViewController.swift in Sources */,
 				9A8DFBA3294729CD00C01721 /* NWConnectionUDPClient.swift in Sources */,
 				9AE20DF129548C17001B0874 /* ConnectUI.swift in Sources */,
 				9AE20DD829539D4E001B0874 /* TrackingService.swift in Sources */,
 				9AE20DD429539D4E001B0874 /* UDPGyroProviderClient.swift in Sources */,
+				B10000000000000000000002 /* OwOTrackApp.swift in Sources */,
+				B10000000000000000000005 /* StatusView.swift in Sources */,
+				B10000000000000000000008 /* ConnectView.swift in Sources */,
+				B1000000000000000000000B /* LogView.swift in Sources */,
+				B1000000000000000000000E /* InfoView.swift in Sources */,
+				B10000000000000000000010 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -472,22 +464,22 @@
 				B00000000000000000000017 /* Quaternion.swift in Sources */,
 				B00000000000000000000018 /* UDPBroadcastConnection.swift in Sources */,
 				B00000000000000000000019 /* AutoDiscovery.swift in Sources */,
-				B0000000000000000000001A /* AppDelegate.swift in Sources */,
 				B0000000000000000000001B /* Logger.swift in Sources */,
-				B0000000000000000000001C /* ConnectViewController.swift in Sources */,
 				B0000000000000000000001D /* CompatibleUDPClient.swift in Sources */,
 				B0000000000000000000001E /* GyroHandler.swift in Sources */,
 				B0000000000000000000001F /* Vector3.swift in Sources */,
-				B00000000000000000000020 /* StatusViewController.swift in Sources */,
 				B00000000000000000000021 /* DeviceHardware.swift in Sources */,
-				B00000000000000000000022 /* SceneDelegate.swift in Sources */,
 				B00000000000000000000023 /* IPhoneHardware.swift in Sources */,
-				B00000000000000000000024 /* FadeTextView.swift in Sources */,
-				B00000000000000000000025 /* InfoViewController.swift in Sources */,
 				B00000000000000000000026 /* NWConnectionUDPClient.swift in Sources */,
 				B00000000000000000000027 /* ConnectUI.swift in Sources */,
 				B00000000000000000000028 /* TrackingService.swift in Sources */,
 				B00000000000000000000029 /* UDPGyroProviderClient.swift in Sources */,
+				B10000000000000000000003 /* OwOTrackApp.swift in Sources */,
+				B10000000000000000000006 /* StatusView.swift in Sources */,
+				B10000000000000000000009 /* ConnectView.swift in Sources */,
+				B1000000000000000000000C /* LogView.swift in Sources */,
+				B1000000000000000000000F /* InfoView.swift in Sources */,
+				B10000000000000000000011 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
