@@ -17,7 +17,6 @@ let BIND_PORT_USERDEFAULTS_KEY = "bindport"
 class NWConnectionUDPClient: CompatibleUDPClient {
 
     var connection: NWConnection?
-    var logger = Logger.getInstance()
     var hostUDP: NWEndpoint.Host = "192.168.0.10"
     var portUDP: NWEndpoint.Port = 6969
     let defaults = UserDefaults.standard
@@ -29,19 +28,25 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     }
     
     //opens the connection to specified ip and port
-    func open(cb: @escaping () -> Void) {
+    func open(cb: @escaping () -> Void, onProblem: @escaping (_ reason: String, _ fatal: Bool) -> Void) {
         loadLastPort()  // if a connection has been established before, the app tries to bind the same UDP port again because of weird behaviour of SlimeVR server.
         let params = NWParameters.udp
         if bindPort != nil {
             params.requiredLocalEndpoint = NWEndpoint.hostPort(host: NWEndpoint.Host("0.0.0.0"), port: self.bindPort!)
         }
         self.connection = NWConnection(host: hostUDP, port: portUDP, using: params)
+        var wasReady = false    //only touched by the state handler, which runs on the connection's queue
         self.connection?.stateUpdateHandler = { (newState) in
             switch (newState) {
             case .ready:
                 self.setLastPort()  //port is saved for next usage
-                cb()
                 print("State: Ready\n")
+                //the state can go ready -> waiting -> ready, e.g. when the Wi-Fi drops briefly.
+                //only start once: a second call would add another listener and handshake
+                if !wasReady {
+                    wasReady = true
+                    cb()
+                }
             case .setup:
                 print("State: Setup\n")
             case .cancelled:
@@ -50,18 +55,38 @@ class NWConnectionUDPClient: CompatibleUDPClient {
                 print("State: Preparing\n")
             case .failed(let error):
                 print("State: error \(error)\n")
+                onProblem("Connection failed: \(self.describe(error))", true)
             case .waiting(let error):
                 print("State: Waiting \(error)\n")
                 //the port we used last time might be bound already. Let's reset it
                 if error.debugDescription.contains("Address already in use") {
                     self.resetLastPort()
-                    self.logger.addEntry("Please try again")
+                    onProblem("The network port of the last connection is still in use. Please try again", false)
+                } else {
+                    onProblem(self.waitingReason(error), false)
                 }
             default:
                 print("ERROR! State not defined!\n")
             }
         }
         self.connection?.start(queue: DispatchQueue(label: "UDPConnection"))
+    }
+
+    //a readable reason why the connection is waiting instead of ready
+    private func waitingReason(_ error: NWError) -> String {
+        if #available(iOS 14.0, watchOS 7.0, *) {
+            if connection?.currentPath?.unsatisfiedReason == .localNetworkDenied {
+                return "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack"
+            }
+        }
+        return "Can't reach the server: \(describe(error))"
+    }
+
+    private func describe(_ error: NWError) -> String {
+        if case .posix(let code) = error {
+            return String(cString: strerror(code.rawValue))     //e.g. "Network is down"
+        }
+        return error.localizedDescription
     }
     
     func close() {

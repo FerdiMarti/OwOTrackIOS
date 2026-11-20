@@ -25,8 +25,8 @@ class SwiftSocketUDPClient: CompatibleUDPClient {
         self.client = UDPClient(address: hostUDP, port: Int32(portUDP))
     }
     
-    func open(cb: @escaping () -> Void) {
-        //no preparation needed, immediately call back
+    func open(cb: @escaping () -> Void, onProblem: @escaping (_ reason: String, _ fatal: Bool) -> Void) {
+        //no preparation needed, immediately call back (SwiftSocket doesn't report connection problems)
         cb()
     }
     
