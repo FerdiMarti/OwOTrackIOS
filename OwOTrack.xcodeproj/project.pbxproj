@@ -76,6 +76,9 @@
 		C00000000000000000000014 /* ReconnectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000013 /* ReconnectTests.swift */; };
 		C00000000000000000000016 /* ConnectScreenTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000015 /* ConnectScreenTests.swift */; };
 		C00000000000000000000018 /* LiveSlimeVRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000017 /* LiveSlimeVRTests.swift */; };
+		C00000000000000000000027 /* ScreenDimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000026 /* ScreenDimmer.swift */; };
+		C00000000000000000000028 /* ScreenDimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000026 /* ScreenDimmer.swift */; };
+		C0000000000000000000002A /* ScreenDimmerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000029 /* ScreenDimmerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -156,6 +159,8 @@
 		C00000000000000000000017 /* LiveSlimeVRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSlimeVRTests.swift; sourceTree = "<group>"; };
 		C00000000000000000000019 /* Tests.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Tests.xcconfig; sourceTree = "<group>"; };
 		C0000000000000000000001A /* OwOTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C00000000000000000000026 /* ScreenDimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenDimmer.swift; sourceTree = "<group>"; };
+		C00000000000000000000029 /* ScreenDimmerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenDimmerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -199,6 +204,7 @@
 				B10000000000000000000007 /* ConnectView.swift */,
 				B1000000000000000000000A /* LogView.swift */,
 				B1000000000000000000000D /* InfoView.swift */,
+				C00000000000000000000026 /* ScreenDimmer.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -305,6 +311,7 @@
 				C00000000000000000000013 /* ReconnectTests.swift */,
 				C00000000000000000000015 /* ConnectScreenTests.swift */,
 				C00000000000000000000017 /* LiveSlimeVRTests.swift */,
+				C00000000000000000000029 /* ScreenDimmerTests.swift */,
 				C0000000000000000000001C /* Helpers */,
 			);
 			path = OwOTrackTests;
@@ -522,6 +529,7 @@
 				B10000000000000000000005 /* StatusView.swift in Sources */,
 				B10000000000000000000008 /* ConnectView.swift in Sources */,
 				B1000000000000000000000B /* LogView.swift in Sources */,
+				C00000000000000000000027 /* ScreenDimmer.swift in Sources */,
 				B1000000000000000000000E /* InfoView.swift in Sources */,
 				B10000000000000000000010 /* ConnectionModel.swift in Sources */,
 			);
@@ -546,6 +554,7 @@
 				B10000000000000000000006 /* StatusView.swift in Sources */,
 				B10000000000000000000009 /* ConnectView.swift in Sources */,
 				B1000000000000000000000C /* LogView.swift in Sources */,
+				C00000000000000000000028 /* ScreenDimmer.swift in Sources */,
 				B1000000000000000000000F /* InfoView.swift in Sources */,
 				B10000000000000000000011 /* ConnectionModel.swift in Sources */,
 			);
@@ -567,6 +576,7 @@
 				C00000000000000000000014 /* ReconnectTests.swift in Sources */,
 				C00000000000000000000016 /* ConnectScreenTests.swift in Sources */,
 				C00000000000000000000018 /* LiveSlimeVRTests.swift in Sources */,
+				C0000000000000000000002A /* ScreenDimmerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
