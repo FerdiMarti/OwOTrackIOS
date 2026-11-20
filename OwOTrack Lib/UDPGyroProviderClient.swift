@@ -33,6 +33,11 @@ class UDPGyroProviderClient {
     //SlimeVR drops every packet whose number isn't higher than the last one it received.
     //Sensor data arrives on several threads at once, so numbering and sending happen together on this serial queue.
     private let sendQueue = DispatchQueue(label: "UDPGyroProviderClient.send")
+    //handshake retries, see handshake()
+    private static let handshakeTries = 13
+    private static let handshakeSlimeTries = 7
+    private static let handshakeRetryInterval: TimeInterval = 0.25
+    private let handshakeQueue = DispatchQueue(label: "UDPGyroProviderClient.handshake")
     var isConnected: Bool = false
     var isConnecting: Bool = false //is true during handshake attempts
     var lastHeartbeat: Double = 0   //last message from server
@@ -135,48 +140,71 @@ class UDPGyroProviderClient {
         return data
     }
     
+    //sends handshakes until the server replies, one try every 250 ms (all 13 tries take about 3 s, within TrackingService's 5 s wait)
+    // if the user is running an old version of owoTrackVR driver,
+    // recvfrom() will fail as the max packet length the old driver
+    // supported was around 28 bytes. to maintain backwards
+    // compatibility the slime extensions are not sent after 7
+    // unanswered tries
+    //the tries must be spaced out: sent all at once, the server answers several of them and also gets the
+    //short legacy handshakes right after the real one
     func handshake() {
         isConnecting = true
-        var tries = 0
-        while(!isConnected && tries <= 12) {
-            // if the user is running an old version of owoTrackVR driver,
-            // recvfrom() will fail as the max packet length the old driver
-            // supported was around 28 bytes. to maintain backwards
-            // compatibility the slime extensions are not sent after a
-            // certain number of failures
-            let sendSlimeExtensions = (tries < 7)
-            let sendData = buildHeaderInfo(slime: sendSlimeExtensions)
-            self.connection?.sendUDP(sendData)
-            tries += 1
+        sendHandshake(attempt: 0)
+    }
+
+    private func sendHandshake(attempt: Int) {
+        if isConnected || !isConnecting || attempt >= UDPGyroProviderClient.handshakeTries {
+            return
+        }
+        let sendSlimeExtensions = attempt < UDPGyroProviderClient.handshakeSlimeTries
+        self.connection?.sendUDP(buildHeaderInfo(slime: sendSlimeExtensions))
+        handshakeQueue.asyncAfter(deadline: .now() + UDPGyroProviderClient.handshakeRetryInterval) {
+            self.sendHandshake(attempt: attempt + 1)
         }
     }
-    
+
+    //the server's handshake reply is byte 3 followed by "Hey OVR =D <version>" in ASCII (SlimeVR pads it with zero bytes to 64 bytes)
+    //returns the text after the first byte up to the first zero byte, or nil if the data doesn't start with byte 3
+    private func handshakeReplyText(_ data: Data) -> String? {
+        guard data.first == 3 else {
+            return nil
+        }
+        return String(decoding: data.dropFirst().prefix { $0 != 0 }, as: UTF8.self)
+    }
+
+    //same checks as the owoTrack Android app, without crashing on short or unexpected replies
     func validateHandshakeResponse(data: Data) {
-        var result = String(data: data, encoding: .ascii)!
-        if (!result.hasPrefix(String(Unicode.Scalar(3)))) {
-            self.logger.addEntry("Handshake Failed")
-            self.logger.addEntry("The server did not respond correctly. Ensure everything is up-to-date and that the port is correct.")
+        guard let text = handshakeReplyText(data) else {
+            //not a handshake reply, e.g. a heartbeat from a server that still knows this phone from an earlier connection.
+            //ignore it, the next try follows anyway
             return
         }
-        result = String(result[result.index(result.startIndex, offsetBy: 1)...])
-        if (!result.hasPrefix("Hey OVR =D")) {
-            self.logger.addEntry("Handshake Failed")
-            self.logger.addEntry("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
+        if (!text.hasPrefix("Hey OVR =D")) {
+            handshakeFailed("The server did not respond correctly in the header. Ensure everything is up-to-date and that the port is correct.")
             return
         }
-        result = String(result[result.index(result.startIndex, offsetBy: 11)...])
-        result = String(result[result.startIndex...result.startIndex])
-        let version = Int(result)!;
+        let digits = text.dropFirst(11).prefix { $0 >= "0" && $0 <= "9" }   //"Hey OVR =D 5" -> "5"
+        guard let version = Int(digits) else {
+            handshakeFailed("The server did not send a valid version number. Please make sure everything is up to date.")
+            return
+        }
         if (version != UDPGyroProviderClient.CURRENT_VERSION) {
-            self.logger.addEntry("Handshake Failed")
-            self.logger.addEntry("Handshake failed, mismatching version"
-                                 + "\nServer version: \(version)"
-                                 + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
-                                 + "\nPlease make sure everything is up to date.")
+            handshakeFailed("Handshake failed, mismatching version"
+                            + "\nServer version: \(version)"
+                            + "\nClient version: \(UDPGyroProviderClient.CURRENT_VERSION)"
+                            + "\nPlease make sure everything is up to date.")
             return
         }
         self.logger.addEntry("Handshake Succeded")
         self.successfulHandshake()
+    }
+
+    //the server answered but isn't compatible: log why and stop sending handshakes, TrackingService then reports the failed connection
+    private func handshakeFailed(_ reason: String) {
+        isConnecting = false
+        logger.addEntry("Handshake Failed")
+        logger.addEntry(reason)
     }
     
     func successfulHandshake() {
@@ -211,6 +239,11 @@ class UDPGyroProviderClient {
         }
         
         self.lastHeartbeat = Date().timeIntervalSince1970;
+        //replies to earlier handshake tries can still arrive after connecting. skip them:
+        //read as a normal packet, their text looks like a huge message type and flips the byte order detection
+        if handshakeReplyText(data)?.hasPrefix("Hey OVR =D") == true {
+            return
+        }
         var msgType : UInt32 = 0
         msgType = readUInt32(data: data)
         var restData = data.advanced(by: 4)
