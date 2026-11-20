@@ -26,6 +26,8 @@ extension OwOTrackTests {
                 #expect(handshake.protocolVersion == 9)
                 #expect(handshake.mac == "02:0E:57:00:00:01")
                 #expect(await waitUntil { appLog.contains("SlimeVR server detected") })
+                #expect(await waitUntil { ui.serverTypes == [.slimeVR] })
+                #expect(ui.localNetwork == [.granted])
 
                 let detected = Date()
                 try #require(service.client).provideRot(rot: floats(0, 0, 0, 1))
@@ -74,8 +76,10 @@ extension OwOTrackTests {
             var timing = ConnectionTiming()
             timing.connectTimeout = 2
             try await withTracking(port: server.port, timing: timing) { _, ui in
-                #expect(await waitUntil(4) { ui.lastState == "not connected" })
-                #expect(ui.states == ["connecting", "not connected"])
+                #expect(await waitUntil(4) { ui.lastState == "failed" })
+                #expect(ui.states == ["connecting", "not connected", "failed"])
+                #expect(ui.failures == ["Couldn't connect to 127.0.0.1"])
+                #expect(ui.localNetwork.isEmpty)
                 #expect(appLog.contains("Connecting Failed"))
                 #expect(FakeHardware.events.contains("auto-lock allowed"))
                 #expect(FakeHardware.events.contains("background stopped"))
@@ -104,7 +108,8 @@ extension OwOTrackTests {
             timing.connectTimeout = 3
             //.invalid never resolves (RFC 2606)
             try await withTracking(host: "owotrack-test.invalid", port: 6969, timing: timing) { _, ui in
-                #expect(await waitUntil(5) { ui.lastState == "not connected" })
+                #expect(await waitUntil(5) { ui.lastState == "failed" })
+                #expect(ui.failures == ["Couldn't connect to owotrack-test.invalid"])
                 #expect(appLog.contains("Can't find a computer named \"owotrack-test.invalid\" on the network"))
             }
         }

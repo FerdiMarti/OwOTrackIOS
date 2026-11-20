@@ -113,9 +113,47 @@ extension OwOTrackTests {
             #expect(dimmer.isDimmed)
             dimmer.setActive(false)
             #expect(!dimmer.isDimmed)
+            #expect(dimmer.countdown == nil)
             #expect(screen.brightness == 0.8)
             await pause(Dimming.delay * 2)
             #expect(screen.brightness == 0.8)
+            #expect(dimmer.countdown == nil)
+        }
+
+        @Test("counts down only the last seconds, and a touch starts the wait over")
+        func countdown() async {
+            let screen = FakeScreen(brightness: 0.8)
+            let dimmer = ScreenDimmer(delay: 1.2, countdownLength: 0.6, fadeDuration: 0, screen: { screen })
+            defer { dimmer.setActive(false) }
+            dimmer.setActive(true)
+            await pause(0.3)
+            #expect(dimmer.countdown == nil)    //not in the last 0.6 s yet
+            await pause(0.5)
+            #expect(dimmer.countdown == 1)
+            dimmer.touched()
+            #expect(dimmer.countdown == nil)
+            await pause(1.0)
+            #expect(dimmer.countdown == 1)
+            await pause(0.4)
+            #expect(dimmer.isDimmed)
+            #expect(dimmer.countdown == nil)
+        }
+
+        @Test("counts down whole seconds: 3, 2, 1")
+        func countdownSeconds() async {
+            let screen = FakeScreen(brightness: 0.8)
+            let dimmer = ScreenDimmer(delay: 2.5, countdownLength: 5, fadeDuration: 0, screen: { screen })
+            defer { dimmer.setActive(false) }
+            dimmer.setActive(true)
+            var shown: [Int] = []
+            for _ in 0..<28 {
+                if let seconds = dimmer.countdown, shown.last != seconds {
+                    shown.append(seconds)
+                }
+                await pause(0.1)
+            }
+            #expect(shown == [3, 2, 1])
+            #expect(dimmer.isDimmed)
         }
 
         @Test("a screen already darker than the dimmed level is left alone, and touches go through")

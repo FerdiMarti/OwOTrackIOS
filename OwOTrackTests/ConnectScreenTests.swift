@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import CoreLocation
 import Testing
 @testable import OwOTrack_iOS
 
@@ -65,11 +66,84 @@ extension OwOTrackTests {
             await show { model.setConnected() }
             #expect(model.isConnected && !model.canEdit && model.canDisconnect)
 
-            await show { model.setReconnecting() }
+            await show { model.setServerType(.slimeVR) }
+            #expect(model.serverType == .slimeVR)
+
+            let giveUp = Date().addingTimeInterval(600)
+            await show { model.setReconnecting(until: giveUp) }
             #expect(model.isReconnecting && !model.canEdit && model.canDisconnect)
+            #expect(model.reconnectDeadline == giveUp)
+            #expect(model.serverType == .slimeVR)      //still the same server it tries to reach
+
+            await show { model.setFailed("Couldn't reconnect for 10 minutes") }
+            #expect(model.status == .failed("Couldn't reconnect for 10 minutes"))
+            #expect(model.canEdit && !model.canDisconnect)
+            #expect(model.serverType == .unknown)
+            #expect(model.reconnectDeadline == nil)
+
+            await show { model.setLocalNetworkAccess(.granted) }
+            #expect(model.localNetwork == .granted)
 
             await show { model.setUnconnected() }
             #expect(model.canEdit && !model.canDisconnect)
+        }
+
+        @Test("connected servers are remembered: newest first, no duplicates, at most 5")
+        @MainActor
+        func recentServers() async {
+            UserDefaults.standard.removeObject(forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
+            defer { UserDefaults.standard.removeObject(forKey: RECENT_SERVERS_USERDEFAULTS_KEY) }
+            let model = ConnectionModel()
+            #expect(model.recentServers.isEmpty)
+            for address in ["a.local", "b.local", "a.local", "c.local", "d.local", "e.local", "f.local"] {
+                model.ip = address
+                model.setConnected()
+                await pause(0.05)
+                model.setUnconnected()
+                await pause(0.05)
+            }
+            let expected = ["f.local", "e.local", "d.local", "c.local", "a.local"]
+            #expect(model.recentServers.map(\.address) == expected)
+            #expect(ConnectionModel().recentServers.map(\.address) == expected)    //saved for the next start
+
+            model.useRecentServer(RecentServer(address: "c.local", port: "7000"))
+            #expect(model.ip == "c.local")
+            #expect(model.port == "7000")
+        }
+
+        @Test("permission colors", arguments: [
+            (CLAuthorizationStatus.authorizedAlways, PermissionState.good),
+            (.authorizedWhenInUse, .limited),
+            (.notDetermined, .limited),
+            (.denied, .off),
+            (.restricted, .off),
+        ])
+        func locationPermission(status: CLAuthorizationStatus, state: PermissionState) {
+            #expect(PermissionState.location(status) == state)
+        }
+
+        @Test("local network: grey until a connection worked or was blocked")
+        func localNetworkPermission() {
+            #expect(PermissionState.localNetwork(.unknown) == .unknown)
+            #expect(PermissionState.localNetwork(.granted) == .good)
+            #expect(PermissionState.localNetwork(.denied) == .off)
+            #expect(PermissionState.unknown.color == .gray)
+        }
+
+        @Test("every explanation has a title and text; the permissions also say their state and offer Settings")
+        func explanations() {
+            let topics: [InfoTopic] = [.address, .port, .magnetometer, .server(.slimeVR), .server(.owoTrackDriver), .reconnecting,
+                                       .cantConnect, .location, .localNetwork, .screen, .volumeButtons]
+            for topic in topics {
+                let content = InfoContent(topic, localNetwork: .unknown, location: .authorizedWhenInUse)
+                #expect(!content.title.isEmpty)
+                #expect(!content.paragraphs.isEmpty)
+                let isPermission = topic == .location || topic == .localNetwork
+                #expect(content.offersSettings == isPermission)
+                #expect((content.state != nil) == isPermission)
+            }
+            #expect(InfoContent(.location, localNetwork: .unknown, location: .authorizedWhenInUse).stateText.contains("only while using"))
+            #expect(InfoContent(.localNetwork, localNetwork: .unknown, location: .denied).stateText.contains("Not checked yet"))
         }
 
         @Test("a wrong address or port is reported instead of connecting")

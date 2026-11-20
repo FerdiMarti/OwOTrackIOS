@@ -26,7 +26,7 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     }
     
     //opens the connection to specified ip (or computer name) and port
-    func open(cb: @escaping () -> Void, onProblem: @escaping (_ reason: String, _ fatal: Bool) -> Void) {
+    func open(cb: @escaping () -> Void, onProblem: @escaping (ConnectionProblem) -> Void) {
         loadLastPort()  // if a connection has been established before, the app tries to bind the same UDP port again because of weird behaviour of SlimeVR server.
         let params = NWParameters.udp
         //IPv4 only: a computer name can also resolve to IPv6 addresses, which the old owoTrack driver doesn't listen on
@@ -58,15 +58,15 @@ class NWConnectionUDPClient: CompatibleUDPClient {
                 print("State: Preparing\n")
             case .failed(let error):
                 print("State: error \(error)\n")
-                onProblem(self.unknownNameReason(error) ?? "Connection failed: \(self.describe(error))", true)
+                onProblem(ConnectionProblem(reason: self.unknownNameReason(error) ?? "Connection failed: \(self.describe(error))", fatal: true))
             case .waiting(let error):
                 print("State: Waiting \(error)\n")
                 //the port we used last time might be bound already. Let's reset it
                 if error.debugDescription.contains("Address already in use") {
                     self.resetLastPort()
-                    onProblem("The network port of the last connection is still in use. Please try again", false)
+                    onProblem(ConnectionProblem(reason: "The network port of the last connection is still in use. Please try again", fatal: false))
                 } else {
-                    onProblem(self.waitingReason(error), false)
+                    onProblem(self.waitingProblem(error))
                 }
             default:
                 print("ERROR! State not defined!\n")
@@ -76,11 +76,12 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     }
 
     //a readable reason why the connection is waiting instead of ready
-    private func waitingReason(_ error: NWError) -> String {
+    private func waitingProblem(_ error: NWError) -> ConnectionProblem {
         if connection?.currentPath?.unsatisfiedReason == .localNetworkDenied {
-            return "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack"
+            return ConnectionProblem(reason: "Local network access is denied. Allow it in Settings → Privacy & Security → Local Network → OwOTrack",
+                                     fatal: false, localNetworkDenied: true)
         }
-        return unknownNameReason(error) ?? "Can't reach the server: \(describe(error))"
+        return ConnectionProblem(reason: unknownNameReason(error) ?? "Can't reach the server: \(describe(error))", fatal: false)
     }
 
     //a computer name that couldn't be looked up (else iOS only gives an error number)

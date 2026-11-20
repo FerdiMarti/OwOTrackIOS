@@ -77,6 +77,13 @@ class UDPGyroProviderClient {
         get { stateLock.lock(); defer { stateLock.unlock() }; return _lastHeartbeat }
         set { stateLock.lock(); _lastHeartbeat = newValue; stateLock.unlock() }
     }
+    //the short handshake of the old protocol went out: a reply after that comes from the old owoTrack driver,
+    //which can't read SlimeVR's longer handshake (SlimeVR answers the first one right away)
+    private var _shortHandshakeSent = false
+    private var shortHandshakeSent: Bool {
+        get { stateLock.lock(); defer { stateLock.unlock() }; return _shortHandshakeSent }
+        set { stateLock.lock(); _shortHandshakeSent = newValue; stateLock.unlock() }
+    }
     var service: TrackingService
     var connectionCheckTimer : Timer? //timer that regularly calls a method to check if connection is still valid
     var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
@@ -127,8 +134,8 @@ class UDPGyroProviderClient {
             self.logStep("Attempting Handshake")
             self.runListener()
             self.handshake()
-        }, onProblem: { reason, fatal in
-            self.connectionProblem(reason: reason, fatal: fatal)
+        }, onProblem: { problem in
+            self.connectionProblem(problem)
         })
     }
 
@@ -149,9 +156,12 @@ class UDPGyroProviderClient {
 
     //the network layer reported why the connection can't be used. log the reason, so the user sees it and not only a timeout.
     //a fatal problem won't recover: stop the handshake, and if connected, report the lost connection now instead of after the heartbeat timeout
-    func connectionProblem(reason: String, fatal: Bool) {
-        logProblem(reason)
-        if !fatal {
+    func connectionProblem(_ problem: ConnectionProblem) {
+        logProblem(problem.reason)
+        if problem.localNetworkDenied {
+            service.connectUI?.setLocalNetworkAccess(.denied)
+        }
+        if !problem.fatal {
             return
         }
         isConnecting = false    //stops the handshake tries, TrackingService then reports the failed connection
@@ -230,6 +240,9 @@ class UDPGyroProviderClient {
             return
         }
         let sendSlimeExtensions = attempt < UDPGyroProviderClient.handshakeSlimeTries
+        if !sendSlimeExtensions {
+            shortHandshakeSent = true
+        }
         self.connection?.sendUDP(buildHeaderInfo(slime: sendSlimeExtensions))
         handshakeQueue.asyncAfter(deadline: .now() + UDPGyroProviderClient.handshakeRetryInterval) {
             self.sendHandshake(attempt: attempt + 1)
@@ -283,6 +296,9 @@ class UDPGyroProviderClient {
         self.isConnected = true
         self.isConnecting = false
         self.lastHeartbeat = Date().timeIntervalSince1970
+        if shortHandshakeSent {
+            service.serverDetected(.owoTrackDriver, by: self)
+        }
         //start timer to check connection regularly
         DispatchQueue.main.async {
             self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
@@ -513,6 +529,7 @@ class UDPGyroProviderClient {
             if !self.isSlimeVR {
                 self.isSlimeVR = true
                 self.logger.addEntry("SlimeVR server detected")
+                self.service.serverDetected(.slimeVR, by: self)
             }
         }
     }

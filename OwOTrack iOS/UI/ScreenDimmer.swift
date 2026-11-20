@@ -21,18 +21,24 @@ final class ScreenDimmer: NSObject, ObservableObject, UIGestureRecognizerDelegat
     static let dimmedBrightness: CGFloat = 0.1
 
     @Published private(set) var isDimmed = false
+    @Published private(set) var countdown: Int?     //seconds until dimming, during the last few seconds ("Dimming in 5…")
 
-    private let delay: TimeInterval
+    let delay: TimeInterval
+    private let countdownLength: TimeInterval
     private let fadeDuration: TimeInterval
     private let screen: () -> AdjustableBrightness?
     private var active = false
     private var idleTimer: Timer?
+    private var countdownTimer: Timer?
+    private var dimAt: Date?
     private var fadeTimer: Timer?
     private var userBrightness: CGFloat?        //the brightness before dimming, restored afterwards
     private var touchRecognizer: UIGestureRecognizer?
 
-    init(delay: TimeInterval = 30, fadeDuration: TimeInterval = 0.5, screen: @escaping () -> AdjustableBrightness? = ScreenDimmer.appScreen) {
+    init(delay: TimeInterval = 30, countdownLength: TimeInterval = 5, fadeDuration: TimeInterval = 0.5,
+         screen: @escaping () -> AdjustableBrightness? = ScreenDimmer.appScreen) {
         self.delay = delay
+        self.countdownLength = countdownLength
         self.fadeDuration = fadeDuration
         self.screen = screen
         super.init()
@@ -50,6 +56,7 @@ final class ScreenDimmer: NSObject, ObservableObject, UIGestureRecognizerDelegat
         } else {
             idleTimer?.invalidate()
             idleTimer = nil
+            stopCountdown()
             stopWatchingTouches()
             brighten()
         }
@@ -66,12 +73,43 @@ final class ScreenDimmer: NSObject, ObservableObject, UIGestureRecognizerDelegat
 
     private func restartIdleTimer() {
         idleTimer?.invalidate()
+        stopCountdown()
+        let dimAt = Date().addingTimeInterval(delay)
+        self.dimAt = dimAt
         idleTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             self?.dim()
+        }
+        //counts the last seconds down; checks often so the number changes on time
+        let countdownStart = dimAt.addingTimeInterval(-min(countdownLength, delay))
+        let timer = Timer(fire: countdownStart, interval: 0.1, repeats: true) { [weak self] _ in
+            self?.updateCountdown()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        countdownTimer = timer
+    }
+
+    private func updateCountdown() {
+        guard let dimAt = dimAt else {
+            return
+        }
+        let remaining = dimAt.timeIntervalSinceNow
+        let seconds = remaining > 0 ? Int(remaining.rounded(.up)) : nil
+        if countdown != seconds {
+            countdown = seconds
+        }
+    }
+
+    private func stopCountdown() {
+        countdownTimer?.invalidate()
+        countdownTimer = nil
+        dimAt = nil
+        if countdown != nil {
+            countdown = nil
         }
     }
 
     private func dim() {
+        stopCountdown()
         guard active, !isDimmed, let screen = screen() else {
             return
         }

@@ -22,7 +22,7 @@ struct LogView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(text.isEmpty ? placeholder : text)
-                        .font(.system(size: 14))
+                        .font(.callout)
                         .foregroundColor(text.isEmpty ? .secondary : .primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Color.clear

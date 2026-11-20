@@ -141,6 +141,20 @@ extension OwOTrackTests {
             #expect(FakeHardware.events.count == 1)
         }
 
+        @Test("a blocked local network is reported to the screen and logged")
+        func localNetworkDenied() {
+            let (client, _, service) = connectedClient()
+            defer { client.disconnectUDP(logIt: false) }
+            let ui = RecordingUI()
+            service.connectUI = ui
+            Logger.getInstance().reset()
+            client.connectionProblem(ConnectionProblem(reason: "Local network access is denied", fatal: false, localNetworkDenied: true))
+            #expect(ui.localNetwork == [.denied])
+            #expect(appLog.contains("Local network access is denied"))
+            client.connectionProblem(ConnectionProblem(reason: "Can't reach the server", fatal: false))
+            #expect(ui.localNetwork == [.denied])   //other problems don't change it
+        }
+
         @Test("a ping is answered with the same packet")
         func ping() {
             let (client, connection, _) = connectedClient()

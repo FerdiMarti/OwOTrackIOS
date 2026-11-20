@@ -28,7 +28,7 @@ final class RecordingConnection: CompatibleUDPClient {
         lock.unlock()
     }
 
-    func open(cb: @escaping () -> Void, onProblem: @escaping (String, Bool) -> Void) {
+    func open(cb: @escaping () -> Void, onProblem: @escaping (ConnectionProblem) -> Void) {
         cb()
     }
 
@@ -48,6 +48,34 @@ final class RecordingUI: ConnectUI {
     private let lock = NSLock()
     private var recordedStates: [String] = []
     private var recordedToggles: [Bool] = []
+    private var recordedFailures: [String] = []
+    private var recordedServerTypes: [ServerType] = []
+    private var recordedLocalNetwork: [LocalNetworkAccess] = []
+    private var recordedDeadline: Date?
+
+    var failures: [String] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedFailures
+    }
+
+    var serverTypes: [ServerType] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedServerTypes
+    }
+
+    var localNetwork: [LocalNetworkAccess] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedLocalNetwork
+    }
+
+    var reconnectDeadline: Date? {
+        lock.lock()
+        defer { lock.unlock() }
+        return recordedDeadline
+    }
 
     var states: [String] {
         lock.lock()
@@ -74,7 +102,32 @@ final class RecordingUI: ConnectUI {
     func setLoading() { record("connecting") }
     func setConnected() { record("connected") }
     func setUnconnected() { record("not connected") }
-    func setReconnecting() { record("reconnecting") }
+
+    func setReconnecting(until giveUp: Date) {
+        lock.lock()
+        recordedDeadline = giveUp
+        lock.unlock()
+        record("reconnecting")
+    }
+
+    func setFailed(_ reason: String) {
+        lock.lock()
+        recordedFailures.append(reason)
+        lock.unlock()
+        record("failed")
+    }
+
+    func setServerType(_ type: ServerType) {
+        lock.lock()
+        recordedServerTypes.append(type)
+        lock.unlock()
+    }
+
+    func setLocalNetworkAccess(_ access: LocalNetworkAccess) {
+        lock.lock()
+        recordedLocalNetwork.append(access)
+        lock.unlock()
+    }
 
     func setMagnometerToggle(use: Bool) {
         lock.lock()

@@ -22,6 +22,9 @@ extension OwOTrackTests {
                 #expect(await waitUntil { appLog.contains("SlimeVR server detected") })
                 server.setState(outage)     //closed: SlimeVR quit. silent: the Wi-Fi is gone
                 #expect(await waitUntil(5) { ui.lastState == "reconnecting" })
+                //the screen shows when reconnecting gives up
+                let deadline = try #require(ui.reconnectDeadline)
+                #expect(abs(deadline.timeIntervalSinceNow - fastTiming.reconnectTimeLimit) < 3)
                 #expect(appLog.contains("Connection with server lost"))
                 #expect(FakeHardware.events.last == "background started")     //the session stays up while reconnecting
 
@@ -35,6 +38,7 @@ extension OwOTrackTests {
                 //a fresh start with the server: new handshake, sensor description acknowledged again, SlimeVR packets
                 #expect(!server.received(type: 3, after: back).isEmpty)
                 #expect(await waitUntil { appLog.components(separatedBy: "SlimeVR server detected").count == 3 })
+                #expect(ui.serverTypes == [.slimeVR, .slimeVR])
                 let client = try #require(service.client)
                 client.provideRot(rot: floats(0, 0, 0, 1))
                 #expect(await waitUntil { !server.received(type: 17, after: back).isEmpty })
@@ -89,7 +93,8 @@ extension OwOTrackTests {
                 #expect(await waitUntil { ui.lastState == "connected" })
                 server.setState(.silent)
                 #expect(await waitUntil(5) { ui.lastState == "reconnecting" })
-                #expect(await waitUntil(10) { ui.lastState == "not connected" })
+                #expect(await waitUntil(10) { ui.lastState == "failed" })
+                #expect(ui.failures == ["Couldn't reconnect for 3 seconds"])
                 #expect(appLog.contains("Couldn't reconnect for 3 seconds, stopped trying"))
                 #expect(FakeHardware.events.suffix(3) == ["auto-lock allowed", "volume buttons off", "background stopped"])
 

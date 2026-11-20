@@ -54,14 +54,8 @@
 		B0000000000000000000002D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9AE6EBFC2619FBFD007C6BBA /* Assets.xcassets */; };
 		B10000000000000000000002 /* OwOTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* OwOTrackApp.swift */; };
 		B10000000000000000000003 /* OwOTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* OwOTrackApp.swift */; };
-		B10000000000000000000005 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* StatusView.swift */; };
-		B10000000000000000000006 /* StatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* StatusView.swift */; };
-		B10000000000000000000008 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* ConnectView.swift */; };
-		B10000000000000000000009 /* ConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* ConnectView.swift */; };
 		B1000000000000000000000B /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* LogView.swift */; };
 		B1000000000000000000000C /* LogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* LogView.swift */; };
-		B1000000000000000000000E /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* InfoView.swift */; };
-		B1000000000000000000000F /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* InfoView.swift */; };
 		B10000000000000000000010 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
 		B10000000000000000000011 /* ConnectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ConnectionModel.swift */; };
 		C00000000000000000000002 /* FakeHardware.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000001 /* FakeHardware.swift */; };
@@ -79,6 +73,12 @@
 		C00000000000000000000027 /* ScreenDimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000026 /* ScreenDimmer.swift */; };
 		C00000000000000000000028 /* ScreenDimmer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000026 /* ScreenDimmer.swift */; };
 		C0000000000000000000002A /* ScreenDimmerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000029 /* ScreenDimmerTests.swift */; };
+		C0000000000000000000002C /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000002B /* MainView.swift */; };
+		C0000000000000000000002D /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000002B /* MainView.swift */; };
+		C0000000000000000000002F /* InfoTopics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000002E /* InfoTopics.swift */; };
+		C00000000000000000000030 /* InfoTopics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000002E /* InfoTopics.swift */; };
+		C00000000000000000000032 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000031 /* Permissions.swift */; };
+		C00000000000000000000033 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000031 /* Permissions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,10 +141,7 @@
 		B00000000000000000000007 /* ConnectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionModel.swift; sourceTree = "<group>"; };
 		B0000000000000000000000C /* OwOTrack iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OwOTrack iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000001 /* OwOTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OwOTrackApp.swift; sourceTree = "<group>"; };
-		B10000000000000000000004 /* StatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusView.swift; sourceTree = "<group>"; };
-		B10000000000000000000007 /* ConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectView.swift; sourceTree = "<group>"; };
 		B1000000000000000000000A /* LogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogView.swift; sourceTree = "<group>"; };
-		B1000000000000000000000D /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
 		C00000000000000000000001 /* FakeHardware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeHardware.swift; sourceTree = "<group>"; };
 		C00000000000000000000003 /* Recorders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recorders.swift; sourceTree = "<group>"; };
 		C00000000000000000000005 /* Packets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Packets.swift; sourceTree = "<group>"; };
@@ -161,6 +158,9 @@
 		C0000000000000000000001A /* OwOTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OwOTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C00000000000000000000026 /* ScreenDimmer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenDimmer.swift; sourceTree = "<group>"; };
 		C00000000000000000000029 /* ScreenDimmerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenDimmerTests.swift; sourceTree = "<group>"; };
+		C0000000000000000000002B /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		C0000000000000000000002E /* InfoTopics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoTopics.swift; sourceTree = "<group>"; };
+		C00000000000000000000031 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -200,11 +200,11 @@
 			children = (
 				9A728BDF263E139800E8605D /* LaunchScreen.storyboard */,
 				B10000000000000000000001 /* OwOTrackApp.swift */,
-				B10000000000000000000004 /* StatusView.swift */,
-				B10000000000000000000007 /* ConnectView.swift */,
 				B1000000000000000000000A /* LogView.swift */,
-				B1000000000000000000000D /* InfoView.swift */,
 				C00000000000000000000026 /* ScreenDimmer.swift */,
+				C0000000000000000000002B /* MainView.swift */,
+				C0000000000000000000002E /* InfoTopics.swift */,
+				C00000000000000000000031 /* Permissions.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -526,11 +526,11 @@
 				9AE20DD829539D4E001B0874 /* TrackingService.swift in Sources */,
 				9AE20DD429539D4E001B0874 /* UDPGyroProviderClient.swift in Sources */,
 				B10000000000000000000002 /* OwOTrackApp.swift in Sources */,
-				B10000000000000000000005 /* StatusView.swift in Sources */,
-				B10000000000000000000008 /* ConnectView.swift in Sources */,
 				B1000000000000000000000B /* LogView.swift in Sources */,
 				C00000000000000000000027 /* ScreenDimmer.swift in Sources */,
-				B1000000000000000000000E /* InfoView.swift in Sources */,
+				C0000000000000000000002C /* MainView.swift in Sources */,
+				C0000000000000000000002F /* InfoTopics.swift in Sources */,
+				C00000000000000000000032 /* Permissions.swift in Sources */,
 				B10000000000000000000010 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -551,11 +551,11 @@
 				B00000000000000000000028 /* TrackingService.swift in Sources */,
 				B00000000000000000000029 /* UDPGyroProviderClient.swift in Sources */,
 				B10000000000000000000003 /* OwOTrackApp.swift in Sources */,
-				B10000000000000000000006 /* StatusView.swift in Sources */,
-				B10000000000000000000009 /* ConnectView.swift in Sources */,
 				B1000000000000000000000C /* LogView.swift in Sources */,
 				C00000000000000000000028 /* ScreenDimmer.swift in Sources */,
-				B1000000000000000000000F /* InfoView.swift in Sources */,
+				C0000000000000000000002D /* MainView.swift in Sources */,
+				C00000000000000000000030 /* InfoTopics.swift in Sources */,
+				C00000000000000000000033 /* Permissions.swift in Sources */,
 				B10000000000000000000011 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

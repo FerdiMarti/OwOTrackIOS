@@ -59,7 +59,7 @@ struct ConnectView: View {
         case .connecting: return "Loading..."
         case .connected: return "Connected"
         case .reconnecting: return "Reconnecting..."
-        case .error(let message): return message
+        case .failed(let message), .error(let message): return message
         }
     }
 
@@ -69,7 +69,7 @@ struct ConnectView: View {
         case .connecting: return .primary
         case .connected: return .green
         case .reconnecting: return .orange
-        case .error: return .red
+        case .failed, .error: return .red
         }
     }
 }

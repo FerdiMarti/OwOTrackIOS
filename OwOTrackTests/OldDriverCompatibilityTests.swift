@@ -20,6 +20,7 @@ extension OwOTrackTests {
             defer { server.stop() }
             try await withTracking(port: server.port) { _, ui in
                 #expect(await waitUntil(5) { ui.lastState == "connected" })
+                #expect(await waitUntil { ui.serverTypes == [.owoTrackDriver] })   //recognised by its answer to the short handshake
                 let handshakes = server.received(type: 3)
                 //7 SlimeVR handshakes the driver can't read, then the short one it answers
                 #expect(handshakes.prefix(7).allSatisfy { $0.raw.count > 28 })

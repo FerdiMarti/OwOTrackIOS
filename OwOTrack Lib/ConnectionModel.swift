@@ -6,23 +6,42 @@
 import Foundation
 import Combine
 
-//State and actions of the connect screen, for SwiftUI views (the watch app now, the iPhone app later).
+let RECENT_SERVERS_USERDEFAULTS_KEY = "recentServers"
+
+//a server the app connected to, offered again on the connect screen
+struct RecentServer: Equatable, Identifiable {
+    let address: String
+    let port: String
+
+    var id: String {
+        return "\(address):\(port)"
+    }
+}
+
+//State and actions of the connect screen, for the SwiftUI views of the iPhone and watch apps.
 //TrackingService and Logger report changes through ConnectUI from background threads, so every change moves to the main thread.
 final class ConnectionModel: ObservableObject, ConnectUI {
 
-    enum Status {
+    enum Status: Equatable {
         case notConnected
         case connecting
         case connected
-        case reconnecting   //the connection was lost, the app keeps trying until it's back or the user disconnects
-        case error(String)
+        case reconnecting       //the connection was lost, the app keeps trying until it's back or the user disconnects
+        case failed(String)     //connecting failed or reconnecting gave up, with the reason
+        case error(String)      //the address or port isn't valid
     }
+
+    static let maxRecentServers = 5
 
     @Published var ip: String
     @Published var port: String
     @Published var useMagnetometer: Bool
     @Published private(set) var status: Status = .notConnected
     @Published private(set) var log = ""
+    @Published private(set) var serverType = ServerType.unknown
+    @Published private(set) var localNetwork = LocalNetworkAccess.unknown
+    @Published private(set) var reconnectDeadline: Date?        //while reconnecting: when the app gives up
+    @Published private(set) var recentServers: [RecentServer]
 
     private let service = TrackingService()
 
@@ -31,6 +50,11 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         ip = defaults.string(forKey: IP_USERDEFAULTS_KEY) ?? "192.168.0.10"
         port = defaults.string(forKey: PORT_USERDEFAULTS_KEY) ?? "6969"
         useMagnetometer = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool ?? true
+        let saved = defaults.array(forKey: RECENT_SERVERS_USERDEFAULTS_KEY) as? [[String: String]] ?? []
+        recentServers = saved.compactMap { entry in
+            guard let address = entry["address"], let port = entry["port"] else { return nil }
+            return RecentServer(address: address, port: port)
+        }
         Logger.getInstance().attachUI(connectUI: self)
     }
 
@@ -81,25 +105,72 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         service.start(ipAdress: address, port: port, magnetometer: useMagnetometer, connectUI: self)
     }
 
+    //fills in a server connected to before
+    func useRecentServer(_ server: RecentServer) {
+        if !canEdit {
+            return
+        }
+        ip = server.address
+        port = server.port
+    }
+
+    //the connected server goes first; the list keeps the last few, without duplicates
+    private func rememberServer() {
+        let server = RecentServer(address: ip, port: port)
+        recentServers = Array(([server] + recentServers.filter { $0 != server }).prefix(ConnectionModel.maxRecentServers))
+        let saved = recentServers.map { ["address": $0.address, "port": $0.port] }
+        UserDefaults.standard.set(saved, forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
+    }
+
     // MARK: ConnectUI, called from any thread
 
     func setLoading() {
         onMain {
             self.status = .connecting
             self.log = ""
+            self.serverType = .unknown
+            self.reconnectDeadline = nil
         }
     }
 
     func setConnected() {
-        onMain { self.status = .connected }
+        onMain {
+            self.status = .connected
+            self.reconnectDeadline = nil
+            self.rememberServer()
+        }
     }
 
     func setUnconnected() {
-        onMain { self.status = .notConnected }
+        onMain {
+            self.status = .notConnected
+            self.serverType = .unknown
+            self.reconnectDeadline = nil
+        }
     }
 
-    func setReconnecting() {
-        onMain { self.status = .reconnecting }
+    //keeps the server type: it's the same server the app tries to reach again
+    func setReconnecting(until giveUp: Date) {
+        onMain {
+            self.status = .reconnecting
+            self.reconnectDeadline = giveUp
+        }
+    }
+
+    func setFailed(_ reason: String) {
+        onMain {
+            self.status = .failed(reason)
+            self.serverType = .unknown
+            self.reconnectDeadline = nil
+        }
+    }
+
+    func setServerType(_ type: ServerType) {
+        onMain { self.serverType = type }
+    }
+
+    func setLocalNetworkAccess(_ access: LocalNetworkAccess) {
+        onMain { self.localNetwork = access }
     }
 
     //used if server triggers a change in magnetometer use

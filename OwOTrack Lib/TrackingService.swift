@@ -74,6 +74,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             }
             if client.isConnected {
                 self.logger.addEntry("Connection established")
+                connectUI.setLocalNetworkAccess(.granted)
                 connectUI.setConnected()
                 self.startStreaming(client: client)
             } else {
@@ -82,6 +83,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                 self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
                 self.logger.addEntry("Connecting Failed")
                 self.stop()
+                connectUI.setFailed("Couldn't connect to \(self.ipAdress)")
             }
         }
     }
@@ -103,6 +105,15 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             Thread.sleep(forTimeInterval: 0.1)
         }
         return client
+    }
+
+    //the client found out what it's connected to. Reported on the main thread, and only for the current client
+    func serverDetected(_ type: ServerType, by detecting: UDPGyroProviderClient) {
+        DispatchQueue.main.async {
+            if detecting === self.client {
+                self.connectUI?.setServerType(type)
+            }
+        }
     }
 
     //sends sensor data, battery level and the sensor description over a connected client
@@ -129,7 +140,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         stopStreaming()
         lostClient.disconnectUDP(logIt: false)
         logger.addEntry("Reconnecting...")
-        connectUI?.setReconnecting()
+        connectUI?.setReconnecting(until: Date().addingTimeInterval(timing.reconnectTimeLimit))
         trackingServiceQueue.async {
             self.reconnect(session: session)
         }
@@ -147,6 +158,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
                         return
                     }
                     self.logger.addEntry("Reconnected")
+                    self.connectUI?.setLocalNetworkAccess(.granted)
                     self.connectUI?.setConnected()
                     self.startStreaming(client: attempt)
                 }
@@ -157,8 +169,10 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             if Date() >= giveUp {
                 DispatchQueue.main.async {
                     if self.isActive(session) {     //not if the user disconnected in the meantime
-                        self.logger.addEntry("Couldn't reconnect for \(self.describe(self.timing.reconnectTimeLimit)), stopped trying")
+                        let reason = "Couldn't reconnect for \(self.describe(self.timing.reconnectTimeLimit))"
+                        self.logger.addEntry("\(reason), stopped trying")
                         self.stop()
+                        self.connectUI?.setFailed(reason)
                     }
                 }
                 return
