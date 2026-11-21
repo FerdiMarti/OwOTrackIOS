@@ -441,7 +441,11 @@ struct MainView: View {
     private var watchDetail: String {
         let status = watchRelay.status
         switch status.state {
-        case .notConnected: return "Connect on the watch to track with it"
+        case .notConnected:
+            if let workout = watchRelay.lastWorkout {
+                return "Last session saved to Health: \(workout.durationText)"
+            }
+            return "Connect on the watch to track with it"
         case .connecting: return "Connecting…"
         case .connected: return ["Tracking through this iPhone", status.serverType.name].compactMap { $0 }.joined(separator: " · ")
         case .reconnecting: return "Reconnecting…"

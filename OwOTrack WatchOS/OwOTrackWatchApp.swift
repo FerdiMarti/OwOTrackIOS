@@ -17,6 +17,10 @@ struct OwOTrackWatchApp: App {
         let model = ConnectionModel()
         _model = StateObject(wrappedValue: model)
         feedback = StatusFeedback(model: model)
+        //a session saved to Health shows on the iPhone too
+        WorkoutRecorder.shared.onSaved = { summary in
+            WatchConnectivityTransport.shared.send(.workout(summary))
+        }
         WatchConnectivityTransport.shared.activate()
     }
 
@@ -24,7 +28,10 @@ struct OwOTrackWatchApp: App {
         WindowGroup {
             ConnectView(model: model)
                 #if DEBUG
-                .onAppear { model.runScreenshotAction() }
+                .onAppear {
+                    model.runScreenshotAction()
+                    WorkoutRecorder.shared.runScreenshotAction()
+                }
                 #endif
         }
     }

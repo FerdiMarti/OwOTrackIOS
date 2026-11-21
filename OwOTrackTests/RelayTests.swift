@@ -24,6 +24,7 @@ extension OwOTrackTests {
                 .status(RelayStatus(state: .failed, reason: "Couldn't connect to my-pc.local")),
                 .log(["Connecting for the Apple Watch", "Handshake Succeeded"]),
                 .vibrate(frequency: 0.25, amplitude: 0.75, duration: 0.5), .magnetometer(false),
+                .workout(WorkoutSummary(start: Date(timeIntervalSince1970: 1_000_000), duration: 2712)),
             ]
             for message in messages {
                 #expect(RelayPacket(data: RelayPacket(message).data) == .message(message))
@@ -39,6 +40,24 @@ extension OwOTrackTests {
             #expect(RelayPacket(data: Data([7, 1, 2])) == nil)
             #expect(RelayPacket(data: Data([1, 1, 0, 0])) == nil)      //a rotation cut short
             #expect(RelayPacket(data: Data([0]) + Data("{".utf8)) == nil)
+        }
+
+        @Test("a session the watch saved to Health reaches the iPhone's screen")
+        func workoutSaved() async {
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            var received: WorkoutSummary?
+            relay.host?.onWorkout = { received = $0 }
+            let summary = WorkoutSummary(start: Date(timeIntervalSince1970: 1_000_000), duration: 2712)
+            relay.link.watch.send(.workout(summary))        //also when the watch isn't tracking (any more)
+            #expect(await waitUntil { received == summary })
+        }
+
+        @Test("a saved session's length, in whole minutes")
+        func workoutText() {
+            #expect(WorkoutSummary(start: Date(), duration: 45 * 60 + 12).durationText == "45 min")
+            #expect(WorkoutSummary(start: Date(), duration: 65 * 60).durationText == "1 h 5 min")
+            #expect(WorkoutSummary(start: Date(), duration: 20).durationText == "1 min")
         }
 
         @Test("every control message carries the app's relay version, so apps that can't work together say which to update")

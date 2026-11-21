@@ -17,6 +17,7 @@ enum RelayMessage: Codable, Equatable {
     case reset(yaw: Bool)               //yaw reset, else full reset
     case alive                          //nothing else to send for a while (no motion readings, as in the simulator): still there
     case find(port: String, mac: [UInt8])   //search the network for the server (the watch's MAC: SlimeVR keeps it as the watch's tracker)
+    case workout(WorkoutSummary)        //a session was saved to Health as a workout (shown on the iPhone)
     //iPhone → watch
     case status(RelayStatus)            //the connection's state, also sent every few seconds as a sign of life
     case log([String])                  //new lines of the connection log
@@ -53,6 +54,22 @@ struct RelayStatus: Codable, Equatable {
     }
 }
 
+//a VR session the watch saved to Health as a workout (its length only)
+struct WorkoutSummary: Codable, Equatable, Identifiable {
+    var start: Date
+    var duration: TimeInterval
+
+    var id: Date {
+        return start
+    }
+
+    //"45 min", "1 h 5 min"
+    var durationText: String {
+        let minutes = max(1, Int((duration / 60).rounded()))
+        return minutes >= 60 ? "\(minutes / 60) h \(minutes % 60) min" : "\(minutes) min"
+    }
+}
+
 //one motion reading of the watch: big-endian floats as GyroHandler delivers them
 struct MotionSample: Equatable {
     enum Kind: UInt8 {
@@ -72,8 +89,8 @@ struct MotionSample: Equatable {
 //which version of the relay messages this app speaks. The watch app can update later than the iPhone app (or the other
 //way round): every control message carries both numbers, so an app that can't work with the other says which one to update
 enum RelayProtocol {
-    //raise for every change of the messages
-    static let version: UInt8 = 1
+    //raise for every change of the messages. 2: the watch's workout summary
+    static let version: UInt8 = 2
     //the oldest version of the other app this one still works with: raise it only when an older app can no longer work
     //with this one (it can't read what this one sends, or this one needs something it doesn't send). Messages an app
     //doesn't know are ignored, so new messages and new optional fields don't need it

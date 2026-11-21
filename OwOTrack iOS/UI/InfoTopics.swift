@@ -141,6 +141,7 @@ struct InfoContent {
                 "Connect on your Apple Watch to track with it. The watch can't reach SlimeVR by itself, so this iPhone passes its readings on. In SlimeVR, the watch is a tracker of its own.",
                 "Keep OwOTrack running on this iPhone while you track with the watch: leave it open (the screen dims), or allow Location \"Always\" so it can keep running in the background.",
                 "This iPhone doesn't have to be connected as a tracker itself. The watch has its own server address, in its settings. Its recent servers include the ones this iPhone connected to, and the other way around.",
+                "While it tracks, the watch records a workout: that keeps it tracking with your wrist down. Sessions of a minute or longer are saved to Apple Health as Fitness Gaming workouts, with their length. Don't want that? Turn off **Save workouts** in the watch's settings.",
                 "**Stop** ends the watch's connection from here.",
             ]
         case .volumeButtons:

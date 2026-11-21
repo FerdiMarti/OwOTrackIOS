@@ -25,6 +25,7 @@ final class RelayHost {
         }
     }
     var onStatusChange: ((RelayStatus) -> Void)?
+    var onWorkout: ((WorkoutSummary) -> Void)?      //the watch saved a session to Health
     let logger = Logger()       //the watch session's own log, sent to the watch
 
     private let transport: RelayTransport
@@ -101,6 +102,8 @@ final class RelayHost {
             hardware?.batteryLevel = level
         case .message(.reset(let yaw)):
             service?.sendReset(yaw: yaw)
+        case .message(.workout(let summary)):
+            onWorkout?(summary)
         case .message(.find(let port, let mac)):
             makeFinder(mac).findServers(port: port) { [weak self] result in
                 DispatchQueue.main.async {

@@ -5,9 +5,9 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
-	<string>OwOTrack doesn't read any health data. It only needs to start a workout session while connected, so tracking continues when the screen turns off.</string>
+	<string>OwOTrack doesn't read any health data. It only saves your VR sessions as workouts.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>OwOTrack starts a workout session while connected, so your Apple Watch keeps tracking when you lower your wrist or the screen turns off. No workouts are saved to Health.</string>
+	<string>OwOTrack records a workout while you track with your Apple Watch, so the watch keeps tracking when you lower your wrist. When you stop, the session's length is saved to Health as a Fitness Gaming workout. You can turn saving off in the watch app's settings.</string>
 	<key>WKBackgroundModes</key>
 	<array>
 		<string>workout-processing</string>

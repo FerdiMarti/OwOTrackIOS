@@ -113,7 +113,7 @@ extension OwOTrackTests {
             service.magnetometer = true
             client.processReceivedData(data: slimeVRPacket(type: 25, number: 7, payload: [sensor] + bytes(setting) + [0]), recursion: false)
             #expect(await waitUntil { service.magnetometer == !switches })     //switched on the main thread
-            #expect(ui.magnetometerToggles == (switches ? [false] : []))
+            #expect(await waitUntil { ui.magnetometerToggles == (switches ? [false] : []) })
             #expect(await waitUntil { connection.packets.contains { $0.type == 24 } })
             #expect(connection.packets.first { $0.type == 24 }?.payload == [sensor] + bytes(setting))
         }

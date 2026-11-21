@@ -2,8 +2,9 @@
 //  ConnectView.swift
 //  OwOTrack WatchOS
 //
-//  The watch app, in three pages: tracking (status, Connect, resets), settings (server, magnetometer)
-//  and details (permissions, iPhone, battery, log). The watch tracks through the iPhone app (RelayClient).
+//  The watch app, in three pages: tracking (status, Connect, resets),
+//  settings (server, magnetometer, saving workouts) and details (permissions, iPhone, battery, log).
+//  The watch tracks through the iPhone app (RelayClient). A saved workout is summed up when tracking ends.
 //
 
 import SwiftUI
@@ -13,6 +14,7 @@ import HealthKit
 
 struct ConnectView: View {
     @ObservedObject var model: ConnectionModel
+    @ObservedObject private var workout = WorkoutRecorder.shared
 
     var body: some View {
         TabView {
@@ -21,6 +23,9 @@ struct ConnectView: View {
             DetailsPage(model: model)
         }
         .pagedVertically()
+        .sheet(item: $workout.shownSummary) { summary in
+            WorkoutSummaryView(summary: summary)
+        }
         .confirmationDialog("Several servers answered", isPresented: choosingServer, titleVisibility: .visible) {
             ForEach(model.serverChoices) { server in
                 Button([server.address, server.type.name].compactMap { $0 }.joined(separator: " · ")) {
@@ -171,7 +176,9 @@ private struct TrackingPage: View {
 
 private struct SettingsPage: View {
     @ObservedObject var model: ConnectionModel
+    @ObservedObject private var workout = WorkoutRecorder.shared
     @State private var showsMagnetometerInfo = false
+    @State private var showsWorkoutInfo = false
 
     var body: some View {
         ScrollView {
@@ -207,8 +214,26 @@ private struct SettingsPage: View {
                     Label("About the magnetometer", systemImage: "info.circle")
                 }
                 .font(.footnote)
+                Toggle(isOn: $workout.savesWorkouts) {       //can change while tracking: it counts when tracking ends
+                    Text("Save workouts")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                Button {
+                    showsWorkoutInfo = true
+                } label: {
+                    Label("About workouts", systemImage: "info.circle")
+                }
+                .font(.footnote)
             }
             .scenePadding(.horizontal)
+        }
+        .sheet(isPresented: $showsWorkoutInfo) {
+            InfoText(title: "Workouts", paragraphs: [
+                "While the watch tracks, it records a workout. That keeps it tracking when you lower your wrist.",
+                "When you stop, sessions of a minute or longer are saved to Apple Health as Fitness Gaming workouts, with their length. OwOTrack doesn't read or save your heart rate.",
+                "Turn off Save workouts to keep tracking with the wrist down without saving anything.",
+            ])
         }
         .sheet(isPresented: $showsMagnetometerInfo) {
             InfoText(title: "Magnetometer", paragraphs: [
@@ -223,6 +248,7 @@ private struct SettingsPage: View {
 
 private struct DetailsPage: View {
     @ObservedObject var model: ConnectionModel
+    @ObservedObject private var workout = WorkoutRecorder.shared
     @State private var health = HKAuthorizationStatus.notDetermined
     @State private var iPhoneReachable = false
     @State private var battery: Float?
@@ -256,11 +282,13 @@ private struct DetailsPage: View {
     private var healthText: String {
         switch health {
         case .sharingAuthorized:
-            return "Allowed: tracking keeps running when the screen turns off"
+            return workout.savesWorkouts
+                ? "Allowed: tracking keeps running when the screen turns off, and your sessions are saved as workouts"
+                : "Allowed: tracking keeps running when the screen turns off. Saving workouts is off in the settings"
         case .sharingDenied:
-            return "Not allowed: tracking stops when the screen turns off. Allow it on your iPhone: Settings → Privacy & Security → Health → OwOTrack"
+            return "Not allowed: tracking stops when the screen turns off, and nothing is saved. Allow it on your iPhone: Settings → Privacy & Security → Health → OwOTrack"
         default:
-            return "Not asked yet: the watch asks when you connect. It keeps tracking running when the screen turns off"
+            return "Not asked yet: the watch asks when you connect. It keeps tracking running when the screen turns off, and saves your sessions as workouts"
         }
     }
 
@@ -292,6 +320,45 @@ private struct DetailsPage: View {
         WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
         let level = WKInterfaceDevice.current().batteryLevel
         battery = level < 0 ? nil : level
+    }
+}
+
+// MARK: workout
+
+//shown once when tracking ends and the session was saved to Health
+private struct WorkoutSummaryView: View {
+    let summary: WorkoutSummary
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Workout saved", systemImage: "figure.dance")
+                    .font(.headline)
+                    .foregroundColor(.green)
+                row("clock.fill", summary.durationText, .yellow)
+                Text("In Apple Health as Fitness Gaming")
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                Button("Done") {
+                    dismiss()
+                }
+            }
+            .scenePadding(.horizontal)
+        }
+    }
+
+    private func row(_ symbol: String, _ text: String, _ color: Color) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Image(systemName: symbol)
+                .foregroundColor(color)
+                .frame(width: 22)
+            Text(text)
+                .font(.title3.weight(.semibold))
+                .monospacedDigit()
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 }
 
