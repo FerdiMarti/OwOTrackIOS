@@ -435,3 +435,21 @@ extension ConnectionModel.Status {
         }
     }
 }
+
+#if DEBUG
+//App Store screenshots: started with the launch argument "-screenshotAction connect" (or "search"), the connect screen
+//does that by itself, so the simulator can be captured in that state without anyone tapping. Only in debug builds
+extension ConnectionModel {
+    static var screenshotAction: String? {
+        return UserDefaults.standard.string(forKey: "screenshotAction")
+    }
+
+    func runScreenshotAction() {
+        switch ConnectionModel.screenshotAction {
+        case "connect": connectPressed()
+        case "search": searchPressed()
+        default: break
+        }
+    }
+}
+#endif

@@ -23,6 +23,9 @@ struct OwOTrackWatchApp: App {
     var body: some Scene {
         WindowGroup {
             ConnectView(model: model)
+                #if DEBUG
+                .onAppear { model.runScreenshotAction() }
+                #endif
         }
     }
 }

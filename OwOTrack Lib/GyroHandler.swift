@@ -43,6 +43,15 @@ public class GyroHandler: MotionSource {
         gyroAvailable = mmanager.isGyroAvailable
         magnetometerAvailable = mmanager.isMagnetometerAvailable
         magnetometerCorrectionAvailable = CMMotionManager.availableAttitudeReferenceFrames().contains(.xArbitraryCorrectedZVertical)
+        #if DEBUG
+        //App Store screenshots come from the simulator, which has no motion sensors: show them like on a real device
+        if ConnectionModel.screenshotAction != nil {
+            motionAvailable = true
+            accelerometerAvailable = true
+            gyroAvailable = true
+            magnetometerAvailable = true
+        }
+        #endif
     }
     
     func startUpdates(sink client: MotionSink, useMagn: Bool) {

@@ -81,6 +81,11 @@ class WatchHardware: DeviceHardware {
             guard HKHealthStore.isHealthDataAvailable() else {
                 return
             }
+            #if DEBUG
+            if ConnectionModel.screenshotAction != nil {
+                return      //App Store screenshots in the simulator: no Health prompt in the way
+            }
+            #endif
             //starting a workout session needs permission to share workouts, watchOS only asks the first time
             healthStore.requestAuthorization(toShare: [HKObjectType.workoutType()], read: nil) { _, _ in
                 DispatchQueue.main.async {

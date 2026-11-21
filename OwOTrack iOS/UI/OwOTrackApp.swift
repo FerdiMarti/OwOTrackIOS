@@ -30,6 +30,9 @@ struct OwOTrackApp: App {
                 .onChange(of: model.canDisconnect) { _ in updateDimmer() }
                 .onChange(of: watchRelay.isActive) { _ in updateDimmer() }
                 .onChange(of: scenePhase) { _ in updateDimmer() }
+                #if DEBUG
+                .onAppear { model.runScreenshotAction() }
+                #endif
         }
     }
 
