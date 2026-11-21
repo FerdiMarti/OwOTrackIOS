@@ -16,11 +16,13 @@ enum RelayMessage: Codable, Equatable {
     case battery(Float)
     case reset(yaw: Bool)               //yaw reset, else full reset
     case alive                          //nothing else to send for a while (no motion readings, as in the simulator): still there
+    case find(port: String, mac: [UInt8])   //search the network for the server (the watch's MAC: SlimeVR keeps it as the watch's tracker)
     //iPhone → watch
     case status(RelayStatus)            //the connection's state, also sent every few seconds as a sign of life
     case log([String])                  //new lines of the connection log
     case vibrate(frequency: Float, amplitude: Float, duration: Float)
     case magnetometer(Bool)             //use the magnetometer from now on (also when SlimeVR switches it)
+    case found(ServerSearchResult)      //what the search found
 }
 
 //what the watch asks the iPhone to connect to, and how the watch identifies itself there

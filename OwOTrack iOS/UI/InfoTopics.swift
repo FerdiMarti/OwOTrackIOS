@@ -43,7 +43,9 @@ struct InfoContent {
         case .address:
             title = "Server Address"
             paragraphs = [
-                "Enter the IP address of the computer running SlimeVR or the owoTrack driver, or the computer's name. A name keeps working when the computer gets a new IP address.",
+                "Leave it empty and Connect finds SlimeVR (or the owoTrack driver) on your Wi-Fi by itself. The search button next to the field does the same and fills in what it finds.",
+                "Nothing found? Check that SlimeVR is running, that this iPhone is on the same Wi-Fi as the computer (not a guest network), that Local Network access is allowed for OwOTrack, and that the computer's firewall lets SlimeVR through.",
+                "You can also enter the IP address of the computer running SlimeVR or the owoTrack driver, or the computer's name. A name keeps working when the computer gets a new IP address.",
                 "On Windows 10/11 PCs and Macs, the name followed by .local usually works, for example **DESKTOP-AB12CD.local**. On Windows, the name is shown under Settings → System → About → Device name.",
                 "The clock button lists the servers you connected to recently.",
             ]

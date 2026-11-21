@@ -8,7 +8,7 @@
 
 import Foundation
 
-final class RelayClient: TrackingControl, MotionSink {
+final class RelayClient: TrackingControl, ServerFinding, MotionSink {
     struct Timing {
         var batchInterval: TimeInterval = 0.05          //motion readings go to the iPhone in batches, 20 times a second
         var firstAnswerTimeout: TimeInterval = 15       //the iPhone app has to answer that soon after Connect (it may have to launch first)
@@ -46,6 +46,8 @@ final class RelayClient: TrackingControl, MotionSink {
     private var shownState: RelayStatus.State?
     private var shownServer = ServerType.unknown
     private var timers: [Timer] = []
+    private var findCompletion: ((ServerSearchResult) -> Void)?    //the iPhone searches the network for the watch
+    private var findTimer: Timer?
     private let batchLock = NSLock()
     private var batch: [MotionSample] = []
     private var sendsGyro = true                //SlimeVR doesn't use the gyro readings: a third less to send (guarded by batchLock)
@@ -187,9 +189,34 @@ final class RelayClient: TrackingControl, MotionSink {
         lastSent = Date()
     }
 
+    // MARK: searching the network, through the iPhone
+
+    //on the main thread
+    func findServers(port: String, completion: @escaping (ServerSearchResult) -> Void) {
+        findCompletion?(ServerSearchResult(failure: "Search again"))      //a newer search replaces it
+        findCompletion = completion
+        transport.send(.find(port: port, mac: hardware.getPseudoMacAddress()))     //wakes the iPhone app if it isn't running
+        findTimer?.invalidate()
+        findTimer = Timer.scheduledTimer(withTimeInterval: timing.firstAnswerTimeout + 3, repeats: false) { [weak self] _ in
+            self?.finishFind(ServerSearchResult(failure: "Open OwOTrack on your iPhone, then search again"))
+        }
+    }
+
+    private func finishFind(_ result: ServerSearchResult) {
+        findTimer?.invalidate()
+        findTimer = nil
+        let completion = findCompletion
+        findCompletion = nil
+        completion?(result)
+    }
+
     // MARK: from the iPhone, on the main thread
 
     private func receive(_ data: Data) {
+        if case .message(.found(let result))? = RelayPacket(data: data) {
+            finishFind(result)
+            return
+        }
         guard active, case .message(let message)? = RelayPacket(data: data) else {
             return
         }

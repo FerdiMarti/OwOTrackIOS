@@ -177,6 +177,11 @@ class UDPGyroProviderClient: MotionSink {
     
     //builds the data header either for legacy OwOTrack driver or SlimeVR server
     func buildHeaderInfo(slime: Bool) -> Data {
+        return UDPGyroProviderClient.handshakePacket(slime: slime, mac: hardware.getPseudoMacAddress(), platform: service.firmwarePlatform)
+    }
+
+    //the handshake, also sent when searching the network for the server (LocalServerFinder)
+    static func handshakePacket(slime: Bool, mac pseudoMac: [UInt8], platform: String) -> Data {
         var len = 12
         if slime { len += 36 + 9 }
         
@@ -199,10 +204,9 @@ class UDPGyroProviderClient: MotionSink {
         //shown as the tracker's firmware version in SlimeVR, e.g. "owoTrack iOS 1.12".
         //not a bare version number like "1.12.0": SlimeVR compares those with its own firmware releases
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-        let firmware = "owoTrack \(service.firmwarePlatform) \(appVersion)"
+        let firmware = "owoTrack \(platform) \(appVersion)"
         let firmwareData = Data(firmware.utf8)
         let firmwareLength : UInt8 = UInt8(firmwareData.count)
-        let pseudoMac : [UInt8] = hardware.getPseudoMacAddress()
         data.append(Data(bigEndian: boardType))
         data.append(Data(bigEndian: imuType))
         data.append(Data(bigEndian: mcuType))

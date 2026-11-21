@@ -31,6 +31,17 @@ extension OwOTrackTests {
            .timeLimit(.minutes(1)))
     struct LiveSlimeVR {
 
+        @Test("a search of this Mac's network finds the server")
+        func searchFindsServer() async throws {
+            let host = try #require(LiveServer.host)
+            let finder = LocalServerFinder(mac: FakeHardware.testMac, platform: "iOS")       //the test tracker, not a new one
+            let result = await withCheckedContinuation { continuation in
+                finder.findServers(port: String(LiveServer.port)) { continuation.resume(returning: $0) }
+            }
+            #expect(result.failure == nil)
+            #expect(result.servers.contains(FoundServer(address: host, type: .slimeVR)), "found: \(result.servers)")
+        }
+
         @Test("connects, is recognised as SlimeVR and stays connected while sending data")
         func connectsAndStreams() async throws {
             let host = try #require(LiveServer.host)

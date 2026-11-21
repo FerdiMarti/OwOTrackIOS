@@ -31,6 +31,7 @@ final class RelayHost {
     private let device: TrackerHardware
     private let connectionTiming: ConnectionTiming
     private let timing: Timing
+    private let makeFinder: ([UInt8]) -> ServerFinding     //searches the network for the watch, with the watch's MAC
     private var service: TrackingService?
     private var hardware: RelayedWatchHardware?
     private var motion: RelayedWatchMotion?
@@ -44,11 +45,13 @@ final class RelayHost {
     private var rateCountStart = Date()
 
     //device: the iPhone's own hardware, which keeps the app awake while it relays
-    init(transport: RelayTransport, device: TrackerHardware, connectionTiming: ConnectionTiming = ConnectionTiming(), timing: Timing = Timing()) {
+    init(transport: RelayTransport, device: TrackerHardware, connectionTiming: ConnectionTiming = ConnectionTiming(), timing: Timing = Timing(),
+         makeFinder: @escaping ([UInt8]) -> ServerFinding = { mac in LocalServerFinder(mac: mac, platform: "watchOS") }) {
         self.transport = transport
         self.device = device
         self.connectionTiming = connectionTiming
         self.timing = timing
+        self.makeFinder = makeFinder
         transport.onReceive = { [weak self] data in
             self?.receive(data)
         }
@@ -78,6 +81,12 @@ final class RelayHost {
             hardware?.batteryLevel = level
         case .message(.reset(let yaw)):
             service?.sendReset(yaw: yaw)
+        case .message(.find(let port, let mac)):
+            makeFinder(mac).findServers(port: port) { [weak self] result in
+                DispatchQueue.main.async {
+                    self?.transport.send(.found(result))
+                }
+            }
         case .message:
             break       //messages for the watch
         }

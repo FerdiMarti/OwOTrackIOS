@@ -60,6 +60,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
 
     enum Status: Equatable {
         case notConnected
+        case searching          //looking for the server on the network
         case connecting
         case connected
         case reconnecting       //the connection was lost, the app keeps trying until it's back or the user disconnects
@@ -78,8 +79,12 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     @Published private(set) var localNetwork = LocalNetworkAccess.unknown
     @Published private(set) var reconnectDeadline: Date?        //while reconnecting: when the app gives up
     @Published private(set) var recentServers: [RecentServer]     //this device's and the paired device's
+    @Published private(set) var serverChoices: [FoundServer] = []   //several servers answered the search: the user picks one
+    @Published private(set) var offersSearch = false                //connecting failed: searching may find the server's new address
 
     private let service: TrackingControl
+    private let finder: ServerFinding
+    private var connectAfterChoice = false
     private let sharing: RecentServerSharing?
     private var ownServers: [RecentServer]
     private var pairedServers: [RecentServer]
@@ -102,11 +107,21 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         #endif
     }
 
-    init(service: TrackingControl = ConnectionModel.makeService(), sharing: RecentServerSharing? = ConnectionModel.makeSharing()) {
+    //searches the network: the iPhone itself; for the watch, the iPhone does (RelayClient)
+    static func makeFinder(for service: TrackingControl) -> ServerFinding {
+        if let finder = service as? ServerFinding {
+            return finder
+        }
+        return LocalServerFinder(mac: StaticHardware(TrackingService.deviceHardware).getPseudoMacAddress(), platform: "iOS")
+    }
+
+    init(service: TrackingControl = ConnectionModel.makeService(), sharing: RecentServerSharing? = ConnectionModel.makeSharing(),
+         finder: ServerFinding? = nil) {
         self.service = service
+        self.finder = finder ?? ConnectionModel.makeFinder(for: service)
         self.sharing = sharing
         let defaults = UserDefaults.standard
-        ip = defaults.string(forKey: IP_USERDEFAULTS_KEY) ?? "192.168.0.10"
+        ip = defaults.string(forKey: IP_USERDEFAULTS_KEY) ?? ""         //empty: Connect searches the network for the server
         port = defaults.string(forKey: PORT_USERDEFAULTS_KEY) ?? "6969"
         useMagnetometer = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool ?? true
         ownServers = RecentServer.load(key: RECENT_SERVERS_USERDEFAULTS_KEY)
@@ -134,6 +149,10 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         return false
     }
 
+    var isSearching: Bool {
+        return status == .searching
+    }
+
     //while connected or reconnecting, the button disconnects
     var canDisconnect: Bool {
         return isConnected || isReconnecting
@@ -141,16 +160,16 @@ final class ConnectionModel: ObservableObject, ConnectUI {
 
     //address and magnetometer can only be changed while not connected
     var canEdit: Bool {
-        return !isConnected && !isConnecting && !isReconnecting
+        return !isConnected && !isConnecting && !isReconnecting && !isSearching
     }
 
-    //connects, or disconnects if connected or reconnecting
+    //connects, or disconnects if connected or reconnecting. Without an address, it searches the network first
     func connectPressed() {
         if canDisconnect {
             service.stop()
             return
         }
-        if isConnecting {
+        if isConnecting || isSearching {
             return
         }
         if !ConnectionModel.isValidPort(port) {
@@ -158,12 +177,81 @@ final class ConnectionModel: ObservableObject, ConnectUI {
             return
         }
         let address = ip.trimmingCharacters(in: .whitespaces)
+        if address.isEmpty {
+            search(thenConnect: true)
+            return
+        }
         if !ConnectionModel.isValidAddress(address) {
             status = .error("Please enter a valid IP address or computer name")
             return
         }
         ip = address
         service.start(ipAdress: address, port: port, magnetometer: useMagnetometer, connectUI: self)
+    }
+
+    //the search button fills in the server it finds; "Search network" after a failed connection also connects to it
+    func searchPressed(thenConnect: Bool = false) {
+        if !canEdit {
+            return
+        }
+        if !ConnectionModel.isValidPort(port) {
+            status = .error("Please enter a valid port number")
+            return
+        }
+        search(thenConnect: thenConnect)
+    }
+
+    //the user picked one of the servers that answered (nil: none)
+    func chooseServer(_ server: FoundServer?) {
+        let connect = connectAfterChoice
+        serverChoices = []
+        connectAfterChoice = false
+        if let server = server {
+            use(server, connect: connect)
+        }
+    }
+
+    private func search(thenConnect: Bool) {
+        status = .searching
+        offersSearch = false
+        serverChoices = []
+        finder.findServers(port: port) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.searchFinished(result, thenConnect: thenConnect)
+            }
+        }
+    }
+
+    private func searchFinished(_ result: ServerSearchResult, thenConnect: Bool) {
+        guard isSearching else {
+            return
+        }
+        if let failure = result.failure {
+            status = .failed(failure)
+            return
+        }
+        switch result.servers.count {
+        case 0:
+            #if os(watchOS)
+            status = .failed("No SlimeVR server found on your iPhone's Wi-Fi")
+            #else
+            status = .failed("No SlimeVR server found on this Wi-Fi")
+            #endif
+        case 1:
+            status = .notConnected
+            use(result.servers[0], connect: thenConnect)
+        default:
+            status = .notConnected
+            connectAfterChoice = thenConnect
+            serverChoices = result.servers
+        }
+    }
+
+    private func use(_ server: FoundServer, connect: Bool) {
+        ip = server.address
+        if connect {
+            service.start(ipAdress: server.address, port: port, magnetometer: useMagnetometer, connectUI: self)
+        }
     }
 
     //a yaw reset (else a full reset) in SlimeVR, while connected
@@ -214,6 +302,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     func setLoading() {
         onMain {
             self.status = .connecting
+            self.offersSearch = false
             self.log = ""
             self.serverType = .unknown
             self.reconnectDeadline = nil
@@ -231,6 +320,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     func setUnconnected() {
         onMain {
             self.status = .notConnected
+            self.offersSearch = false
             self.serverType = .unknown
             self.reconnectDeadline = nil
         }
@@ -247,6 +337,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     func setFailed(_ reason: String) {
         onMain {
             self.status = .failed(reason)
+            self.offersSearch = true        //the server may have a new address
             self.serverType = .unknown
             self.reconnectDeadline = nil
         }

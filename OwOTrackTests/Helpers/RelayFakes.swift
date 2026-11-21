@@ -204,10 +204,13 @@ final class RelaySetup {
     let watch: RelayClient
     let host: RelayHost?
 
-    //withHost: false is a watch without the iPhone app
-    init(withHost: Bool = true) {
+    //withHost: false is a watch without the iPhone app. finderCandidates: the addresses the iPhone searches for the watch
+    init(withHost: Bool = true, finderCandidates: [String]? = nil) {
         watch = RelayClient(transport: link.watch, hardware: watchHardware, motion: watchMotion, logger: watchLog, timing: .fastTest)
-        host = withHost ? RelayHost(transport: link.phone, device: StaticHardware(FakeHardware.self), connectionTiming: fastTiming, timing: .fastTest) : nil
+        host = withHost ? RelayHost(transport: link.phone, device: StaticHardware(FakeHardware.self), connectionTiming: fastTiming, timing: .fastTest,
+                                    makeFinder: { mac in
+                                        LocalServerFinder(mac: mac, platform: "watchOS", candidates: { finderCandidates }, timing: .fastTest)
+                                    }) : nil
     }
 
     func connect(port: UInt16, magnetometer: Bool = true) {

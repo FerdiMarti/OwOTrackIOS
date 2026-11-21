@@ -24,6 +24,22 @@ struct ConnectView: View {
         .onChange(of: model.status) { status in
             vibrate(for: status)
         }
+        .confirmationDialog("Several servers answered", isPresented: choosingServer, titleVisibility: .visible) {
+            ForEach(model.serverChoices) { server in
+                Button([server.address, server.type.name].compactMap { $0 }.joined(separator: " · ")) {
+                    model.chooseServer(server)
+                }
+            }
+        }
+    }
+
+    //several servers answered the search: pick one
+    private var choosingServer: Binding<Bool> {
+        Binding(get: { !model.serverChoices.isEmpty }, set: { shown in
+            if !shown {
+                model.chooseServer(nil)
+            }
+        })
     }
 
     //felt on the wrist: connected, connection lost, connecting failed
@@ -79,7 +95,10 @@ private struct TrackingPage: View {
                         .frame(maxWidth: .infinity)
                 }
                 .tint(model.canDisconnect ? .red : .green)
-                .disabled(model.isConnecting)
+                .disabled(model.isConnecting || model.isSearching)
+                if case .failed = model.status, model.offersSearch {
+                    SearchButton(model: model, thenConnect: true)       //the server may have a new address
+                }
                 if model.isConnected && model.serverType == .slimeVR {
                     HStack(spacing: 6) {
                         Button("Yaw reset") {
@@ -100,7 +119,7 @@ private struct TrackingPage: View {
 
     @ViewBuilder
     private var indicator: some View {
-        if model.isConnecting || model.isReconnecting {
+        if model.isConnecting || model.isReconnecting || model.isSearching {
             ProgressView()
                 .scaleEffect(0.85)      //the watch's spinner is bigger than a symbol
         } else {
@@ -113,6 +132,7 @@ private struct TrackingPage: View {
     private var title: String {
         switch model.status {
         case .notConnected: return "Not connected"
+        case .searching: return "Searching for SlimeVR…"
         case .connecting: return "Connecting…"
         case .connected: return "Connected"
         case .reconnecting: return "Reconnecting…"
@@ -123,7 +143,7 @@ private struct TrackingPage: View {
     private var color: Color {
         switch model.status {
         case .notConnected: return .secondary
-        case .connecting: return .primary
+        case .searching, .connecting: return .primary
         case .connected: return .green
         case .reconnecting: return .orange
         case .failed, .error: return .red
@@ -143,6 +163,8 @@ private struct TrackingPage: View {
         switch model.status {
         case .notConnected:
             Text("Tracks through your iPhone")
+        case .searching:
+            Text("Your iPhone searches its Wi-Fi")
         case .connecting:
             Text("\(model.ip) · via iPhone")
         case .connected:
@@ -176,10 +198,11 @@ private struct SettingsPage: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Server")
                     .font(.headline)
-                TextField("IP or computer name", text: $model.ip)
+                TextField("Automatic", text: $model.ip)        //empty: Connect searches the network
                     .disabled(!model.canEdit)
                 TextField("Port", text: $model.port)
                     .disabled(!model.canEdit)
+                SearchButton(model: model, thenConnect: false)
                 if !model.recentServers.isEmpty {
                     Text("Recent")
                         .font(.footnote)
@@ -289,6 +312,22 @@ private struct DetailsPage: View {
         WKInterfaceDevice.current().isBatteryMonitoringEnabled = true
         let level = WKInterfaceDevice.current().batteryLevel
         battery = level < 0 ? nil : level
+    }
+}
+
+//searches the iPhone's Wi-Fi for SlimeVR: fills in the address, or also connects (after a failed connection)
+private struct SearchButton: View {
+    @ObservedObject var model: ConnectionModel
+    let thenConnect: Bool
+
+    var body: some View {
+        Button {
+            model.searchPressed(thenConnect: thenConnect)
+        } label: {
+            Label(model.isSearching ? "Searching…" : "Search network", systemImage: "antenna.radiowaves.left.and.right")
+                .frame(maxWidth: .infinity)
+        }
+        .disabled(!model.canEdit)
     }
 }
 

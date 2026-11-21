@@ -91,6 +91,13 @@ struct MainView: View {
         .overlay(alignment: .bottom) {
             dimmingBanner
         }
+        .confirmationDialog("Several servers answered", isPresented: choosingServer, titleVisibility: .visible) {
+            ForEach(model.serverChoices) { server in
+                Button([server.address, server.type.name].compactMap { $0 }.joined(separator: " · ")) {
+                    model.chooseServer(server)
+                }
+            }
+        }
         .sheet(item: $sheet) { sheet in
             switch sheet {
             case .info(let topic):
@@ -123,7 +130,7 @@ struct MainView: View {
         let lineHeight = UIFont.preferredFont(forTextStyle: .title2).lineHeight
         return HStack(alignment: .top, spacing: 10) {
             Group {
-                if model.isConnecting || model.isReconnecting {
+                if model.isConnecting || model.isReconnecting || model.isSearching {
                     ProgressView()
                 } else {
                     Image(systemName: statusSymbol)
@@ -146,6 +153,7 @@ struct MainView: View {
     private var statusTitle: String {
         switch model.status {
         case .notConnected: return "Not connected"
+        case .searching: return "Searching for SlimeVR…"
         case .connecting: return "Connecting…"
         case .connected: return "Connected"
         case .reconnecting: return "Reconnecting…"
@@ -156,7 +164,7 @@ struct MainView: View {
     private var statusColor: Color {
         switch model.status {
         case .notConnected: return .secondary
-        case .connecting: return .primary
+        case .searching, .connecting: return .primary
         case .connected: return .green
         case .reconnecting: return .orange
         case .failed, .error: return .red
@@ -175,7 +183,12 @@ struct MainView: View {
     private var statusDetail: some View {
         switch model.status {
         case .notConnected:
-            Text("Enter the address of the computer running SlimeVR, then connect.")
+            Text(model.ip.trimmingCharacters(in: .whitespaces).isEmpty
+                 ? "Connect finds SlimeVR on your Wi-Fi, or enter the computer's address."
+                 : "Enter the address of the computer running SlimeVR, then connect.")
+                .foregroundColor(.secondary)
+        case .searching:
+            Text("On your Wi-Fi network")
                 .foregroundColor(.secondary)
         case .connecting:
             Text(model.ip)
@@ -195,10 +208,19 @@ struct MainView: View {
                 }
             }
         case .failed:
-            Button {
-                sheet = .info(.cantConnect)
-            } label: {
-                Label("Can't connect?", systemImage: "questionmark.circle")
+            HStack(spacing: 16) {
+                if model.offersSearch {
+                    Button {
+                        model.searchPressed(thenConnect: true)
+                    } label: {
+                        Label("Search network", systemImage: "antenna.radiowaves.left.and.right")
+                    }
+                }
+                Button {
+                    sheet = .info(.cantConnect)
+                } label: {
+                    Label("Can't connect?", systemImage: "questionmark.circle")
+                }
             }
             .buttonStyle(.borderless)
         case .error:
@@ -227,7 +249,7 @@ struct MainView: View {
     private var settings: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                TextField("IP address or computer name", text: $model.ip)
+                TextField("Automatic", text: $model.ip)       //empty: Connect searches the network
                     .textFieldStyle(.roundedBorder)
                     .keyboardType(.numbersAndPunctuation)
                     .textInputAutocapitalization(.never)
@@ -249,6 +271,14 @@ struct MainView: View {
                     .disabled(!model.canEdit)
                     .accessibilityLabel("Recent servers")
                 }
+                Button {
+                    model.searchPressed()
+                } label: {
+                    Image(systemName: "antenna.radiowaves.left.and.right")
+                        .imageScale(.large)
+                }
+                .disabled(!model.canEdit)
+                .accessibilityLabel("Search the network for SlimeVR")
                 InfoButton(subject: "the server address") { sheet = .info(.address) }
             }
             HStack(spacing: 12) {
@@ -285,7 +315,16 @@ struct MainView: View {
         .buttonStyle(.borderedProminent)
         .controlSize(.large)
         .tint(model.canDisconnect ? .red : .accentColor)
-        .disabled(model.isConnecting)
+        .disabled(model.isConnecting || model.isSearching)
+    }
+
+    //several servers answered the search: pick one
+    private var choosingServer: Binding<Bool> {
+        Binding(get: { !model.serverChoices.isEmpty }, set: { shown in
+            if !shown {
+                model.chooseServer(nil)
+            }
+        })
     }
 
     //where the volume buttons aren't on the side (iPad, iPhone Duo): a legend instead of labels at the edge
