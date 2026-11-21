@@ -77,6 +77,7 @@ struct MainView: View {
                 .frame(minHeight: isPad ? min(screen.size.height, 820) : screen.size.height, alignment: .top)
                 .frame(maxWidth: .infinity)
             }
+            .bounceOnlyWhenScrollable()
         }
         .overlay(alignment: .topLeading) {
             if showsVolumeButtons, let positions = volumeButtonPositions {
@@ -441,6 +442,19 @@ struct MainView: View {
         case .reconnecting: generator.notificationOccurred(.warning)
         case .failed: generator.notificationOccurred(.error)
         default: break
+        }
+    }
+}
+
+extension View {
+    //the screen fills the display, so it only needs to scroll when the content is taller (large text, keyboard,
+    //small screens). Without this, iOS lets it bounce even when everything fits. Needs iOS 16.4; before, it keeps bouncing
+    @ViewBuilder
+    func bounceOnlyWhenScrollable() -> some View {
+        if #available(iOS 16.4, *) {
+            self.scrollBounceBehavior(.basedOnSize)
+        } else {
+            self
         }
     }
 }
