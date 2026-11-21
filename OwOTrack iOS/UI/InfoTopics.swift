@@ -147,7 +147,9 @@ struct InfoContent {
             title = "Volume Buttons"
             paragraphs = [
                 "While connected to SlimeVR, the volume buttons trigger a reset: **volume up** for a yaw reset, **volume down** for a full reset. SlimeVR's reset delays apply.",
+                "Any volume change counts, also from Control Center, Siri, AirPods or the Apple Watch.",
                 "Volume up doesn't register when the volume is already at the maximum, and volume down doesn't at the minimum.",
+                "Don't want them? Turn off **Volume buttons reset** under Advanced. The buttons then only change the volume.",
             ]
         }
     }

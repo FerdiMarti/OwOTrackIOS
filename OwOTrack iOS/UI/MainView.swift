@@ -111,9 +111,9 @@ struct MainView: View {
         }
     }
 
-    //the volume buttons only do something with SlimeVR (resets)
+    //the volume buttons only do something with SlimeVR (resets), and only if they aren't switched off
     private var showsVolumeButtons: Bool {
-        return model.isConnected && model.serverType == .slimeVR
+        return model.isConnected && model.serverType == .slimeVR && model.useVolumeButtons
     }
 
     //where the labels next to the volume buttons go. nil where the buttons aren't on the side of the screen
@@ -300,6 +300,10 @@ struct MainView: View {
                     InfoButton(subject: "the port") { sheet = .info(.port) }
                 }
                 .padding(.top, 8)
+                HStack(spacing: 12) {
+                    Toggle("Volume buttons reset", isOn: $model.useVolumeButtons)     //can be switched while tracking
+                    InfoButton(subject: "the volume buttons") { sheet = .info(.volumeButtons) }
+                }
             }
         }
     }

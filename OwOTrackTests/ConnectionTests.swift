@@ -54,6 +54,31 @@ extension OwOTrackTests {
             }
         }
 
+        @Test("the volume buttons can be switched off, also while tracking")
+        func volumeButtonsSwitch() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let defaults = UserDefaults.standard
+            defer { defaults.removeObject(forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY) }
+            defaults.set(false, forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY)
+            try await withTracking(port: server.port) { service, ui in
+                #expect(await waitUntil { ui.lastState == "connected" })
+                #expect(!FakeHardware.events.contains("volume buttons on"))     //off: the buttons are left alone
+                await MainActor.run {
+                    defaults.set(true, forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY)
+                    service.volumeButtonsSettingChanged()
+                }
+                #expect(FakeHardware.events.filter { $0.hasPrefix("volume buttons") } == ["volume buttons on"])
+                await MainActor.run {
+                    defaults.set(false, forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY)
+                    service.volumeButtonsSettingChanged()
+                }
+                #expect(FakeHardware.events.filter { $0.hasPrefix("volume buttons") } == ["volume buttons on", "volume buttons off"])
+            }
+            //stopping doesn't switch them off a second time
+            #expect(FakeHardware.events.filter { $0.hasPrefix("volume buttons") } == ["volume buttons on", "volume buttons off"])
+        }
+
         @Test("volume buttons send resets to SlimeVR")
         func volumeButtonResets() async throws {
             let server = FakeServer(mode: .slimeVR)

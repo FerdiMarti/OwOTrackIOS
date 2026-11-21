@@ -13,6 +13,7 @@ let TRACKING_SERVICE_QUEUE_LABEL = "TrackingService"
 let IP_USERDEFAULTS_KEY = "ip"
 let PORT_USERDEFAULTS_KEY = "port"
 let MAGNETOMETER_USERDEFAULTS_KEY = "useM"
+let VOLUME_BUTTONS_USERDEFAULTS_KEY = "volumeButtons"
 
 //how long connecting and reconnecting wait. The tests use shorter times
 struct ConnectionTiming {
@@ -30,6 +31,12 @@ protocol TrackingControl: AnyObject {
     func stop()
     //a yaw reset (else a full reset) in SlimeVR
     func sendReset(yaw: Bool)
+    //the volume buttons were switched on or off in the settings
+    func volumeButtonsSettingChanged()
+}
+
+extension TrackingControl {
+    func volumeButtonsSettingChanged() {}
 }
 
 //manages connection, app and UI state
@@ -60,6 +67,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
     private var wantsConnection = false     //between start() and stop(): a lost connection is retried
     private var reconnecting = false
     private var holdsDevice = false         //between start() and stop(): keeps the device awake (shared with other sessions)
+    private var listensToVolumeButtons = false      //on the main thread
     var timing = ConnectionTiming()     //set before start()
 
     //the hardware (sensors aside): this iPhone or Apple Watch, the relayed watch, or a fake in the tests
@@ -95,7 +103,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         if takeDevice() {
             hardware.startProximitySensor()
             hardware.preventAutoLock()
-            hardware.registerVolButtonListener(target: self)
+            startVolumeButtons()
             hardware.startBackgroundUsage(target: self)
         }
         trackingServiceQueue.async {
@@ -285,6 +293,12 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         return true
     }
 
+    private var isHoldingDevice: Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return holdsDevice
+    }
+
     //false if the session ended while the last attempt connected
     private func finishReconnecting(_ session: Int) -> Bool {
         stateLock.lock()
@@ -317,7 +331,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         if releaseDevice() {
             hardware.stopProximitySensor()
             hardware.allowAutoLock()
-            hardware.unregisterVolButtonListener(target: self)
+            stopVolumeButtons()
             hardware.stopBackgroundUsage()
         }
         stopStreaming()
@@ -355,7 +369,40 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         client?.provideButtonPushed(volumeUp: yaw)
     }
     
-    //handler for volume button presses, which show up as changes of the output volume.
+    // MARK: volume buttons
+
+    //the volume buttons send resets, unless they're switched off in the advanced settings
+    static var volumeButtonsEnabled: Bool {
+        return UserDefaults.standard.object(forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY) as? Bool ?? true
+    }
+
+    //the switch in the settings takes effect right away while tracking. On the main thread
+    func volumeButtonsSettingChanged() {
+        guard isHoldingDevice else {
+            return
+        }
+        if TrackingService.volumeButtonsEnabled {
+            startVolumeButtons()
+        } else {
+            stopVolumeButtons()
+        }
+    }
+
+    private func startVolumeButtons() {
+        if TrackingService.volumeButtonsEnabled && !listensToVolumeButtons {
+            listensToVolumeButtons = true
+            hardware.registerVolButtonListener(target: self)
+        }
+    }
+
+    private func stopVolumeButtons() {
+        if listensToVolumeButtons {
+            listensToVolumeButtons = false
+            hardware.unregisterVolButtonListener(target: self)
+        }
+    }
+
+    //volume button presses show up as changes of the output volume (any change counts: iOS doesn't say what changed it).
     //the old and new volume tell which button it was; if they're missing, it counts as volume up
     public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "outputVolume" {

@@ -73,6 +73,13 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     @Published var ip: String
     @Published var port: String
     @Published var useMagnetometer: Bool
+    //the iPhone's volume buttons send resets (a switch in the advanced settings), also changed while tracking
+    @Published var useVolumeButtons: Bool {
+        didSet {
+            UserDefaults.standard.set(useVolumeButtons, forKey: VOLUME_BUTTONS_USERDEFAULTS_KEY)
+            service.volumeButtonsSettingChanged()
+        }
+    }
     @Published private(set) var status: Status = .notConnected
     @Published private(set) var log = ""
     @Published private(set) var serverType = ServerType.unknown
@@ -124,6 +131,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         ip = defaults.string(forKey: IP_USERDEFAULTS_KEY) ?? ""         //empty: Connect searches the network for the server
         port = defaults.string(forKey: PORT_USERDEFAULTS_KEY) ?? "6969"
         useMagnetometer = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool ?? true
+        useVolumeButtons = TrackingService.volumeButtonsEnabled
         ownServers = RecentServer.load(key: RECENT_SERVERS_USERDEFAULTS_KEY)
         pairedServers = RecentServer.load(key: PAIRED_RECENT_SERVERS_USERDEFAULTS_KEY)
         recentServers = ConnectionModel.merged(ownServers, pairedServers)
