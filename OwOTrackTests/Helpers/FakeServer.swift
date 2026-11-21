@@ -11,8 +11,12 @@ import Darwin
 //and can be up, silent (packets vanish, like a Wi-Fi drop) or closed (like quitting the server app: the system answers "port unreachable")
 final class FakeServer {
     enum Mode {
-        case slimeVR        //answers the handshake with 64 bytes, acknowledges the sensor description
-        case oldDriver      //can't read handshakes over 28 bytes, never acknowledges the sensor description
+        //answers the handshake with 64 bytes, acknowledges the sensor description. Its packets are big-endian with
+        //packet number 0 (SlimeVR doesn't count its own), and it pings the tracker twice a second
+        case slimeVR
+        //can't read handshakes over 28 bytes, never acknowledges the sensor description, doesn't ping.
+        //Its packets are little-endian (its computer's byte order) without a packet number
+        case oldDriver
     }
 
     enum State {
@@ -29,12 +33,14 @@ final class FakeServer {
     let mode: Mode
     let port: UInt16
     var heartbeatInterval: TimeInterval = 0.5
+    var pingInterval: TimeInterval = 0.5
 
     private let lock = NSLock()
     private var wantedState = State.up
     private var receivedPackets: [Received] = []
     private var outbox: [Data] = []
     private var rawOutbox: [Data] = []
+    private var sentPings: [UInt32] = []
     private var running = true
     private let finished = DispatchSemaphore(value: 0)
 
@@ -53,7 +59,7 @@ final class FakeServer {
         lock.unlock()
     }
 
-    //sends a packet the way SlimeVR does (type, packet number, payload) to the client that last sent a handshake
+    //sends a packet the way SlimeVR does (type, packet number 0, payload) to the client that last sent a handshake
     func send(type: UInt32, payload: [UInt8]) {
         lock.lock()
         outbox.append(Data(bytes(type)) + payload)     //the packet number is added when it's sent
@@ -77,6 +83,14 @@ final class FakeServer {
         return received.filter { $0.packet.type == type && $0.time > time }
     }
 
+    //SlimeVR's pings (packet 10 with an id) the client sent back, as SlimeVR measures the latency with them
+    var answeredPings: Int {
+        lock.lock()
+        let ids = sentPings.map { bytes($0) }
+        lock.unlock()
+        return received(type: 10).filter { ids.contains($0.packet.payload) }.count
+    }
+
     var lastHandshake: SlimeVRHandshake? {
         return received(type: 3).last.flatMap { SlimeVRHandshake(packet: $0.raw) }
     }
@@ -94,14 +108,13 @@ final class FakeServer {
         var socket = initialSocket
         var state = State.up
         var client: sockaddr_in?
-        var outNumber: Int64 = 0
         var nextHeartbeat = Date()
+        var nextPing = Date()
         var buffer = [UInt8](repeating: 0, count: 2048)
 
         func sendToClient(_ typeAndPayload: Data) {
             guard var address = client else { return }
-            outNumber += 1
-            let data = Data(typeAndPayload.prefix(4)) + Data(bytes(outNumber)) + typeAndPayload.dropFirst(4)
+            let data = Data(typeAndPayload.prefix(4)) + Data(bytes(Int64(0))) + typeAndPayload.dropFirst(4)
             FakeServer.send(data, from: socket, to: &address)
         }
 
@@ -137,9 +150,21 @@ final class FakeServer {
                     FakeServer.send(raw, from: socket, to: &address)
                 }
             }
-            if state == .up && client != nil && Date() >= nextHeartbeat {
-                sendToClient(Data(bytes(UInt32(1))))
+            if state == .up, var address = client, Date() >= nextHeartbeat {
+                if mode == .slimeVR {
+                    sendToClient(Data(bytes(UInt32(1))))
+                } else {
+                    FakeServer.send(driverPacket(type: 1), from: socket, to: &address)
+                }
                 nextHeartbeat = Date().addingTimeInterval(heartbeatInterval)
+            }
+            if mode == .slimeVR && state == .up && client != nil && Date() >= nextPing {
+                let id = UInt32.random(in: 1...UInt32.max)
+                lock.lock()
+                sentPings.append(id)
+                lock.unlock()
+                sendToClient(Data(bytes(UInt32(10)) + bytes(id)))
+                nextPing = Date().addingTimeInterval(pingInterval)
             }
 
             var from = sockaddr_in()

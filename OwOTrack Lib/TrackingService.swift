@@ -24,6 +24,12 @@ struct ConnectionTiming {
     var reconnectTimeLimit: TimeInterval = 10 * 60
 }
 
+//"10 minutes", or "3 seconds" for the short limits in the tests
+func describeDuration(_ duration: TimeInterval) -> String {
+    let seconds = Int(duration)
+    return seconds >= 60 && seconds % 60 == 0 ? "\(seconds / 60) minutes" : "\(seconds) seconds"
+}
+
 //starts and stops tracking for the connect screen: TrackingService connects this device to the server;
 //the watch uses RelayClient, which has the iPhone connect for it
 protocol TrackingControl: AnyObject {
@@ -212,7 +218,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
             if Date() >= giveUp {
                 DispatchQueue.main.async {
                     if self.isActive(session) {     //not if the user disconnected in the meantime
-                        let reason = "Couldn't reconnect for \(self.describe(self.timing.reconnectTimeLimit))"
+                        let reason = "Couldn't reconnect for \(describeDuration(self.timing.reconnectTimeLimit))"
                         self.logger.addEntry("\(reason), stopped trying")
                         self.end(failure: reason)
                     }
@@ -226,11 +232,6 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         }
     }
 
-    //"10 minutes", or "3 seconds" for the short limits in the tests
-    private func describe(_ duration: TimeInterval) -> String {
-        let seconds = Int(duration)
-        return seconds >= 60 && seconds % 60 == 0 ? "\(seconds / 60) minutes" : "\(seconds) seconds"
-    }
 
     // MARK: session state
 

@@ -246,6 +246,83 @@ extension OwOTrackTests {
             #expect(relay.watchUI.failures.count == 1)
         }
 
+        @Test("a late Stop of an earlier session doesn't end the next one")
+        func staleStop() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.watch.stop()
+            let oldStop = try #require(relay.link.watch.sentMessages.last { $0.isStop })
+            #expect(await waitUntil { relay.host?.status.state == .notConnected })
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.link.watch.send(oldStop)
+            await pause(0.5)
+            #expect(relay.host?.status.state == .connected)
+            #expect(relay.watchUI.lastState == "connected")
+        }
+
+        @Test("the iPhone gives up reconnecting for the watch: the watch gets the reason")
+        func reconnectGivesUp() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let timing = ConnectionTiming(heartbeatTimeout: 1.5, connectTimeout: 1, reconnectPause: 0.3, reconnectTimeLimit: 3)
+            let relay = RelaySetup(connectionTiming: timing)
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            server.setState(.closed)        //SlimeVR quit
+            #expect(await waitUntil(4) { relay.watchUI.lastState == "reconnecting" })
+            #expect(await waitUntil(8) { relay.watchUI.lastState == "failed" })
+            #expect(relay.watchUI.failures == ["Couldn't reconnect for 3 seconds"])
+            #expect(relay.watchUI.states.suffix(2) == ["reconnecting", "failed"])
+            #expect(relay.host?.status.state == .failed)
+            #expect(relay.host?.status.reason == "Couldn't reconnect for 3 seconds")
+            #expect(relay.watchHardware.events.last == "workout ended")
+        }
+
+        @Test("the iPhone stays out of reach: the watch gives up after a while")
+        func iPhoneGone() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.link.watch.link.isUp = false
+            #expect(await waitUntil(4) { relay.watchUI.lastState == "reconnecting" })
+            #expect(await waitUntil(9) { relay.watchUI.lastState == "failed" })     //after 6 s in the tests
+            #expect(relay.watchUI.failures == ["Couldn't reach the iPhone for 6 seconds"])
+            #expect(relay.watchHardware.events.last == "workout ended")
+        }
+
+        @Test("the watch picks one of several servers the iPhone found, and connects to it through the iPhone")
+        func serverChoice() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let servers = [FoundServer(address: "127.0.0.1", type: .slimeVR), FoundServer(address: "192.168.1.40", type: .owoTrackDriver)]
+            let relay = RelaySetup(finder: FakeFinder(result: ServerSearchResult(servers: servers)))
+            defer { relay.stop() }
+            //the watch's connect screen saves the server it connects to: put the saved settings back afterwards
+            let keys = [IP_USERDEFAULTS_KEY, PORT_USERDEFAULTS_KEY, MAGNETOMETER_USERDEFAULTS_KEY, RECENT_SERVERS_USERDEFAULTS_KEY]
+            let saved = keys.map { UserDefaults.standard.object(forKey: $0) }
+            defer { zip(keys, saved).forEach { UserDefaults.standard.set($1, forKey: $0) } }
+
+            let model = ConnectionModel(service: relay.watch, sharing: nil)       //searches through the iPhone too
+            model.port = String(server.port)
+            model.ip = ""
+            model.connectPressed()
+            #expect(await waitUntil(5) { model.serverChoices == servers })
+            model.chooseServer(nil)                 //SwiftUI may close the list before it runs the button's action
+            model.chooseServer(servers[0])
+            #expect(await waitUntil(5) { model.isConnected })
+            #expect(relay.host?.status.state == .connected)
+            #expect(server.lastHandshake?.mac == "02:0E:57:00:00:02")
+        }
+
         @Test("asking twice for the same session doesn't connect twice")
         func repeatedStart() async throws {
             let server = FakeServer(mode: .slimeVR)
@@ -279,14 +356,14 @@ extension OwOTrackTests {
 
         @Test("vibrations from the server reach the watch")
         func vibration() async throws {
-            let server = FakeServer(mode: .slimeVR)
+            let server = FakeServer(mode: .oldDriver)       //it sends vibrations
             defer { server.stop() }
             let relay = RelaySetup()
             defer { relay.stop() }
             relay.connect(port: server.port)
             #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
             //duration, frequency, amplitude, as the owoTrack driver sends them
-            server.sendRaw(driverPacket(type: 2, payload: bytes(Float(0.5)) + bytes(Float(0.25)) + bytes(Float(0.75))))
+            server.sendRaw(driverPacket(type: 2, payload: littleEndianBytes(Float(0.5)) + littleEndianBytes(Float(0.25)) + littleEndianBytes(Float(0.75))))
             #expect(await waitUntil { relay.watchHardware.events.contains("vibrate f=0.25 a=0.75 d=0.5") })
         }
 

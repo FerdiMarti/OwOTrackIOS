@@ -54,6 +54,16 @@ extension OwOTrackTests {
             }
         }
 
+        @Test("SlimeVR's pings are answered, so it can show the latency")
+        func pings() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            try await withTracking(port: server.port) { _, ui in
+                #expect(await waitUntil { ui.lastState == "connected" })
+                #expect(await waitUntil { server.answeredPings >= 2 })
+            }
+        }
+
         @Test("the volume buttons can be switched off, also while tracking")
         func volumeButtonsSwitch() async throws {
             let server = FakeServer(mode: .slimeVR)

@@ -94,9 +94,23 @@ func slimeVRPacket(type: UInt32, number: Int64 = 1, payload: [UInt8] = []) -> Da
     return Data(bytes(type) + bytes(number) + payload)
 }
 
-//a packet as the old owoTrack driver sends it: type and payload, no packet number
+//a packet as the old owoTrack driver sends it: type and payload in its computer's byte order (little-endian),
+//no packet number. Build the payload with littleEndianBytes
 func driverPacket(type: UInt32, payload: [UInt8] = []) -> Data {
-    return Data(bytes(type) + payload)
+    return Data(littleEndianBytes(type) + payload)
+}
+
+func littleEndianBytes<T: FixedWidthInteger>(_ value: T) -> [UInt8] {
+    return withUnsafeBytes(of: value.littleEndian) { [UInt8]($0) }
+}
+
+func littleEndianBytes(_ value: Float) -> [UInt8] {
+    return littleEndianBytes(value.bitPattern)
+}
+
+//a 2-byte character, like the driver's magnetometer switch ('y' or 'n')
+func littleEndianChar(_ character: Character) -> [UInt8] {
+    return littleEndianBytes(UInt16(character.asciiValue ?? 0))
 }
 
 //handshake replies: the old driver's, and SlimeVR's (the same text, padded with zero bytes to 64 bytes)

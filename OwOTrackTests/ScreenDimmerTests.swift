@@ -95,6 +95,26 @@ extension OwOTrackTests {
             #expect(!dimmer.isDimmed)
         }
 
+        @Test("on while this iPhone or the watch through it tracks (also while reconnecting), and only in the foreground")
+        func switchedOn() async {
+            #expect(ScreenDimmer.shouldBeActive(tracking: true, relaying: false, inForeground: true))
+            #expect(ScreenDimmer.shouldBeActive(tracking: false, relaying: true, inForeground: true))
+            #expect(!ScreenDimmer.shouldBeActive(tracking: true, relaying: true, inForeground: false))
+            #expect(!ScreenDimmer.shouldBeActive(tracking: false, relaying: false, inForeground: true))
+            //what counts as tracking on the connect screen (the app passes canDisconnect)
+            let model = ConnectionModel(service: RecordingService(), sharing: nil, finder: FakeFinder(result: ServerSearchResult()))
+            model.setConnected()
+            #expect(await waitUntil { model.isConnected && model.canDisconnect })
+            model.setReconnecting(until: Date().addingTimeInterval(60))
+            #expect(await waitUntil { model.isReconnecting && model.canDisconnect })
+            model.setFailed("Couldn't reconnect")
+            #expect(await waitUntil { !model.canDisconnect })
+            model.setLoading()
+            #expect(await waitUntil { model.isConnecting && !model.canDisconnect })
+            model.setUnconnected()
+            #expect(await waitUntil { model.status == .notConnected && !model.canDisconnect })
+        }
+
         @Test("never dims while not connected")
         func inactive() async {
             let (dimmer, screen) = makeDimmer()

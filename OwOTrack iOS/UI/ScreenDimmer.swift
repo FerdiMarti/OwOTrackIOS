@@ -44,6 +44,12 @@ final class ScreenDimmer: NSObject, ObservableObject, UIGestureRecognizerDelegat
         super.init()
     }
 
+    //dims only while something tracks (this iPhone connected or reconnecting, or the watch through it)
+    //and while the app is in the foreground
+    static func shouldBeActive(tracking: Bool, relaying: Bool, inForeground: Bool) -> Bool {
+        return (tracking || relaying) && inForeground
+    }
+
     //on while connected and the app is in the foreground
     func setActive(_ active: Bool) {
         if active == self.active {

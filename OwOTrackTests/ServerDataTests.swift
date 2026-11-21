@@ -122,9 +122,9 @@ extension OwOTrackTests {
         func driverMagnetometerSwitch() async {
             let (client, _, service) = connectedClient()
             defer { client.disconnectUDP(logIt: false) }
-            client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "n")]), recursion: false)
+            client.processReceivedData(data: driverPacket(type: 62, payload: littleEndianChar("n")), recursion: false)
             #expect(await waitUntil { service.magnetometer == false })     //switched on the main thread
-            client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "y")]), recursion: false)
+            client.processReceivedData(data: driverPacket(type: 62, payload: littleEndianChar("y")), recursion: false)
             #expect(await waitUntil { service.magnetometer == true })
             client.processReceivedData(data: driverPacket(type: 62, payload: [0]), recursion: false)    //too short: ignored
             await pause(0.1)
@@ -132,7 +132,7 @@ extension OwOTrackTests {
         }
 
         @Test("a handshake reply after the attempt was given up doesn't bring the connection back")
-        func lateHandshakeReply() async {
+        func handshakeReplyAfterGivingUp() async {
             let (client, _, service) = connectedClient()
             client.disconnectUDP(logIt: false)      //TrackingService gave up on this attempt at its time limit
             client.successfulHandshake()            //and the reply arrives right after
@@ -147,9 +147,9 @@ extension OwOTrackTests {
             let (client, _, _) = connectedClient()
             defer { client.disconnectUDP(logIt: false) }
             //duration, frequency, amplitude
-            client.processReceivedData(data: driverPacket(type: 2, payload: bytes(Float(0.5)) + bytes(Float(0.25)) + bytes(Float(0.75))), recursion: false)
+            client.processReceivedData(data: driverPacket(type: 2, payload: littleEndianBytes(Float(0.5)) + littleEndianBytes(Float(0.25)) + littleEndianBytes(Float(0.75))), recursion: false)
             #expect(FakeHardware.events == ["vibrate f=0.25 a=0.75 d=0.5"])
-            client.processReceivedData(data: driverPacket(type: 2, payload: bytes(Float(0.5))), recursion: false)
+            client.processReceivedData(data: driverPacket(type: 2, payload: littleEndianBytes(Float(0.5))), recursion: false)
             #expect(FakeHardware.events.count == 1)
         }
 

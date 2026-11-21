@@ -61,10 +61,25 @@ extension OwOTrackTests {
                 #expect(await waitUntil(5) { ui.lastState == "connected" })
                 //the app tells the driver whether the magnetometer is on when connecting
                 #expect(await waitUntil { server.received(type: 61).last?.packet.payload == [0, UInt8(ascii: "y")] })
-                let client = try #require(service.client)
-                client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "n")]), recursion: false)
-                #expect(await waitUntil { service.magnetometer == false })     //switched on the main thread
+                //the driver's overlay switches it off: a little-endian packet 62 with a 2-byte 'n'
+                server.sendRaw(driverPacket(type: 62, payload: littleEndianChar("n")))
+                #expect(await waitUntil { service.magnetometer == false })
                 #expect(ui.magnetometerToggles == [false])
+            }
+        }
+
+        @Test("its little-endian packets are read: the byte order is detected, vibrations arrive")
+        func littleEndian() async throws {
+            let server = FakeServer(mode: .oldDriver)
+            defer { server.stop() }
+            try await withTracking(port: server.port) { service, ui in
+                #expect(await waitUntil(5) { ui.lastState == "connected" })
+                let client = try #require(service.client)
+                #expect(await waitUntil { !client.receivingBigEndian })     //from its heartbeats
+                //duration, frequency, amplitude
+                server.sendRaw(driverPacket(type: 2, payload: littleEndianBytes(Float(0.5)) + littleEndianBytes(Float(0.25)) + littleEndianBytes(Float(0.75))))
+                #expect(await waitUntil { FakeHardware.events.contains("vibrate f=0.25 a=0.75 d=0.5") })
+                #expect(!client.receivingBigEndian)
             }
         }
     }

@@ -38,6 +38,6 @@ struct OwOTrackApp: App {
     }
 
     private func updateDimmer() {
-        dimmer.setActive((model.canDisconnect || watchRelay.isActive) && scenePhase == .active)
+        dimmer.setActive(ScreenDimmer.shouldBeActive(tracking: model.canDisconnect, relaying: watchRelay.isActive, inForeground: scenePhase == .active))
     }
 }

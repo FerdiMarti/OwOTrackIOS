@@ -176,7 +176,7 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
             connectUI?.setReconnecting(until: now.addingTimeInterval(timing.giveUp))
         }
         if let lostSince = lostSince, now.timeIntervalSince(lostSince) > timing.giveUp {
-            finish(failure: "Couldn't reach the iPhone for \(Int(timing.giveUp / 60)) minutes")
+            finish(failure: "Couldn't reach the iPhone for \(describeDuration(timing.giveUp))")
             return
         }
         if now.timeIntervalSince(lastAsked) > timing.retryInterval {
