@@ -79,6 +79,8 @@
 		C00000000000000000000030 /* InfoTopics.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000002E /* InfoTopics.swift */; };
 		C00000000000000000000032 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000031 /* Permissions.swift */; };
 		C00000000000000000000033 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000031 /* Permissions.swift */; };
+		C00000000000000000000041 /* VolumeButtonPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000040 /* VolumeButtonPositions.swift */; };
+		C00000000000000000000042 /* VolumeButtonPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000040 /* VolumeButtonPositions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -161,6 +163,7 @@
 		C0000000000000000000002B /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		C0000000000000000000002E /* InfoTopics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoTopics.swift; sourceTree = "<group>"; };
 		C00000000000000000000031 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
+		C00000000000000000000040 /* VolumeButtonPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonPositions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +208,7 @@
 				C0000000000000000000002B /* MainView.swift */,
 				C0000000000000000000002E /* InfoTopics.swift */,
 				C00000000000000000000031 /* Permissions.swift */,
+				C00000000000000000000040 /* VolumeButtonPositions.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -531,6 +535,7 @@
 				C0000000000000000000002C /* MainView.swift in Sources */,
 				C0000000000000000000002F /* InfoTopics.swift in Sources */,
 				C00000000000000000000032 /* Permissions.swift in Sources */,
+				C00000000000000000000041 /* VolumeButtonPositions.swift in Sources */,
 				B10000000000000000000010 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -556,6 +561,7 @@
 				C0000000000000000000002D /* MainView.swift in Sources */,
 				C00000000000000000000030 /* InfoTopics.swift in Sources */,
 				C00000000000000000000033 /* Permissions.swift in Sources */,
+				C00000000000000000000042 /* VolumeButtonPositions.swift in Sources */,
 				B10000000000000000000011 /* ConnectionModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

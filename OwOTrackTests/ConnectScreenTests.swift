@@ -111,6 +111,42 @@ extension OwOTrackTests {
             #expect(model.port == "7000")
         }
 
+        @Test("volume button positions: the iPhone 17 from Apple's drawing; unknown models get the estimate")
+        func volumeButtonPositions() throws {
+            let iPhone17 = try #require(VolumeButtonPositions.forModel("iPhone18,3"))
+            #expect(abs(iPhone17.up - 0.3162) < 0.0005)     //(48.23 - 2.44) / 144.79
+            #expect(abs(iPhone17.down - 0.4143) < 0.0005)   //(62.43 - 2.44) / 144.79
+            let se = try #require(VolumeButtonPositions.forModel("iPhone14,6"))
+            #expect(abs(se.up - 0.1669) < 0.0005)           //(34.56 - 17.19) / 104.05: a big border above the screen
+            #expect(VolumeButtonPositions.forModel("iPhone99,9") == .estimate)
+            #expect(VolumeButtonPositions.forModel("arm64") == .estimate)
+        }
+
+        @Test("the iPhone Duo has its volume buttons on top: no labels at the side")
+        func volumeButtonsOnTop() {
+            #expect(VolumeButtonPositions.forModel("iPhone19,4") == nil)
+            #expect(!VolumeButtonPositions.models.contains { $0.identifiers.contains("iPhone19,4") })
+        }
+
+        @Test("the table lists each model once, with positions that fit a phone")
+        func volumeButtonTable() {
+            var seen = Set<String>()
+            for model in VolumeButtonPositions.models {
+                for identifier in model.identifiers {
+                    #expect(identifier.hasPrefix("iPhone"), "\(model.name): \(identifier)")
+                    #expect(seen.insert(identifier).inserted, "\(identifier) is listed twice")
+                }
+                #expect(model.positions.up > 0.1 && model.positions.up < 0.5, "\(model.name): up \(model.positions.up)")
+                #expect(model.positions.down > model.positions.up + 0.05 && model.positions.down < 0.6, "\(model.name): down \(model.positions.down)")
+            }
+        }
+
+        @Test("the app reads the model it runs on (in the simulator: the simulated one)")
+        func deviceModel() {
+            #expect(VolumeButtonPositions.deviceModel.hasPrefix("iPhone") || VolumeButtonPositions.deviceModel.hasPrefix("iPad"))
+            #expect(VolumeButtonPositions.current == VolumeButtonPositions.forModel(VolumeButtonPositions.deviceModel))
+        }
+
         @Test("permission colors", arguments: [
             (CLAuthorizationStatus.authorizedAlways, PermissionState.good),
             (.authorizedWhenInUse, .limited),

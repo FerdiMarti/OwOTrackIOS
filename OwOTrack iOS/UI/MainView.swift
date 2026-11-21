@@ -54,7 +54,7 @@ struct MainView: View {
                             settings
                             connectButton
                         }
-                        if isPad && showsVolumeButtons {
+                        if showsVolumeButtons && volumeButtonPositions == nil {
                             volumeButtonLegend
                         }
                     }
@@ -79,8 +79,8 @@ struct MainView: View {
             }
         }
         .overlay(alignment: .topLeading) {
-            if !isPad && showsVolumeButtons {
-                VolumeButtonLabels { sheet = .info(.volumeButtons) }
+            if showsVolumeButtons, let positions = volumeButtonPositions {
+                VolumeButtonLabels(positions: positions) { sheet = .info(.volumeButtons) }
             }
         }
         .overlay(alignment: .bottom) {
@@ -102,6 +102,12 @@ struct MainView: View {
     //the volume buttons only do something with SlimeVR (resets)
     private var showsVolumeButtons: Bool {
         return model.isConnected && model.serverType == .slimeVR
+    }
+
+    //where the labels next to the volume buttons go. nil where the buttons aren't on the side of the screen
+    //(iPad, iPhone Duo): there, a line of text explains them instead
+    private var volumeButtonPositions: VolumeButtonPositions? {
+        return isPad ? nil : VolumeButtonPositions.current
     }
 
     // MARK: status
@@ -277,7 +283,7 @@ struct MainView: View {
         .disabled(model.isConnecting)
     }
 
-    //iPads have their volume buttons in different places, so a legend instead of labels at the edge
+    //where the volume buttons aren't on the side (iPad, iPhone Duo): a legend instead of labels at the edge
     private var volumeButtonLegend: some View {
         HStack(spacing: 12) {
             Label("Volume + yaw reset, volume − full reset", systemImage: "speaker.wave.2")
@@ -507,24 +513,26 @@ enum Sensor: CaseIterable, Identifiable {
 }
 
 //slim tabs at the left screen edge, next to the volume buttons, inside the content's margin so they don't cover anything.
-//The buttons sit at slightly different heights on different iPhones; the positions are checked on an iPhone 17
+//The buttons sit at different heights on different iPhones, so the positions come from a table per model
 private struct VolumeButtonLabels: View {
+    let positions: VolumeButtonPositions
     let onTap: () -> Void
     private let width: CGFloat = 18
-    private let length: CGFloat = 80
 
     var body: some View {
         GeometryReader { geometry in
-            label(sign: "+", action: "Yaw reset", spoken: "Volume up")
-                .position(x: width / 2, y: geometry.size.height * 0.315)
-            label(sign: "−", action: "Full reset", spoken: "Volume down")
-                .position(x: width / 2, y: geometry.size.height * 0.415)
+            //up to 80 pt long, shorter where the buttons are close together (e.g. iPhone SE), so the tabs don't overlap
+            let length = min(80, (positions.down - positions.up) * geometry.size.height - 6)
+            label(sign: "+", action: "Yaw reset", spoken: "Volume up", length: length)
+                .position(x: width / 2, y: geometry.size.height * positions.up)
+            label(sign: "−", action: "Full reset", spoken: "Volume down", length: length)
+                .position(x: width / 2, y: geometry.size.height * positions.down)
         }
         .ignoresSafeArea()
     }
 
     //the text runs along the edge, read from bottom to top
-    private func label(sign: String, action: String, spoken: String) -> some View {
+    private func label(sign: String, action: String, spoken: String, length: CGFloat) -> some View {
         Button(action: onTap) {
             Text("\(sign) \(action)")
                 .font(.caption2.weight(.semibold))
