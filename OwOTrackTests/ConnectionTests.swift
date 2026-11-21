@@ -77,7 +77,7 @@ extension OwOTrackTests {
             timing.connectTimeout = 2
             try await withTracking(port: server.port, timing: timing) { _, ui in
                 #expect(await waitUntil(4) { ui.lastState == "failed" })
-                #expect(ui.states == ["connecting", "not connected", "failed"])
+                #expect(ui.states == ["connecting", "failed"])     //the reason right away, not "not connected" first
                 #expect(ui.failures == ["Couldn't connect to 127.0.0.1"])
                 #expect(ui.localNetwork.isEmpty)
                 #expect(appLog.contains("Connecting Failed"))

@@ -19,8 +19,8 @@ extension OwOTrackTests {
         func packets() {
             let messages: [RelayMessage] = [
                 .start(RelayStart(address: "my-pc.local", port: "6969", magnetometer: true, mac: FakeWatchHardware.mac, magnetometerAvailable: false)),
-                .stop, .battery(0.42), .reset(yaw: true), .reset(yaw: false), .alive,
-                .status(RelayStatus(state: .reconnecting, serverType: .slimeVR, giveUp: Date(timeIntervalSince1970: 1_000_000), reason: nil)),
+                .stop(session: UUID()), .battery(0.42), .reset(yaw: true), .reset(yaw: false), .alive,
+                .status(RelayStatus(state: .reconnecting, serverType: .slimeVR, giveUp: Date(timeIntervalSince1970: 1_000_000), reason: nil, session: UUID())),
                 .status(RelayStatus(state: .failed, reason: "Couldn't connect to my-pc.local")),
                 .log(["Connecting for the Apple Watch", "Handshake Succeeded"]),
                 .vibrate(frequency: 0.25, amplitude: 0.75, duration: 0.5), .magnetometer(false),
@@ -150,10 +150,72 @@ extension OwOTrackTests {
             defer { relay.stop() }
             relay.connect(port: server.port)
             #expect(await waitUntil(5) { relay.watchUI.serverTypes.last == .slimeVR })
+            //the setting it already has: confirmed, but the readings don't restart (that made the yaw jump)
+            server.send(type: 25, payload: [0, 0, 1, 1])
+            #expect(await waitUntil { server.received(type: 24).count == 1 })
             server.send(type: 25, payload: [0, 0, 1, 0])        //sensor 0, magnetometer, off
             #expect(await waitUntil { relay.watchMotion.startModes == [true, false] })
             #expect(relay.watchUI.magnetometerToggles == [false])
-            #expect(await waitUntil { server.received(type: 24).first?.packet.payload == [0, 0, 1] })
+            #expect(await waitUntil { server.received(type: 24).count == 2 })
+            #expect(server.received(type: 24).map(\.packet.payload) == [[0, 0, 1], [0, 0, 1]])
+        }
+
+        @Test("connecting fails for the watch: the iPhone ends the session with the reason, and the next Connect works")
+        func failedConnect() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            server.setState(.silent)
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(8) { relay.watchUI.lastState == "failed" })
+            #expect(relay.watchUI.failures == ["Couldn't connect to 127.0.0.1"])
+            #expect(relay.watchUI.states.suffix(2) == ["connecting", "failed"])     //no "not connected" without the reason
+            #expect(relay.host?.status.state == .failed)
+            //the iPhone stopped: no more status messages, and the reason isn't replaced by "lost contact with the watch"
+            let statuses = relay.link.phone.sentMessages.filter(\.isStatus).count
+            await pause(3.5)        //longer than the iPhone waits for the watch in the tests (3 s)
+            #expect(relay.link.phone.sentMessages.filter(\.isStatus).count == statuses)
+            #expect(relay.host?.status.reason == "Couldn't connect to 127.0.0.1")
+
+            //the old session's failure, arriving late, doesn't end the new one
+            server.setState(.up)
+            let oldFailure = try #require(relay.link.phone.sentMessages.last { $0.isStatus })
+            relay.connect(port: server.port)
+            relay.link.phone.send(oldFailure)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            #expect(relay.watchUI.failures.count == 1)
+        }
+
+        @Test("asking twice for the same session doesn't connect twice")
+        func repeatedStart() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            let start = try #require(relay.link.watch.sentMessages.first { $0.isStart })
+            relay.link.watch.send(start)        //the watch asked again before the iPhone answered
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            #expect(relay.watchLog.get().components(separatedBy: "Connecting for the Apple Watch").count == 2)
+        }
+
+        @Test("a Stop on the iPhone that the watch missed isn't undone when the watch asks again")
+        func missedStop() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.link.watch.link.isUp = false
+            relay.host?.stop(tellWatch: true)       //lost on the way
+            relay.link.watch.link.isUp = true
+            //the watch hears nothing more and asks for its session again: it gets the Stop again instead of a new connection
+            #expect(await waitUntil(6) { relay.watchUI.lastState == "not connected" })
+            #expect(relay.watchLog.get().contains("Stopped on the iPhone"))
+            #expect(relay.host?.status.state == .notConnected)
+            #expect(relay.watchUI.failures.isEmpty)
         }
 
         @Test("vibrations from the server reach the watch")
@@ -254,7 +316,7 @@ extension OwOTrackTests {
             #expect(relay.watchHardware.events.last == "workout ended")
             //it kept asking meanwhile, which wakes the iPhone app if it's there, and called it off when it gave up
             #expect(relay.link.watch.sentMessages.filter(\.isStart).count >= 3)
-            #expect(relay.link.watch.sentMessages.last == .stop)
+            #expect(relay.link.watch.sentMessages.last?.isStop == true)
         }
 
         @Test("the iPhone out of reach: the watch shows reconnecting, and continues when it's back")
@@ -323,6 +385,20 @@ private func unconfirmedCounts(_ log: Logger) -> [Int] {
 extension RelayMessage {
     var isStart: Bool {
         if case .start = self {
+            return true
+        }
+        return false
+    }
+
+    var isStop: Bool {
+        if case .stop = self {
+            return true
+        }
+        return false
+    }
+
+    var isStatus: Bool {
+        if case .status = self {
             return true
         }
         return false

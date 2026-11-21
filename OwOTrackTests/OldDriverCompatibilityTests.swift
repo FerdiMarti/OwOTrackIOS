@@ -63,7 +63,7 @@ extension OwOTrackTests {
                 #expect(await waitUntil { server.received(type: 61).last?.packet.payload == [0, UInt8(ascii: "y")] })
                 let client = try #require(service.client)
                 client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "n")]), recursion: false)
-                #expect(service.magnetometer == false)
+                #expect(await waitUntil { service.magnetometer == false })     //switched on the main thread
                 #expect(ui.magnetometerToggles == [false])
             }
         }

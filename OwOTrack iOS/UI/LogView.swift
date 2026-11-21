@@ -48,6 +48,12 @@ struct LogView: View {
             .onChange(of: text) { _ in
                 proxy.scrollTo("end", anchor: .bottom)
             }
+            .onAppear {
+                //opens at the newest line, once the text is laid out
+                DispatchQueue.main.async {
+                    proxy.scrollTo("end", anchor: .bottom)
+                }
+            }
         }
     }
 

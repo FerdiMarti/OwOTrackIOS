@@ -112,21 +112,22 @@ extension OwOTrackTests {
             service.connectUI = ui
             service.magnetometer = true
             client.processReceivedData(data: slimeVRPacket(type: 25, number: 7, payload: [sensor] + bytes(setting) + [0]), recursion: false)
-            #expect(service.magnetometer == !switches)
+            #expect(await waitUntil { service.magnetometer == !switches })     //switched on the main thread
             #expect(ui.magnetometerToggles == (switches ? [false] : []))
             #expect(await waitUntil { connection.packets.contains { $0.type == 24 } })
             #expect(connection.packets.first { $0.type == 24 }?.payload == [sensor] + bytes(setting))
         }
 
         @Test("the old driver's overlay switches the magnetometer")
-        func driverMagnetometerSwitch() {
+        func driverMagnetometerSwitch() async {
             let (client, _, service) = connectedClient()
             defer { client.disconnectUDP(logIt: false) }
             client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "n")]), recursion: false)
-            #expect(service.magnetometer == false)
+            #expect(await waitUntil { service.magnetometer == false })     //switched on the main thread
             client.processReceivedData(data: driverPacket(type: 62, payload: [0, UInt8(ascii: "y")]), recursion: false)
-            #expect(service.magnetometer == true)
+            #expect(await waitUntil { service.magnetometer == true })
             client.processReceivedData(data: driverPacket(type: 62, payload: [0]), recursion: false)    //too short: ignored
+            await pause(0.1)
             #expect(service.magnetometer == true)
         }
 

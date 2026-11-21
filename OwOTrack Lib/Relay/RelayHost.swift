@@ -37,6 +37,9 @@ final class RelayHost {
     private var motion: RelayedWatchMotion?
     private var reporter: RelayReporter?
     private var request: RelayStart?
+    //how the last session ended when the watch didn't end it itself (stopped on the iPhone, connecting failed):
+    //if the watch missed that and asks for the session again, it gets this again instead of a new connection
+    private var ended: RelayStatus?
     private var lastHeard = Date.distantPast
     private var timer: Timer?
     private var statusSendScheduled = false
@@ -69,14 +72,18 @@ final class RelayHost {
             receivedSamples += samples.count
             receivedBatches += 1
         case .message(.start(let request)):
-            if service != nil && status.isActive && request == self.request {
-                transport.send(.status(status))     //already on it: the watch lost contact for a moment
+            if service != nil && request.session == self.request?.session {
+                transport.send(.status(status))     //already on it: the watch asked again before it heard back, or lost contact for a moment
+            } else if let ended = ended, ended.session == request.session {
+                transport.send(.status(ended))      //it ended, and the watch missed that
             } else {
                 stop(tellWatch: false)
                 start(request)
             }
-        case .message(.stop):
-            stop(tellWatch: false)
+        case .message(.stop(let session)):
+            if session == request?.session {
+                end(RelayStatus(state: .notConnected), tellWatch: false, final: false)
+            }
         case .message(.battery(let level)):
             hardware?.batteryLevel = level
         case .message(.reset(let yaw)):
@@ -94,6 +101,7 @@ final class RelayHost {
 
     private func start(_ request: RelayStart) {
         self.request = request
+        status = RelayStatus(state: .connecting, session: request.session)
         let hardware = RelayedWatchHardware(device: device, mac: request.mac, transport: transport)
         let motion = RelayedWatchMotion(magnetometerAvailable: request.magnetometerAvailable, transport: transport)
         let service = TrackingService(device: hardware, motion: motion, logger: logger)
@@ -122,14 +130,15 @@ final class RelayHost {
     //ends the watch's session: the user stopped it on the iPhone (tellWatch: the watch learns why),
     //or the watch stopped it or asked for a new one
     func stop(tellWatch: Bool) {
-        end(RelayStatus(state: .notConnected, reason: tellWatch ? "Stopped on the iPhone" : nil), tellWatch: tellWatch)
+        end(RelayStatus(state: .notConnected, reason: tellWatch ? "Stopped on the iPhone" : nil), tellWatch: tellWatch, final: tellWatch)
     }
 
-    //ends the watch's session in the given state, which the watch gets with the reason
-    private func end(_ endState: RelayStatus, tellWatch: Bool) {
+    //ends the watch's session in the given state, which the watch gets with the reason.
+    //final: the watch asking for this session again gets this state again (else the session starts over)
+    private func end(_ endState: RelayStatus, tellWatch: Bool, final: Bool) {
         timer?.invalidate()
         timer = nil
-        guard let service = service else {
+        guard let service = service, let request = request else {
             return
         }
         reporter?.detach()      //late reports of this session must not change the next one's status
@@ -138,18 +147,24 @@ final class RelayHost {
         self.service = nil
         hardware = nil
         motion = nil
-        request = nil
+        self.request = nil
+        var endState = endState
+        endState.session = request.session
         status = endState
+        if final {
+            ended = endState
+        }
         if tellWatch {
-            transport.send(.status(status))
+            transport.send(.status(endState))
         }
     }
 
     //a sign of life for the watch, and the end of the session if the watch went quiet
     private func check() {
         if Date().timeIntervalSince(lastHeard) > timing.watchTimeout {
-            //shown on the iPhone, and on the watch if it can still hear the iPhone
-            end(RelayStatus(state: .failed, reason: "The iPhone lost contact with the watch"), tellWatch: true)
+            //shown on the iPhone, and on the watch if it can still hear the iPhone. If the watch comes back, it asks for
+            //its session again, which then starts over
+            end(RelayStatus(state: .failed, reason: "The iPhone lost contact with the watch"), tellWatch: true, final: false)
             return
         }
         transport.send(.status(status))
@@ -163,11 +178,16 @@ final class RelayHost {
         }
     }
 
-    //the session reported a change. Changes in one pass go to the watch together, as the final state:
-    //giving up reports "not connected" and then "failed" with the reason, and the watch should get the reason
+    //the session reported a change. Changes in one pass go to the watch together, as the final state.
+    //Connecting failed or reconnecting gave up: the session ends here, and the watch gets the reason
     fileprivate func update(_ change: (inout RelayStatus) -> Void) {
         var status = self.status
         change(&status)
+        if status.state == .failed {
+            end(status, tellWatch: true, final: true)
+            return
+        }
+        status.session = request?.session
         self.status = status
         if !statusSendScheduled {
             statusSendScheduled = true

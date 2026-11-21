@@ -33,9 +33,7 @@ class PacketTypes {
 class UDPGyroProviderClient: MotionSink {
 
     var connection: CompatibleUDPClient?
-    var logger: Logger {
-        return service.logger
-    }
+    let logger: Logger
     var hostUDP = "192.168.0.10"
     var portUDP = 6969
     
@@ -86,14 +84,16 @@ class UDPGyroProviderClient: MotionSink {
         get { stateLock.lock(); defer { stateLock.unlock() }; return _shortHandshakeSent }
         set { stateLock.lock(); _shortHandshakeSent = newValue; stateLock.unlock() }
     }
-    var service: TrackingService
+    //weak: the service keeps its client, so a strong reference here kept both alive after the session (the relayed watch's leaked)
+    weak var service: TrackingService?
+    private let localPortKey: String
+    private let firmwarePlatform: String
+    private let heartbeatTimeout: TimeInterval
     var connectionCheckTimer : Timer? //timer that regularly calls a method to check if connection is still valid
     var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
     
     //the device's hardware, from TrackingService (a fake in the tests)
-    var hardware: TrackerHardware {
-        return service.hardware
-    }
+    let hardware: TrackerHardware
     
     public static var CURRENT_VERSION = 5
     
@@ -101,6 +101,11 @@ class UDPGyroProviderClient: MotionSink {
         self.hostUDP = host
         self.portUDP = Int(port) ?? 6969
         self.service = service
+        logger = service.logger
+        hardware = service.hardware
+        localPortKey = service.localPortKey
+        firmwarePlatform = service.firmwarePlatform
+        heartbeatTimeout = service.timing.heartbeatTimeout
     }
     
     //logIt is false when the user didn't ask for it: a lost connection or a failed reconnect attempt
@@ -129,7 +134,7 @@ class UDPGyroProviderClient: MotionSink {
         sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
 
-        self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP, portKey: service.localPortKey)
+        self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP, portKey: localPortKey)
 
         self.connection?.open(cb: {
             self.logStep("Connection Ready")
@@ -161,7 +166,7 @@ class UDPGyroProviderClient: MotionSink {
     func connectionProblem(_ problem: ConnectionProblem) {
         logProblem(problem.reason)
         if problem.localNetworkDenied {
-            service.connectUI?.setLocalNetworkAccess(.denied)
+            service?.connectUI?.setLocalNetworkAccess(.denied)
         }
         if !problem.fatal {
             return
@@ -170,14 +175,14 @@ class UDPGyroProviderClient: MotionSink {
         if isConnected {
             logger.addEntry("Connection with server lost")
             DispatchQueue.main.async {
-                self.service.connectionLost(client: self)     //on the main thread like the heartbeat timeout
+                self.service?.connectionLost(client: self)     //on the main thread like the heartbeat timeout
             }
         }
     }
     
     //builds the data header either for legacy OwOTrack driver or SlimeVR server
     func buildHeaderInfo(slime: Bool) -> Data {
-        return UDPGyroProviderClient.handshakePacket(slime: slime, mac: hardware.getPseudoMacAddress(), platform: service.firmwarePlatform)
+        return UDPGyroProviderClient.handshakePacket(slime: slime, mac: hardware.getPseudoMacAddress(), platform: firmwarePlatform)
     }
 
     //the handshake, also sent when searching the network for the server (LocalServerFinder)
@@ -299,7 +304,7 @@ class UDPGyroProviderClient: MotionSink {
         self.isConnecting = false
         self.lastHeartbeat = Date().timeIntervalSince1970
         if shortHandshakeSent {
-            service.serverDetected(.owoTrackDriver, by: self)
+            service?.serverDetected(.owoTrackDriver, by: self)
         }
         //start timer to check connection regularly
         DispatchQueue.main.async {
@@ -364,7 +369,7 @@ class UDPGyroProviderClient: MotionSink {
         } else if msgType == PacketTypes.CHANGE_MAG_STATUS {
             //lets the server (owoTrack driver overlay) turn the magnetometer on or off, payload is a 2-byte char 'y' or 'n'
             if let c = readChar(data: restData) {
-                self.service.toggleMagnetometerUse(use: c == "y")
+                self.service?.toggleMagnetometerUse(use: c == "y", by: self)
             }
         } else if msgType == PacketTypes.SENSOR_INFO {
             //SlimeVR acknowledges the sensor description
@@ -394,7 +399,7 @@ class UDPGyroProviderClient: MotionSink {
         let setting = UInt16(bytes[9]) << 8 | UInt16(bytes[10])
         let enabled = bytes[11] != 0
         if setting == PacketTypes.CONFIG_MAG_ENABLED && (sensorId == 0 || sensorId == 255) {   //255 means all sensors
-            service.toggleMagnetometerUse(use: enabled)
+            service?.toggleMagnetometerUse(use: enabled, by: self)
         }
         var payload = Data([sensorId])
         payload.append(Data(bigEndian: setting))
@@ -456,9 +461,9 @@ class UDPGyroProviderClient: MotionSink {
         }
         let time = Date().timeIntervalSince1970
         let timeDiff = time - lastHeartbeat
-        if timeDiff > service.timing.heartbeatTimeout {
+        if timeDiff > heartbeatTimeout {
             logger.addEntry("Connection with server lost")
-            service.connectionLost(client: self)
+            service?.connectionLost(client: self)
             return
         }
         return
@@ -531,7 +536,7 @@ class UDPGyroProviderClient: MotionSink {
             if !self.isSlimeVR {
                 self.isSlimeVR = true
                 self.logger.addEntry("SlimeVR server detected")
-                self.service.serverDetected(.slimeVR, by: self)
+                self.service?.serverDetected(.slimeVR, by: self)
             }
         }
     }

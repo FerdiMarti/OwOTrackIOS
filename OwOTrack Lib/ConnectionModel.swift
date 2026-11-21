@@ -201,12 +201,16 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         search(thenConnect: thenConnect)
     }
 
-    //the user picked one of the servers that answered (nil: none)
+    //the user picked one of the servers that answered (nil: the list closed). SwiftUI may close the list before it
+    //runs the button's action, so closing it keeps connectAfterChoice for the choice that may still come
     func chooseServer(_ server: FoundServer?) {
-        let connect = connectAfterChoice
         serverChoices = []
+        guard let server = server else {
+            return
+        }
+        let connect = connectAfterChoice
         connectAfterChoice = false
-        if let server = server {
+        if canEdit {
             use(server, connect: connect)
         }
     }
@@ -215,6 +219,7 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         status = .searching
         offersSearch = false
         serverChoices = []
+        connectAfterChoice = false
         finder.findServers(port: port) { [weak self] result in
             DispatchQueue.main.async {
                 self?.searchFinished(result, thenConnect: thenConnect)

@@ -98,6 +98,7 @@ final class LocalServerFinder: ServerFinding {
         var types: [String: ServerType] = [:]
         var order: [String] = []
         var driverSent = false
+        var anySent = false
         let start = Date()
         while true {
             let elapsed = Date().timeIntervalSince(start)
@@ -108,7 +109,7 @@ final class LocalServerFinder: ServerFinding {
                 steps.removeFirst()
                 driverSent = driverSent || step.isDriver
                 for (host, address) in addresses where types[host] == nil {
-                    send(step.packet, to: address, on: socketHandle)
+                    anySent = send(step.packet, to: address, on: socketHandle) || anySent
                 }
             }
             //answers until the next step, a few at a time
@@ -124,10 +125,17 @@ final class LocalServerFinder: ServerFinding {
                 }
             }
         }
+        //not a single handshake went out: iOS blocks the local network (not allowed, or still asking on the first search)
+        if !anySent && order.isEmpty && !addresses.isEmpty {
+            return ServerSearchResult(failure: platform == "watchOS" ? "Allow Local Network access on your iPhone, then search again"
+                                                                     : "Allow Local Network access for OwOTrack, then search again")
+        }
         return ServerSearchResult(servers: order.compactMap { host in types[host].map { FoundServer(address: host, type: $0) } })
     }
 
-    private func send(_ packet: Data, to address: sockaddr_in, on socketHandle: Int32) {
+    //true if it went out
+    @discardableResult
+    private func send(_ packet: Data, to address: sockaddr_in, on socketHandle: Int32) -> Bool {
         var address = address
         for _ in 0..<5 {
             let sent = packet.withUnsafeBytes { bytes in
@@ -137,12 +145,16 @@ final class LocalServerFinder: ServerFinding {
                     }
                 }
             }
-            //a full send buffer: wait a moment and try again. Other errors (no such host): skip the address
-            if sent >= 0 || (errno != ENOBUFS && errno != EAGAIN) {
-                return
+            //a full send buffer: wait a moment and try again. Other errors (no such host, no local network access): skip the address
+            if sent >= 0 {
+                return true
+            }
+            if errno != ENOBUFS && errno != EAGAIN {
+                return false
             }
             usleep(2000)
         }
+        return false
     }
 
     //the address of the next handshake answer waiting (other packets are skipped), nil when none is waiting

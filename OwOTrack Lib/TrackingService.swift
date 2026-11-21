@@ -102,18 +102,24 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
             guard let client = self.connect(session: session, quiet: false, lastProblem: nil) else {
                 return
             }
-            if client.isConnected {
-                self.logger.addEntry("Connection established")
-                connectUI.setLocalNetworkAccess(.granted)
-                connectUI.setConnected()
-                self.startStreaming(client: client)
-            } else {
-                //only a connection that worked is retried: if the first try fails, the address or the setup is likely wrong
-                self.logger.addEntry("Handshake Failed")
-                self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
-                self.logger.addEntry("Connecting Failed")
-                self.stop()
-                connectUI.setFailed("Couldn't connect to \(self.ipAdress)")
+            //on the main thread, like stop() and start(): the session can't end in between
+            DispatchQueue.main.async {
+                guard self.isActive(session) else {
+                    client.disconnectUDP(logIt: false)      //stopped (or started again) meanwhile: not a failed connection
+                    return
+                }
+                if client.isConnected {
+                    self.logger.addEntry("Connection established")
+                    connectUI.setLocalNetworkAccess(.granted)
+                    connectUI.setConnected()
+                    self.startStreaming(client: client)
+                } else {
+                    //only a connection that worked is retried: if the first try fails, the address or the setup is likely wrong
+                    self.logger.addEntry("Handshake Failed")
+                    self.logger.addEntry("\nConnection timed out. Ensure IP and port are correct, that the server is running and not blocked by Windows Firewall (try changing your network type to private in Windows, or running the firewall script) or blocked by router, and that you're connected to the same network (you may need to disable Mobile Data) \n")
+                    self.logger.addEntry("Connecting Failed")
+                    self.end(failure: "Couldn't connect to \(self.ipAdress)")
+                }
             }
         }
     }
@@ -200,8 +206,7 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
                     if self.isActive(session) {     //not if the user disconnected in the meantime
                         let reason = "Couldn't reconnect for \(self.describe(self.timing.reconnectTimeLimit))"
                         self.logger.addEntry("\(reason), stopped trying")
-                        self.stop()
-                        self.connectUI?.setFailed(reason)
+                        self.end(failure: reason)
                     }
                 }
                 return
@@ -230,12 +235,15 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         return session
     }
 
-    private func endSession() {
+    //false if the session had already ended
+    private func endSession() -> Bool {
         stateLock.lock()
         defer { stateLock.unlock() }
+        let wasActive = wantsConnection
         session += 1
         wantsConnection = false
         reconnecting = false
+        return wasActive
     }
 
     private func isActive(_ session: Int) -> Bool {
@@ -295,9 +303,17 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         defaults.set(self.magnetometer, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
     }
     
-    //ends the session: the user pressed Disconnect (also while reconnecting), or the first connection attempt failed
+    //ends the session: the user pressed Disconnect (also while reconnecting). On the main thread
     func stop() {
-        endSession()
+        end(failure: nil)
+    }
+
+    //ends the session; failure: connecting failed or reconnecting gave up, the screen shows why (and not "not connected" first).
+    //Nothing happens if the session already ended
+    private func end(failure: String?) {
+        guard endSession() else {
+            return
+        }
         if releaseDevice() {
             hardware.stopProximitySensor()
             hardware.allowAutoLock()
@@ -306,21 +322,33 @@ public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingContr
         }
         stopStreaming()
         client?.disconnectUDP()
-        if (client?.isConnected) != nil && !client!.isConnected {
+        if let failure = failure {
+            connectUI?.setFailed(failure)
+        } else {
             connectUI?.setUnconnected()
+        }
+        if client != nil {
             logger.addEntry("Disconnected")
         }
     }
-    
-    func toggleMagnetometerUse(use: Bool) {
-        if client == nil {
+
+    //SlimeVR or the old owoTrack driver switched the magnetometer. Only a real change restarts the readings
+    //(SlimeVR also sends the setting it already has), on the main thread like starting them
+    func toggleMagnetometerUse(use: Bool, by caller: UDPGyroProviderClient) {
+        guard Thread.isMainThread else {
+            DispatchQueue.main.async {
+                self.toggleMagnetometerUse(use: use, by: caller)
+            }
             return
         }
-        self.magnetometer = use
+        guard caller === client, use != magnetometer else {
+            return
+        }
+        magnetometer = use
         motion.stopUpdates()
-        motion.startUpdates(sink: client!, useMagn: use)
+        motion.startUpdates(sink: caller, useMagn: use)
         connectUI?.setMagnometerToggle(use: use)
-        client?.sensorConfigChanged(magnetometerEnabled: use)
+        caller.sensorConfigChanged(magnetometerEnabled: use)
     }
 
     func sendReset(yaw: Bool) {

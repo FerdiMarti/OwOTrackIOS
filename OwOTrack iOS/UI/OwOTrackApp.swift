@@ -26,8 +26,8 @@ struct OwOTrackApp: App {
                             .accessibilityLabel("Screen dimmed. Touch to brighten")
                     }
                 }
-                //the screen dims only while tracking (this iPhone, or the watch through it) and while the app is in the foreground
-                .onChange(of: model.isConnected) { _ in updateDimmer() }
+                //the screen dims only while tracking or reconnecting (this iPhone, or the watch through it) and while the app is in the foreground
+                .onChange(of: model.canDisconnect) { _ in updateDimmer() }
                 .onChange(of: watchRelay.isActive) { _ in updateDimmer() }
                 .onChange(of: scenePhase) { _ in updateDimmer() }
         }
@@ -38,6 +38,6 @@ struct OwOTrackApp: App {
     }
 
     private func updateDimmer() {
-        dimmer.setActive((model.isConnected || watchRelay.isActive) && scenePhase == .active)
+        dimmer.setActive((model.canDisconnect || watchRelay.isActive) && scenePhase == .active)
     }
 }

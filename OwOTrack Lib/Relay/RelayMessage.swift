@@ -12,7 +12,7 @@ import Foundation
 enum RelayMessage: Codable, Equatable {
     //watch → iPhone
     case start(RelayStart)              //connect for the watch (also sent again while the iPhone doesn't answer)
-    case stop
+    case stop(session: UUID)            //ends that session (a late one doesn't end a newer session)
     case battery(Float)
     case reset(yaw: Bool)               //yaw reset, else full reset
     case alive                          //nothing else to send for a while (no motion readings, as in the simulator): still there
@@ -32,6 +32,9 @@ struct RelayStart: Codable, Equatable {
     var magnetometer: Bool
     var mac: [UInt8]                    //the watch's own, so SlimeVR shows it as its own tracker
     var magnetometerAvailable: Bool
+    //new for every Connect on the watch: the same request sent again (the iPhone didn't answer yet) doesn't start over,
+    //and the status messages of an earlier session are told apart
+    var session = UUID()
 }
 
 struct RelayStatus: Codable, Equatable {
@@ -43,6 +46,7 @@ struct RelayStatus: Codable, Equatable {
     var serverType = ServerType.unknown
     var giveUp: Date?                   //while reconnecting
     var reason: String?                 //why it failed, or why the iPhone ended it
+    var session: UUID?                  //the watch's session it's about (RelayStart.session)
 
     var isActive: Bool {
         return state == .connecting || state == .connected || state == .reconnecting

@@ -105,6 +105,7 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     
     func close() {
         connection?.cancel()
+        connection?.stateUpdateHandler = nil    //it holds this object and the tracker's client, which would never be freed
     }
 
     func sendUDP(_ content: Data) {

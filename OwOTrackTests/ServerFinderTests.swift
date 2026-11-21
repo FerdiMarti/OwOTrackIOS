@@ -45,6 +45,13 @@ extension OwOTrackTests {
             #expect(await search(port: 6969, candidates: nil) == ServerSearchResult(failure: "Connect to Wi-Fi to search for SlimeVR"))
         }
 
+        @Test("no handshake can go out (no Local Network access): it says so instead of \"nothing found\"")
+        func sendsBlocked() async {
+            //a broadcast without permission fails to send, like every send does while iOS blocks the local network
+            #expect(await search(port: 6969, candidates: ["255.255.255.255"])
+                    == ServerSearchResult(failure: "Allow Local Network access for OwOTrack, then search again"))
+        }
+
         @Test("the addresses asked: the whole home network, around this device in big networks, only private networks")
         func addresses() throws {
             let ip = try #require(LocalServerFinder.parse("192.168.1.37"))
@@ -94,6 +101,7 @@ extension OwOTrackTests {
             model.connectPressed()
             #expect(await waitUntil { model.serverChoices == servers })
             #expect(service.started.isEmpty)
+            model.chooseServer(nil)             //SwiftUI may close the list before it runs the button's action
             model.chooseServer(servers[1])
             #expect(model.serverChoices.isEmpty)
             #expect(model.ip == "192.168.1.40")

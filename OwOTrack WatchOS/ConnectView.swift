@@ -21,9 +21,6 @@ struct ConnectView: View {
             DetailsPage(model: model)
         }
         .pagedVertically()
-        .onChange(of: model.status) { status in
-            vibrate(for: status)
-        }
         .confirmationDialog("Several servers answered", isPresented: choosingServer, titleVisibility: .visible) {
             ForEach(model.serverChoices) { server in
                 Button([server.address, server.type.name].compactMap { $0 }.joined(separator: " · ")) {
@@ -40,16 +37,6 @@ struct ConnectView: View {
                 model.chooseServer(nil)
             }
         })
-    }
-
-    //felt on the wrist: connected, connection lost, connecting failed
-    private func vibrate(for status: ConnectionModel.Status) {
-        switch status {
-        case .connected: WKInterfaceDevice.current().play(.success)
-        case .reconnecting: WKInterfaceDevice.current().play(.retry)
-        case .failed: WKInterfaceDevice.current().play(.failure)
-        default: break
-        }
     }
 }
 

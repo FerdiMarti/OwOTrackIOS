@@ -112,7 +112,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         if !active {
             return
         }
-        send(.stop)
+        if let request = request {
+            send(.stop(session: request.session))
+        }
         finish(failure: nil)
     }
 
@@ -137,10 +139,11 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         batchLock.lock()
         batch.removeAll()
         batchLock.unlock()
-        connectUI?.setUnconnected()
         if let failure = failure {
             logger.addEntry(failure)
             connectUI?.setFailed(failure)
+        } else {
+            connectUI?.setUnconnected()
         }
     }
 
@@ -153,7 +156,7 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         logStats(now)
         if !heardFromiPhone {
             if now.timeIntervalSince(startedAt) > timing.firstAnswerTimeout {
-                send(.stop)                 //in case the iPhone got the request after all: it doesn't connect for nothing
+                send(.stop(session: request.session))       //in case the iPhone got the request after all: it doesn't connect for nothing
                 finish(failure: "Open OwOTrack on your iPhone, then connect again")      //short enough for small watches
             } else if now.timeIntervalSince(lastAsked) > timing.retryInterval {
                 lastAsked = now
@@ -220,6 +223,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         guard active, case .message(let message)? = RelayPacket(data: data) else {
             return
         }
+        if case .status(let status) = message, status.session != request?.session {
+            return      //about an earlier session: a late message, or the iPhone didn't get this session's request yet
+        }
         heardFromiPhone = true
         lastHeard = Date()
         switch message {
@@ -234,6 +240,7 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         case .magnetometer(let use):
             if use != magnetometer {
                 magnetometer = use
+                request?.magnetometer = use         //if the iPhone starts the session over, it keeps SlimeVR's choice
                 motion.stopUpdates()
                 motion.startUpdates(sink: self, useMagn: use)
                 connectUI?.setMagnometerToggle(use: use)
