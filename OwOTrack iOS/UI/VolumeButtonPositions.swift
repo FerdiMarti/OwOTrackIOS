@@ -63,8 +63,28 @@ struct VolumeButtonPositions: Equatable {
     //or "to active area" on older drawings), its height, and the centers of the volume buttons in the side view.
     //Identifiers: the community list at gist.github.com/adamawolf/3048717, and Xcode's simulator profiles for the iPhone 18 Pro models.
     //The iPhone 6s, 7 and 8 have no drawing anymore; they share the design of the iPhone SE (2nd generation), whose drawing
-    //also covers the 3rd generation. Models without a drawing (older ones like the X and 11) and future ones use the estimate
+    //also covers the 3rd generation. The other older models are no longer on that page either: their measurements come from
+    //the drawings in Apple's Accessory Design Guidelines of 2021-09-28 (chapter 44, archived at web.archive.org).
+    //The first iPhone SE's drawing shows the display's 90.39 mm outline, 16.72 mm from the top and bottom: its active area
+    //(1136 pixels at 326 ppi, 88.51 mm) is centered in it. The 7 Plus uses the 8 Plus drawing (same housing, cases fit both),
+    //the XS the X drawing (same measurements as the XS Max's top). Future models use the estimate
     static let models: [Model] = [
+        Model(name: "iPhone SE (1st generation)", identifiers: ["iPhone8,4"],
+              positions: VolumeButtonPositions(displayTop: 17.66, displayHeight: 88.51, volumeUp: 30.93, volumeDown: 41.22)),
+        Model(name: "iPhone 6s Plus", identifiers: ["iPhone8,2"],
+              positions: VolumeButtonPositions(displayTop: 18.34, displayHeight: 121.54, volumeUp: 35.55, volumeDown: 48.16)),
+        Model(name: "iPhone 7 Plus, 8 Plus", identifiers: ["iPhone9,2", "iPhone9,4", "iPhone10,2", "iPhone10,5"],
+              positions: VolumeButtonPositions(displayTop: 18.42, displayHeight: 121.54, volumeUp: 35.63, volumeDown: 48.24)),
+        Model(name: "iPhone X, XS", identifiers: ["iPhone10,3", "iPhone10,6", "iPhone11,2"],
+              positions: VolumeButtonPositions(displayTop: 3.91, displayHeight: 135.75, volumeUp: 34.83, volumeDown: 47.94)),
+        Model(name: "iPhone XS Max", identifiers: ["iPhone11,4", "iPhone11,6"],
+              positions: VolumeButtonPositions(displayTop: 3.91, displayHeight: 149.71, volumeUp: 34.84, volumeDown: 47.94)),
+        Model(name: "iPhone XR, 11", identifiers: ["iPhone11,8", "iPhone12,1"],
+              positions: VolumeButtonPositions(displayTop: 5.57, displayHeight: 139.78, volumeUp: 36.09, volumeDown: 49.20)),
+        Model(name: "iPhone 11 Pro", identifiers: ["iPhone12,3"],
+              positions: VolumeButtonPositions(displayTop: 4.52, displayHeight: 134.95, volumeUp: 37.84, volumeDown: 51.37)),
+        Model(name: "iPhone 11 Pro Max", identifiers: ["iPhone12,5"],
+              positions: VolumeButtonPositions(displayTop: 4.52, displayHeight: 148.91, volumeUp: 37.84, volumeDown: 51.37)),
         Model(name: "iPhone 6s, 7 and 8", identifiers: ["iPhone8,1", "iPhone9,1", "iPhone9,3", "iPhone10,1", "iPhone10,4"],
               positions: VolumeButtonPositions(displayTop: 17.19, displayHeight: 104.05, volumeUp: 34.56, volumeDown: 47.17)),
         Model(name: "iPhone SE (2nd and 3rd generation)", identifiers: ["iPhone12,8", "iPhone14,6"],

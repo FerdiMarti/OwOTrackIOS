@@ -65,6 +65,7 @@ class UDPGyroProviderClient: MotionSink {
     private var _isConnected = false
     private var _isConnecting = false
     private var _lastHeartbeat: Double = 0
+    private var _closed = false     //disconnectUDP() ran: a handshake reply arriving after that doesn't connect it again
     var isConnected: Bool {
         get { stateLock.lock(); defer { stateLock.unlock() }; return _isConnected }
         set { stateLock.lock(); _isConnected = newValue; stateLock.unlock() }
@@ -76,6 +77,11 @@ class UDPGyroProviderClient: MotionSink {
     var lastHeartbeat: Double {   //last message from server
         get { stateLock.lock(); defer { stateLock.unlock() }; return _lastHeartbeat }
         set { stateLock.lock(); _lastHeartbeat = newValue; stateLock.unlock() }
+    }
+    private var isClosed: Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        return _closed
     }
     //the short handshake of the old protocol went out: a reply after that comes from the old owoTrack driver,
     //which can't read SlimeVR's longer handshake (SlimeVR answers the first one right away)
@@ -114,8 +120,11 @@ class UDPGyroProviderClient: MotionSink {
             logStep("Disconnecting Client")
         }
         //clear the flags before closing, so the listener knows the connection was closed on purpose
-        isConnected = false
-        isConnecting = false
+        stateLock.lock()
+        _closed = true
+        _isConnected = false
+        _isConnecting = false
+        stateLock.unlock()
         self.connection?.close()
         //the timer runs on the main thread and must be invalidated there
         DispatchQueue.main.async {
@@ -129,8 +138,11 @@ class UDPGyroProviderClient: MotionSink {
             logger.reset()
         }
         logStep("Attempting Connection")
-        isConnected = false
-        isConnecting = false
+        stateLock.lock()
+        _closed = false
+        _isConnected = false
+        _isConnecting = false
+        stateLock.unlock()
         sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
 
@@ -300,14 +312,29 @@ class UDPGyroProviderClient: MotionSink {
     }
     
     func successfulHandshake() {
-        self.isConnected = true
-        self.isConnecting = false
+        //the reply can arrive just after TrackingService gave up on this attempt (at its time limit) and closed it:
+        //then it stays closed, instead of a leftover connection reporting "Connection with server lost" every second
+        stateLock.lock()
+        let closed = _closed
+        if !closed {
+            _isConnected = true
+            _isConnecting = false
+        }
+        stateLock.unlock()
+        if closed {
+            return
+        }
         self.lastHeartbeat = Date().timeIntervalSince1970
         if shortHandshakeSent {
             service?.serverDetected(.owoTrackDriver, by: self)
         }
-        //start timer to check connection regularly
+        //start timer to check connection regularly. disconnectUDP() invalidates it on the main thread too,
+        //so it's either never started or invalidated after
         DispatchQueue.main.async {
+            if self.isClosed {
+                return
+            }
+            self.connectionCheckTimer?.invalidate()
             self.connectionCheckTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(self.checkConnection), userInfo: nil, repeats: true)
         }
     }

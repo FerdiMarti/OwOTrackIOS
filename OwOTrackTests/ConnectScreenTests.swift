@@ -182,6 +182,11 @@ extension OwOTrackTests {
             #expect(abs(iPhone17.down - 0.4143) < 0.0005)   //(62.43 - 2.44) / 144.79
             let se = try #require(VolumeButtonPositions.forModel("iPhone14,6"))
             #expect(abs(se.up - 0.1669) < 0.0005)           //(34.56 - 17.19) / 104.05: a big border above the screen
+            //older models, from the 2021 Accessory Design Guidelines: Home button phones have the buttons high up on the screen
+            let iPhone8Plus = try #require(VolumeButtonPositions.forModel("iPhone10,2"))
+            #expect(abs(iPhone8Plus.up - 0.1416) < 0.0005)  //(35.63 - 18.42) / 121.54
+            let iPhone11 = try #require(VolumeButtonPositions.forModel("iPhone12,1"))
+            #expect(abs(iPhone11.down - 0.3121) < 0.0005)   //(49.20 - 5.57) / 139.78
             #expect(VolumeButtonPositions.forModel("iPhone99,9") == .estimate)
             #expect(VolumeButtonPositions.forModel("arm64") == .estimate)
         }

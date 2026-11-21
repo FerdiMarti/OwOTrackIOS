@@ -131,6 +131,17 @@ extension OwOTrackTests {
             #expect(service.magnetometer == true)
         }
 
+        @Test("a handshake reply after the attempt was given up doesn't bring the connection back")
+        func lateHandshakeReply() async {
+            let (client, _, service) = connectedClient()
+            client.disconnectUDP(logIt: false)      //TrackingService gave up on this attempt at its time limit
+            client.successfulHandshake()            //and the reply arrives right after
+            #expect(!client.isConnected)
+            await pause(0.2)
+            #expect(client.connectionCheckTimer?.isValid != true)      //no leftover check reporting a lost connection every second
+            _ = service
+        }
+
         @Test("vibration requests reach the hardware, short ones are ignored")
         func vibration() {
             let (client, _, _) = connectedClient()
