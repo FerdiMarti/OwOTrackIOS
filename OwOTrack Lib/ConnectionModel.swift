@@ -7,15 +7,51 @@ import Foundation
 import Combine
 
 let RECENT_SERVERS_USERDEFAULTS_KEY = "recentServers"
+let PAIRED_RECENT_SERVERS_USERDEFAULTS_KEY = "recentServersOfPairedDevice"     //the watch's on the iPhone, the iPhone's on the watch
 
 //a server the app connected to, offered again on the connect screen
 struct RecentServer: Equatable, Identifiable {
     let address: String
     let port: String
+    var used = Date.distantPast         //when it was last connected to
 
     var id: String {
         return "\(address):\(port)"
     }
+
+    //as saved, and as sent to the paired device
+    var plist: [String: Any] {
+        return ["address": address, "port": port, "used": used.timeIntervalSince1970]
+    }
+
+    //lists saved before entries had a date keep their order: the first is the newest
+    static func list(fromPlist entries: [[String: Any]]) -> [RecentServer] {
+        return entries.enumerated().compactMap { index, entry in
+            guard let address = entry["address"] as? String, let port = entry["port"] as? String else {
+                return nil
+            }
+            let used = (entry["used"] as? Double).map { Date(timeIntervalSince1970: $0) }
+                ?? Date(timeIntervalSince1970: Double(entries.count - index))
+            return RecentServer(address: address, port: port, used: used)
+        }
+    }
+
+    static func load(key: String) -> [RecentServer] {
+        return list(fromPlist: UserDefaults.standard.array(forKey: key) as? [[String: Any]] ?? [])
+    }
+
+    static func save(_ servers: [RecentServer], key: String) {
+        UserDefaults.standard.set(servers.map(\.plist), forKey: key)
+    }
+}
+
+//the iPhone and the watch show each other's recent servers: each sends its own list, the latest one arrives
+//even when the other app isn't running
+protocol RecentServerSharing: AnyObject {
+    //this device's own servers, newest first
+    func shareRecentServers(_ servers: [RecentServer])
+    //the paired device's own servers arrived. On the main thread
+    var onPairedRecentServers: (([RecentServer]) -> Void)? { get set }
 }
 
 //State and actions of the connect screen, for the SwiftUI views of the iPhone and watch apps.
@@ -41,21 +77,46 @@ final class ConnectionModel: ObservableObject, ConnectUI {
     @Published private(set) var serverType = ServerType.unknown
     @Published private(set) var localNetwork = LocalNetworkAccess.unknown
     @Published private(set) var reconnectDeadline: Date?        //while reconnecting: when the app gives up
-    @Published private(set) var recentServers: [RecentServer]
+    @Published private(set) var recentServers: [RecentServer]     //this device's and the paired device's
 
-    private let service = TrackingService()
+    private let service: TrackingControl
+    private let sharing: RecentServerSharing?
+    private var ownServers: [RecentServer]
+    private var pairedServers: [RecentServer]
 
-    init() {
+    //this device's tracking; on the watch, the relay through the iPhone
+    static func makeService() -> TrackingControl {
+        #if os(watchOS)
+        return RelayClient(transport: WatchConnectivityTransport.shared, hardware: StaticHardware(WatchHardware.self), motion: GyroHandler.getInstance())
+        #else
+        return TrackingService()
+        #endif
+    }
+
+    //the recent servers go to the paired iPhone or watch, and come from it
+    static func makeSharing() -> RecentServerSharing? {
+        #if canImport(WatchConnectivity)
+        return WatchConnectivityTransport.shared
+        #else
+        return nil
+        #endif
+    }
+
+    init(service: TrackingControl = ConnectionModel.makeService(), sharing: RecentServerSharing? = ConnectionModel.makeSharing()) {
+        self.service = service
+        self.sharing = sharing
         let defaults = UserDefaults.standard
         ip = defaults.string(forKey: IP_USERDEFAULTS_KEY) ?? "192.168.0.10"
         port = defaults.string(forKey: PORT_USERDEFAULTS_KEY) ?? "6969"
         useMagnetometer = defaults.object(forKey: MAGNETOMETER_USERDEFAULTS_KEY) as? Bool ?? true
-        let saved = defaults.array(forKey: RECENT_SERVERS_USERDEFAULTS_KEY) as? [[String: String]] ?? []
-        recentServers = saved.compactMap { entry in
-            guard let address = entry["address"], let port = entry["port"] else { return nil }
-            return RecentServer(address: address, port: port)
-        }
+        ownServers = RecentServer.load(key: RECENT_SERVERS_USERDEFAULTS_KEY)
+        pairedServers = RecentServer.load(key: PAIRED_RECENT_SERVERS_USERDEFAULTS_KEY)
+        recentServers = ConnectionModel.merged(ownServers, pairedServers)
         Logger.getInstance().attachUI(connectUI: self)
+        sharing?.onPairedRecentServers = { [weak self] servers in
+            self?.pairedServersArrived(servers)
+        }
+        sharing?.shareRecentServers(ownServers)
     }
 
     var isConnected: Bool {
@@ -105,6 +166,13 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         service.start(ipAdress: address, port: port, magnetometer: useMagnetometer, connectUI: self)
     }
 
+    //a yaw reset (else a full reset) in SlimeVR, while connected
+    func requestReset(yaw: Bool) {
+        if isConnected {
+            service.sendReset(yaw: yaw)
+        }
+    }
+
     //fills in a server connected to before
     func useRecentServer(_ server: RecentServer) {
         if !canEdit {
@@ -114,12 +182,31 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         port = server.port
     }
 
-    //the connected server goes first; the list keeps the last few, without duplicates
+    //the connected server goes first; the list keeps the last few, without duplicates.
+    //It's also filled in on the next start (on the watch nothing else saves it: the iPhone connects for it)
     private func rememberServer() {
-        let server = RecentServer(address: ip, port: port)
-        recentServers = Array(([server] + recentServers.filter { $0 != server }).prefix(ConnectionModel.maxRecentServers))
-        let saved = recentServers.map { ["address": $0.address, "port": $0.port] }
-        UserDefaults.standard.set(saved, forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
+        let defaults = UserDefaults.standard
+        defaults.set(ip, forKey: IP_USERDEFAULTS_KEY)
+        defaults.set(port, forKey: PORT_USERDEFAULTS_KEY)
+        defaults.set(useMagnetometer, forKey: MAGNETOMETER_USERDEFAULTS_KEY)
+        let server = RecentServer(address: ip, port: port, used: Date())
+        ownServers = Array(([server] + ownServers.filter { $0.id != server.id }).prefix(ConnectionModel.maxRecentServers))
+        RecentServer.save(ownServers, key: RECENT_SERVERS_USERDEFAULTS_KEY)
+        recentServers = ConnectionModel.merged(ownServers, pairedServers)
+        sharing?.shareRecentServers(ownServers)     //only its own: the paired device's don't go back to it
+    }
+
+    private func pairedServersArrived(_ servers: [RecentServer]) {
+        pairedServers = Array(servers.prefix(ConnectionModel.maxRecentServers))
+        RecentServer.save(pairedServers, key: PAIRED_RECENT_SERVERS_USERDEFAULTS_KEY)
+        recentServers = ConnectionModel.merged(ownServers, pairedServers)
+    }
+
+    //both devices' servers, newest first, each once, at most maxRecentServers
+    static func merged(_ own: [RecentServer], _ paired: [RecentServer]) -> [RecentServer] {
+        var seen = Set<String>()
+        let newestFirst = (own + paired).sorted { $0.used > $1.used }
+        return Array(newestFirst.filter { seen.insert($0.id).inserted }.prefix(maxRecentServers))
     }
 
     // MARK: ConnectUI, called from any thread

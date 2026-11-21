@@ -8,8 +8,25 @@
 import Foundation
 import CoreMotion
 
+//receives motion readings as big-endian floats: rotation (x y z w), rotation rate and acceleration (x y z).
+//The client sends them to the server; on the watch, the relay sends them to the iPhone
+protocol MotionSink: AnyObject {
+    func provideRot(rot: [Data])
+    func provideGyro(gyro: [Data])
+    func provideAccel(accel: [Data])
+}
+
+//where a tracking session gets its motion readings: this device's sensors (GyroHandler),
+//or for the watch's session that the iPhone relays, the watch's readings (RelayedWatchMotion)
+protocol MotionSource: AnyObject {
+    //whether the orientation can be corrected with the magnetometer
+    var magnetometerCorrectionAvailable: Bool { get }
+    func startUpdates(sink: MotionSink, useMagn: Bool)
+    func stopUpdates()
+}
+
 //Singleton that queries and provides sensor data
-public class GyroHandler {
+public class GyroHandler: MotionSource {
     
     var mmanager = CMMotionManager()
     static var instance : GyroHandler?
@@ -28,7 +45,7 @@ public class GyroHandler {
         magnetometerCorrectionAvailable = CMMotionManager.availableAttitudeReferenceFrames().contains(.xArbitraryCorrectedZVertical)
     }
     
-    func startUpdates(client: UDPGyroProviderClient, useMagn: Bool) {
+    func startUpdates(sink client: MotionSink, useMagn: Bool) {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
         sensorQueue.maxConcurrentOperationCount = 1 //OperationQueue is concurrent by default; handle sensor updates one at a time, in order

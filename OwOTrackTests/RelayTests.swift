@@ -1,0 +1,330 @@
+//
+//  RelayTests.swift
+//  OwOTrackTests
+//
+//  The Apple Watch tracks through the iPhone app: the watch side (RelayClient) and the iPhone side (RelayHost)
+//  talk over a loopback instead of WatchConnectivity, and the iPhone connects to the fake server for the watch.
+//
+
+import Foundation
+import Testing
+@testable import OwOTrack_iOS
+
+extension OwOTrackTests {
+    @Suite("Relay for the Apple Watch", .timeLimit(.minutes(1)))
+    @MainActor
+    struct Relay {
+
+        @Test("messages and motion readings arrive as they were sent")
+        func packets() {
+            let messages: [RelayMessage] = [
+                .start(RelayStart(address: "my-pc.local", port: "6969", magnetometer: true, mac: FakeWatchHardware.mac, magnetometerAvailable: false)),
+                .stop, .battery(0.42), .reset(yaw: true), .reset(yaw: false), .alive,
+                .status(RelayStatus(state: .reconnecting, serverType: .slimeVR, giveUp: Date(timeIntervalSince1970: 1_000_000), reason: nil)),
+                .status(RelayStatus(state: .failed, reason: "Couldn't connect to my-pc.local")),
+                .log(["Connecting for the Apple Watch", "Handshake Succeeded"]),
+                .vibrate(frequency: 0.25, amplitude: 0.75, duration: 0.5), .magnetometer(false),
+            ]
+            for message in messages {
+                #expect(RelayPacket(data: RelayPacket(message).data) == .message(message))
+            }
+            let samples = [
+                MotionSample(kind: .rotation, values: [0.1, 0.2, 0.3, 0.9].map { Data(bigEndian: Float($0)) }),
+                MotionSample(kind: .acceleration, values: [0, 0, -9.81].map { Data(bigEndian: Float($0)) }),
+                MotionSample(kind: .gyro, values: [1, 2, 3].map { Data(bigEndian: Float($0)) }),
+            ]
+            #expect(RelayPacket(data: RelayPacket(samples: samples).data) == .samples(samples))
+            //broken data is ignored, not crashed on
+            #expect(RelayPacket(data: Data()) == nil)
+            #expect(RelayPacket(data: Data([7, 1, 2])) == nil)
+            #expect(RelayPacket(data: Data([1, 1, 0, 0])) == nil)      //a rotation cut short
+            #expect(RelayPacket(data: Data([0]) + Data("{".utf8)) == nil)
+        }
+
+        @Test("the watch connects through the iPhone, as a tracker of its own")
+        func connects() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            let savedAddress = UserDefaults.standard.string(forKey: IP_USERDEFAULTS_KEY)
+            relay.connect(port: server.port)
+
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            #expect(server.lastHandshake?.mac == "02:0E:57:00:00:02")        //the watch's MAC, not the iPhone's
+            #expect(server.lastHandshake?.firmware.hasPrefix("owoTrack watchOS ") == true)     //SlimeVR shows it's the watch
+            #expect(await waitUntil { relay.watchUI.serverTypes.last == .slimeVR })
+            #expect(relay.watchHardware.events.first == "workout started")
+            #expect(relay.watchMotion.startModes == [true])
+            #expect(relay.host?.status.state == .connected)
+
+            //the watch's readings and battery level reach SlimeVR
+            let before = Date()
+            let rotation: [Float] = [0.1, 0.2, 0.3, 0.9]
+            relay.watchMotion.emit(rotation: rotation)
+            #expect(await waitUntil { !server.received(type: 17, after: before).isEmpty })
+            #expect(server.received(type: 17, after: before).first?.packet.payload == [0, 1] + rotation.flatMap { bytes($0) } + [0])
+            #expect(await waitUntil { server.received(type: 12).contains { $0.packet.payload == bytes(FakeWatchHardware.batteryLevel) } })
+
+            //SlimeVR doesn't use gyro readings: the watch doesn't send them, which saves a third of the data
+            relay.watchMotion.emit(gyro: [1, 2, 3])
+            relay.watchMotion.emit(rotation: rotation)
+            #expect(await waitUntil { server.received(type: 17, after: before).count >= 2 })
+            #expect(!relay.link.watch.sentSamples.contains { $0.kind == .gyro })
+
+            //the iPhone's log for the watch's connection shows on the watch; the iPhone's own saved address stays
+            #expect(await waitUntil { relay.watchLog.get().contains("SlimeVR server detected") })
+            #expect(UserDefaults.standard.string(forKey: IP_USERDEFAULTS_KEY) == savedAddress)
+            //and every so often how fast the readings arrive, to see what the connection to the watch manages
+            #expect(await waitUntil(4) { relay.watchLog.get().contains("From the watch:") })
+            #expect(await waitUntil(4) { relay.watchLog.get().contains("To the iPhone:") })
+        }
+
+        @Test("a slow connection to the iPhone means bigger batches, not a growing queue")
+        func slowConnection() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+
+            //confirmations stop coming: at most 3 batches go on their way meanwhile
+            relay.link.watch.link.confirms = false
+            let before = relay.link.watch.sentBatches
+            for _ in 0..<10 {
+                relay.watchMotion.emit(rotation: [0, 0, 0, 1])
+                await pause(0.03)
+            }
+            #expect(relay.link.watch.sentBatches - before <= 3)
+
+            //unconfirmed ones stop holding up the next after a while, and everything still arrives at the server
+            let later = Date()
+            relay.watchMotion.emit(rotation: [0, 0, 0, 1])
+            #expect(await waitUntil { !server.received(type: 17, after: later).isEmpty })
+            #expect(await waitUntil(4) { unconfirmedCounts(relay.watchLog).contains { $0 > 0 } })
+
+            //confirmations again: batches go every 20 ms again
+            relay.link.watch.link.confirms = true
+            await pause(0.6)
+            let resumed = relay.link.watch.sentBatches
+            for _ in 0..<10 {
+                relay.watchMotion.emit(rotation: [0, 0, 0, 1])
+                await pause(0.03)
+            }
+            #expect(relay.link.watch.sentBatches - resumed >= 6)
+        }
+
+        @Test("with the owoTrack driver, the watch sends its gyro readings too")
+        func gyroForDriver() async throws {
+            let server = FakeServer(mode: .oldDriver)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            let before = Date()
+            relay.watchMotion.emit(gyro: [1, 2, 3])
+            #expect(await waitUntil { !server.received(type: 2, after: before).isEmpty })
+        }
+
+        @Test("resets from the watch reach SlimeVR")
+        func resets() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.serverTypes.last == .slimeVR })
+            relay.watch.sendReset(yaw: true)
+            relay.watch.sendReset(yaw: false)
+            #expect(await waitUntil { server.received(type: 21).count == 2 })
+            #expect(server.received(type: 21).map(\.packet.payload) == [[3], [2]])      //yaw reset, full reset
+        }
+
+        @Test("SlimeVR switches the watch's magnetometer: the watch measures differently and its switch follows")
+        func magnetometer() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.serverTypes.last == .slimeVR })
+            server.send(type: 25, payload: [0, 0, 1, 0])        //sensor 0, magnetometer, off
+            #expect(await waitUntil { relay.watchMotion.startModes == [true, false] })
+            #expect(relay.watchUI.magnetometerToggles == [false])
+            #expect(await waitUntil { server.received(type: 24).first?.packet.payload == [0, 0, 1] })
+        }
+
+        @Test("vibrations from the server reach the watch")
+        func vibration() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            //duration, frequency, amplitude, as the owoTrack driver sends them
+            server.sendRaw(driverPacket(type: 2, payload: bytes(Float(0.5)) + bytes(Float(0.25)) + bytes(Float(0.75))))
+            #expect(await waitUntil { relay.watchHardware.events.contains("vibrate f=0.25 a=0.75 d=0.5") })
+        }
+
+        @Test("Disconnect on the watch ends its connection on the iPhone")
+        func disconnectOnWatch() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.watch.stop()
+            #expect(relay.watchUI.lastState == "not connected")
+            #expect(relay.watchHardware.events.last == "workout ended")
+            #expect(await waitUntil { relay.host?.status.state == .notConnected })
+            let stopped = Date()
+            await pause(1)
+            #expect(server.received(after: stopped.addingTimeInterval(0.3)).isEmpty)
+        }
+
+        @Test("Stop on the iPhone ends the watch's session")
+        func stopOnPhone() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            relay.host?.stop(tellWatch: true)
+            #expect(await waitUntil { relay.watchUI.lastState == "not connected" })
+            #expect(relay.watchHardware.events.last == "workout ended")
+            #expect(relay.watchLog.get().contains("Stopped on the iPhone"))       //the watch's log says why
+            #expect(relay.watchUI.failures.isEmpty)
+        }
+
+        @Test("the iPhone and the watch track at the same time, as two trackers")
+        func phoneAndWatch() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            try await withTracking(port: server.port) { service, phoneUI in
+                #expect(await waitUntil { phoneUI.lastState == "connected" })
+                let relay = RelaySetup()
+                defer { relay.stop() }
+                relay.connect(port: server.port)
+                #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+
+                let handshakes = server.received(type: 3)
+                let macs = Set(handshakes.compactMap { SlimeVRHandshake(packet: $0.raw)?.mac })
+                #expect(macs == ["02:0E:57:00:00:01", "02:0E:57:00:00:02"])
+                let firmware = handshakes.compactMap { SlimeVRHandshake(packet: $0.raw) }.map { $0.firmware.components(separatedBy: " ").prefix(2).joined(separator: " ") }
+                #expect(Set(firmware) == ["owoTrack iOS", "owoTrack watchOS"])
+                #expect(Set(handshakes.map(\.sourcePort)).count == 2)
+
+                //the watch stops; the iPhone keeps tracking
+                relay.watch.stop()
+                #expect(await waitUntil { relay.host?.status.state == .notConnected })
+                let after = Date()
+                try #require(service.client).provideRot(rot: floats(0, 0, 0, 1))
+                #expect(await waitUntil { !server.received(type: 17, after: after).isEmpty })
+                #expect(phoneUI.lastState == "connected")
+            }
+        }
+
+        @Test("a watch without motion readings or battery level (like the simulator) stays connected")
+        func quietWatch() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.watchHardware.reportsBattery = false
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            await pause(4.5)        //longer than the iPhone waits for the watch in the tests (3 s)
+            #expect(relay.host?.status.state == .connected)
+            #expect(relay.watchUI.lastState == "connected")
+            #expect(relay.link.watch.sentMessages.contains(.alive))
+        }
+
+        @Test("without the iPhone app, the watch explains what to do")
+        func noPhoneApp() async {
+            let relay = RelaySetup(withHost: false)
+            defer { relay.stop() }
+            relay.connect(port: 6969)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "failed" })
+            #expect(relay.watchUI.failures.first == "Open OwOTrack on your iPhone, then connect again")
+            #expect(relay.watchHardware.events.last == "workout ended")
+            //it kept asking meanwhile, which wakes the iPhone app if it's there, and called it off when it gave up
+            #expect(relay.link.watch.sentMessages.filter(\.isStart).count >= 3)
+            #expect(relay.link.watch.sentMessages.last == .stop)
+        }
+
+        @Test("the iPhone out of reach: the watch shows reconnecting, and continues when it's back")
+        func iPhoneOutOfReach() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+
+            relay.link.watch.link.isUp = false
+            #expect(await waitUntil(4) { relay.watchUI.lastState == "reconnecting" })
+            //meanwhile the iPhone hears nothing from the watch and ends its connection
+            #expect(await waitUntil(4) { relay.host?.status.state == .failed })
+
+            relay.link.watch.link.isUp = true
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            #expect(relay.host?.status.state == .connected)
+            #expect(relay.watchLog.get().contains("Connected to the iPhone again"))
+        }
+
+        @Test("the watch goes quiet: the iPhone ends its connection to the server")
+        func watchGoesQuiet() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.host?.status.state == .connected })
+            relay.link.watch.link.isUp = false
+            #expect(await waitUntil(5) { relay.host?.status.state == .failed })
+            #expect(relay.host?.status.reason == "The iPhone lost contact with the watch")      //shown on the iPhone
+            let ended = Date()
+            await pause(1.5)
+            #expect(server.received(after: ended.addingTimeInterval(0.3)).isEmpty)
+        }
+
+        @Test("keeping the iPhone awake is shared: on with the first session, off after the last")
+        func sharedSwitch() {
+            var switched: [String] = []
+            let keepAwake = SharedSwitch(on: { switched.append("on") }, off: { switched.append("off") })
+            keepAwake.acquire()     //the iPhone tracks
+            keepAwake.acquire()     //and relays the watch
+            keepAwake.release()     //the watch stops
+            #expect(switched == ["on"])
+            #expect(keepAwake.isOn)
+            keepAwake.release()     //the iPhone stops
+            keepAwake.release()     //one release too many is ignored
+            #expect(switched == ["on", "off"])
+            #expect(!keepAwake.isOn)
+        }
+    }
+}
+
+//the unconfirmed counts in the watch's "To the iPhone: … ms there and back, 2 of 40 messages unconfirmed" lines
+private func unconfirmedCounts(_ log: Logger) -> [Int] {
+    return log.get().split(separator: "\n").compactMap { line -> Int? in
+        guard line.hasPrefix("To the iPhone:"), let range = line.range(of: "there and back, ") else {
+            return nil
+        }
+        return Int(line[range.upperBound...].prefix { $0.isNumber })
+    }
+}
+
+extension RelayMessage {
+    var isStart: Bool {
+        if case .start = self {
+            return true
+        }
+        return false
+    }
+}

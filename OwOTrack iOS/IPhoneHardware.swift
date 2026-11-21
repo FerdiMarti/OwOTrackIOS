@@ -95,17 +95,20 @@ class IPhoneHardware: DeviceHardware {
     }
 
     //a locked phone puts the app in the background, so keep it from locking automatically while tracking.
-    //covering the proximity sensor still turns the screen off, and the app stays in the foreground then
+    //covering the proximity sensor still turns the screen off, and the app stays in the foreground then.
+    //Shared by the iPhone's own session and the watch's relayed one: on while either needs it
+    private static let noAutoLock = SharedSwitch(on: {
+        DispatchQueue.main.async { UIApplication.shared.isIdleTimerDisabled = true }
+    }, off: {
+        DispatchQueue.main.async { UIApplication.shared.isIdleTimerDisabled = false }
+    })
+
     static func preventAutoLock() {
-        DispatchQueue.main.async {
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
+        noAutoLock.acquire()
     }
 
     static func allowAutoLock() {
-        DispatchQueue.main.async {
-            UIApplication.shared.isIdleTimerDisabled = false
-        }
+        noAutoLock.release()
     }
     
     static func getBatteryLevel() -> Float? {
@@ -127,8 +130,19 @@ class IPhoneHardware: DeviceHardware {
         }
     }
     
-    //uses background location to keep the app running in background
-    static func startBackgroundUsage(target: CLLocationManagerDelegate) {
+    //uses background location to keep the app running in background.
+    //Shared by the iPhone's own session and the watch's relayed one: on while either needs it
+    private static let backgroundRunning = SharedSwitch(on: startLocationUpdates, off: stopLocationUpdates)
+
+    static func startBackgroundUsage(target: CLLocationManagerDelegate?) {
+        backgroundRunning.acquire()
+    }
+
+    static func stopBackgroundUsage() {
+        backgroundRunning.release()
+    }
+
+    private static func startLocationUpdates() {
         locationManager.requestAlwaysAuthorization()
         locationManager.allowsBackgroundLocationUpdates = true
         //iOS pauses location updates while the phone doesn't move (e.g. strapped to the body in one room),
@@ -137,7 +151,6 @@ class IPhoneHardware: DeviceHardware {
         locationManager.showsBackgroundLocationIndicator = true
         locationManager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
         locationManager.distanceFilter = 99999
-        locationManager.delegate = target
         locationManager.startUpdatingLocation()
         //only becomes active when started while the app is in the foreground, which it is when Connect is pressed
         if #available(iOS 17.0, *), backgroundActivitySession == nil {
@@ -145,7 +158,7 @@ class IPhoneHardware: DeviceHardware {
         }
     }
 
-    static func stopBackgroundUsage() {
+    private static func stopLocationUpdates() {
         locationManager.stopUpdatingLocation()
         if #available(iOS 17.0, *) {
             (backgroundActivitySession as? CLBackgroundActivitySession)?.invalidate()

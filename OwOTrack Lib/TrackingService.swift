@@ -23,15 +23,33 @@ struct ConnectionTiming {
     var reconnectTimeLimit: TimeInterval = 10 * 60
 }
 
+//starts and stops tracking for the connect screen: TrackingService connects this device to the server;
+//the watch uses RelayClient, which has the iPhone connect for it
+protocol TrackingControl: AnyObject {
+    func start(ipAdress: String, port: String, magnetometer: Bool, connectUI: ConnectUI)
+    func stop()
+    //a yaw reset (else a full reset) in SlimeVR
+    func sendReset(yaw: Bool)
+}
+
 //manages connection, app and UI state
-public class TrackingService: NSObject, CLLocationManagerDelegate {
+public class TrackingService: NSObject, CLLocationManagerDelegate, TrackingControl {
     var ipAdress = ""
     var port = ""
     var magnetometer = true
     var connectUI: ConnectUI?  // the UI component that needs to be updated when status changes
-    let logger = Logger.getInstance()
-    var gHandler: GyroHandler?
+    let logger: Logger
+    let motion: MotionSource
     var client: UDPGyroProviderClient?  //the current connection attempt or connection, only assigned on the main thread
+    //the watch's session that the iPhone relays doesn't touch the app's own saved address, and saves its local port separately
+    var savesSettings = true
+    var localPortKey = BIND_PORT_USERDEFAULTS_KEY
+    //the platform in the firmware text SlimeVR shows ("owoTrack iOS 1.12"); the relayed watch's session says watchOS
+    #if os(watchOS)
+    var firmwarePlatform = "watchOS"
+    #else
+    var firmwarePlatform = "iOS"
+    #endif
     var batteryTimer : Timer?   //timer that triggers sending of current battery level ever 10s
     var trackingServiceQueue = DispatchQueue.init(label: TRACKING_SERVICE_QUEUE_LABEL)
 
@@ -41,19 +59,27 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     private var session = 0
     private var wantsConnection = false     //between start() and stop(): a lost connection is retried
     private var reconnecting = false
+    private var holdsDevice = false         //between start() and stop(): keeps the device awake (shared with other sessions)
     var timing = ConnectionTiming()     //set before start()
 
-    //the device's hardware (sensors aside): iPhone or Apple Watch, a fake in the tests
-    let hardware: any DeviceHardware.Type
+    //the hardware (sensors aside): this iPhone or Apple Watch, the relayed watch, or a fake in the tests
+    let hardware: TrackerHardware
     #if os(iOS)
     static let deviceHardware: any DeviceHardware.Type = IPhoneHardware.self
     #elseif os(watchOS)
     static let deviceHardware: any DeviceHardware.Type = WatchHardware.self
     #endif
 
-    init(hardware: any DeviceHardware.Type = TrackingService.deviceHardware) {
-        self.hardware = hardware
+    init(device: TrackerHardware, motion: MotionSource = GyroHandler.getInstance(), logger: Logger = Logger.getInstance()) {
+        self.hardware = device
+        self.motion = motion
+        self.logger = logger
         super.init()
+    }
+
+    //a session of this device, with its sensors and the app's log
+    convenience init(hardware: any DeviceHardware.Type = TrackingService.deviceHardware) {
+        self.init(device: StaticHardware(hardware))
     }
 
     func start(ipAdress: String, port: String, magnetometer: Bool, connectUI: ConnectUI) {
@@ -61,13 +87,17 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         self.ipAdress = ipAdress
         self.port = port
         self.magnetometer = magnetometer
-        self.setDefaults()
+        if savesSettings {
+            self.setDefaults()
+        }
         let session = beginSession()
         connectUI.setLoading()
-        hardware.startProximitySensor()
-        hardware.preventAutoLock()
-        hardware.registerVolButtonListener(target: self)
-        hardware.startBackgroundUsage(target: self)
+        if takeDevice() {
+            hardware.startProximitySensor()
+            hardware.preventAutoLock()
+            hardware.registerVolButtonListener(target: self)
+            hardware.startBackgroundUsage(target: self)
+        }
         trackingServiceQueue.async {
             guard let client = self.connect(session: session, quiet: false, lastProblem: nil) else {
                 return
@@ -119,15 +149,14 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     //sends sensor data, battery level and the sensor description over a connected client
     private func startStreaming(client: UDPGyroProviderClient) {
         startSendingBattery()
-        gHandler = GyroHandler.getInstance()
-        gHandler?.startUpdates(client: client, useMagn: magnetometer)
+        motion.startUpdates(sink: client, useMagn: magnetometer)
         client.provideMagnetometerUse(enabled: magnetometer)
-        client.provideSensorInfo(magnetometerSupported: gHandler?.magnetometerCorrectionAvailable ?? false, magnetometerEnabled: magnetometer)
+        client.provideSensorInfo(magnetometerSupported: motion.magnetometerCorrectionAvailable, magnetometerEnabled: magnetometer)
     }
 
     private func stopStreaming() {
         stopSendingBattery()
-        gHandler?.stopUpdates()
+        motion.stopUpdates()
     }
 
     //a working connection was lost: no message from the server for 10 s, or the network failed. Called by the client on the main thread.
@@ -226,6 +255,28 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
         return session
     }
 
+    //true if the device wasn't held yet: then the caller switches on what tracking needs (no auto-lock, background running)
+    private func takeDevice() -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if holdsDevice {
+            return false
+        }
+        holdsDevice = true
+        return true
+    }
+
+    //true if the device was held: then the caller switches it off again. A second stop() doesn't release another session's hold
+    private func releaseDevice() -> Bool {
+        stateLock.lock()
+        defer { stateLock.unlock() }
+        if !holdsDevice {
+            return false
+        }
+        holdsDevice = false
+        return true
+    }
+
     //false if the session ended while the last attempt connected
     private func finishReconnecting(_ session: Int) -> Bool {
         stateLock.lock()
@@ -247,10 +298,12 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
     //ends the session: the user pressed Disconnect (also while reconnecting), or the first connection attempt failed
     func stop() {
         endSession()
-        hardware.stopProximitySensor()
-        hardware.allowAutoLock()
-        hardware.unregisterVolButtonListener(target: self)
-        hardware.stopBackgroundUsage()
+        if releaseDevice() {
+            hardware.stopProximitySensor()
+            hardware.allowAutoLock()
+            hardware.unregisterVolButtonListener(target: self)
+            hardware.stopBackgroundUsage()
+        }
         stopStreaming()
         client?.disconnectUDP()
         if (client?.isConnected) != nil && !client!.isConnected {
@@ -264,10 +317,14 @@ public class TrackingService: NSObject, CLLocationManagerDelegate {
             return
         }
         self.magnetometer = use
-        gHandler?.stopUpdates()
-        gHandler?.startUpdates(client: client!, useMagn: use)
+        motion.stopUpdates()
+        motion.startUpdates(sink: client!, useMagn: use)
         connectUI?.setMagnometerToggle(use: use)
         client?.sensorConfigChanged(magnetometerEnabled: use)
+    }
+
+    func sendReset(yaw: Bool) {
+        client?.provideButtonPushed(volumeUp: yaw)
     }
     
     //handler for volume button presses, which show up as changes of the output volume.

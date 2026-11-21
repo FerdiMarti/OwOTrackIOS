@@ -20,7 +20,11 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     let defaults = UserDefaults.standard
     var bindPort: NWEndpoint.Port? = nil
     
-    init(host: String, port: Int) {
+    //where the local port of the last connection is saved: the app's own session and the watch's relayed session each keep theirs
+    let portKey: String
+
+    init(host: String, port: Int, portKey: String = BIND_PORT_USERDEFAULTS_KEY) {
+        self.portKey = portKey
         self.hostUDP = NWEndpoint.Host(host)
         self.portUDP = NWEndpoint.Port(String(port)) ?? NWEndpoint.Port("6969")!
     }
@@ -134,7 +138,7 @@ class NWConnectionUDPClient: CompatibleUDPClient {
     
     //loads last used port from UserDefaults if available
     func loadLastPort() {
-        if let portTmp = defaults.object(forKey: BIND_PORT_USERDEFAULTS_KEY) as? String {
+        if let portTmp = defaults.object(forKey: portKey) as? String {
             self.bindPort = NWEndpoint.Port(portTmp)
         }
     }
@@ -145,12 +149,12 @@ class NWConnectionUDPClient: CompatibleUDPClient {
         guard case .hostPort(_, let port) = self.connection?.currentPath?.localEndpoint else {
             return
         }
-        self.defaults.set(String(port.rawValue), forKey: BIND_PORT_USERDEFAULTS_KEY)
+        self.defaults.set(String(port.rawValue), forKey: portKey)
     }
     
     //Deletes last used port from UserDefaults so that the port is chosen automatically on next connection
     func resetLastPort() {
         self.bindPort = nil
-        self.defaults.removeObject(forKey: BIND_PORT_USERDEFAULTS_KEY)
+        self.defaults.removeObject(forKey: portKey)
     }
 }

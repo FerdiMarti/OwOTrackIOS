@@ -34,6 +34,7 @@ final class FakeServer {
     private var wantedState = State.up
     private var receivedPackets: [Received] = []
     private var outbox: [Data] = []
+    private var rawOutbox: [Data] = []
     private var running = true
     private let finished = DispatchSemaphore(value: 0)
 
@@ -56,6 +57,13 @@ final class FakeServer {
     func send(type: UInt32, payload: [UInt8]) {
         lock.lock()
         outbox.append(Data(bytes(type)) + payload)     //the packet number is added when it's sent
+        lock.unlock()
+    }
+
+    //sends bytes as they are (e.g. the old driver's packets, which have no packet number) to the client
+    func sendRaw(_ data: Data) {
+        lock.lock()
+        rawOutbox.append(data)
         lock.unlock()
     }
 
@@ -103,6 +111,8 @@ final class FakeServer {
             let wanted = wantedState
             let queued = state == .up && client != nil ? outbox : []
             if !queued.isEmpty { outbox.removeAll() }
+            let queuedRaw = state == .up && client != nil ? rawOutbox : []
+            if !queuedRaw.isEmpty { rawOutbox.removeAll() }
             lock.unlock()
             if !keepRunning { break }
 
@@ -121,6 +131,11 @@ final class FakeServer {
             }
             for packet in queued {
                 sendToClient(packet)
+            }
+            if var address = client {
+                for raw in queuedRaw {
+                    FakeServer.send(raw, from: socket, to: &address)
+                }
             }
             if state == .up && client != nil && Date() >= nextHeartbeat {
                 sendToClient(Data(bytes(UInt32(1))))

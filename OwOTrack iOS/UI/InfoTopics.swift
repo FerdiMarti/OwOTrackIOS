@@ -20,6 +20,7 @@ enum InfoTopic: Identifiable, Equatable {
     case localNetwork
     case screen
     case volumeButtons
+    case watch
 
     var id: String {
         switch self {
@@ -131,6 +132,14 @@ struct InfoContent {
                 "While connected, the iPhone doesn't lock automatically, so tracking keeps running.",
                 "To save battery, the screen dims after 30 seconds without a touch. The last 5 seconds are counted down. Touch the screen to brighten it again; that touch doesn't press anything.",
                 "You can also turn the screen off by covering the sensor at the top of the iPhone, next to the front camera. The app stays connected.",
+            ]
+        case .watch:
+            title = "Apple Watch"
+            paragraphs = [
+                "Connect on your Apple Watch to track with it. The watch can't reach SlimeVR by itself, so this iPhone passes its readings on. In SlimeVR, the watch is a tracker of its own.",
+                "Keep OwOTrack running on this iPhone while you track with the watch: leave it open (the screen dims), or allow Location \"Always\" so it can keep running in the background.",
+                "This iPhone doesn't have to be connected as a tracker itself. The watch has its own server address, in its settings. Its recent servers include the ones this iPhone connected to, and the other way around.",
+                "**Stop** ends the watch's connection from here.",
             ]
         case .volumeButtons:
             title = "Volume Buttons"

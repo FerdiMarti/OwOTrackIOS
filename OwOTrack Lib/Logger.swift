@@ -17,7 +17,8 @@ class Logger {
     private var connectUI : ConnectUI?
     private let lock = NSLock()
 
-    private init() {
+    //the app's log is the shared one (getInstance); the watch's session that the iPhone relays keeps its own
+    init() {
 
     }
 

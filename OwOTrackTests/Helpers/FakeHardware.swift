@@ -48,7 +48,7 @@ final class FakeHardware: DeviceHardware {
     static func getBatteryLevel() -> Float? { batteryLevel }
     static func startBatteryLevelMonitoring() {}
     static func stopBatteryLevelMonitoring() {}
-    static func startBackgroundUsage(target: CLLocationManagerDelegate) { record("background started") }
+    static func startBackgroundUsage(target: CLLocationManagerDelegate?) { record("background started") }
     static func stopBackgroundUsage() { record("background stopped") }
     static func getPseudoMacAddress() -> [UInt8] { testMac }
 }

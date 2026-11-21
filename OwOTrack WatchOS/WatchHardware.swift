@@ -75,7 +75,7 @@ class WatchHardware: DeviceHardware {
 
     //watchOS keeps an app with an active workout session running, also when the wrist is lowered or the screen is off.
     //the session only runs while tracking and is ended afterwards; nothing is saved to Health
-    static func startBackgroundUsage(target: CLLocationManagerDelegate) {
+    static func startBackgroundUsage(target: CLLocationManagerDelegate?) {
         DispatchQueue.main.async {
             workoutWanted = true
             guard HKHealthStore.isHealthDataAvailable() else {

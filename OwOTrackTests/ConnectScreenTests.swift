@@ -52,7 +52,7 @@ extension OwOTrackTests {
         @Test("what can be edited and what the button does in each state")
         @MainActor
         func states() async {
-            let model = ConnectionModel()
+            let model = ConnectionModel(sharing: nil)
             //the model updates on the main thread
             func show(_ change: () -> Void) async {
                 change()
@@ -91,9 +91,15 @@ extension OwOTrackTests {
         @Test("connected servers are remembered: newest first, no duplicates, at most 5")
         @MainActor
         func recentServers() async {
-            UserDefaults.standard.removeObject(forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
-            defer { UserDefaults.standard.removeObject(forKey: RECENT_SERVERS_USERDEFAULTS_KEY) }
-            let model = ConnectionModel()
+            clearRecentServers()
+            defer { clearRecentServers() }
+            //a list saved by an earlier version, without dates, keeps its order
+            UserDefaults.standard.set([["address": "old1.local", "port": "6969"], ["address": "old2.local", "port": "7000"]],
+                                      forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
+            #expect(ConnectionModel(sharing: nil).recentServers.map(\.id) == ["old1.local:6969", "old2.local:7000"])
+            clearRecentServers()
+
+            let model = ConnectionModel(sharing: nil)
             #expect(model.recentServers.isEmpty)
             for address in ["a.local", "b.local", "a.local", "c.local", "d.local", "e.local", "f.local"] {
                 model.ip = address
@@ -104,11 +110,69 @@ extension OwOTrackTests {
             }
             let expected = ["f.local", "e.local", "d.local", "c.local", "a.local"]
             #expect(model.recentServers.map(\.address) == expected)
-            #expect(ConnectionModel().recentServers.map(\.address) == expected)    //saved for the next start
+            #expect(ConnectionModel(sharing: nil).recentServers.map(\.address) == expected)    //saved for the next start
 
             model.useRecentServer(RecentServer(address: "c.local", port: "7000"))
             #expect(model.ip == "c.local")
             #expect(model.port == "7000")
+        }
+
+        @Test("the last server connected to is filled in on the next start, also on the watch")
+        @MainActor
+        func lastServerFilledIn() async {
+            let keys = [IP_USERDEFAULTS_KEY, PORT_USERDEFAULTS_KEY, MAGNETOMETER_USERDEFAULTS_KEY]
+            let saved = keys.map { UserDefaults.standard.object(forKey: $0) }
+            defer { zip(keys, saved).forEach { UserDefaults.standard.set($1, forKey: $0) } }
+            clearRecentServers()
+            defer { clearRecentServers() }
+            //the watch's model: its service (the relay) doesn't save anything itself
+            let model = ConnectionModel(service: RelayClient(transport: LoopbackTransport.pair().watch, hardware: FakeWatchHardware(),
+                                                             motion: FakeMotion()), sharing: nil)
+            model.ip = "my-pc.local"
+            model.port = "7000"
+            model.useMagnetometer = false
+            model.setConnected()
+            await pause(0.05)
+            let next = ConnectionModel(sharing: nil)
+            #expect(next.ip == "my-pc.local")
+            #expect(next.port == "7000")
+            #expect(next.useMagnetometer == false)
+        }
+
+        @Test("the iPhone and the watch show each other's recent servers: newest first, each once, at most 5")
+        @MainActor
+        func recentServersOfPairedDevice() async {
+            clearRecentServers()
+            defer { clearRecentServers() }
+            let sharing = FakeRecentServerSharing()
+            let model = ConnectionModel(sharing: sharing)
+            #expect(sharing.shared.map { $0.map(\.id) } == [[]])        //its own list, when the app starts
+            model.port = "6969"         //the same server only with the same port
+            model.ip = "pc.local"
+            model.setConnected()
+            await pause(0.05)
+            #expect(sharing.shared.last?.map(\.address) == ["pc.local"])
+
+            //the paired device's list arrives: a newer server, one this device has too (used here more recently), an older one
+            let now = Date()
+            sharing.onPairedRecentServers?([
+                RecentServer(address: "watch-new.local", port: "6969", used: now.addingTimeInterval(60)),
+                RecentServer(address: "pc.local", port: "6969", used: now.addingTimeInterval(-60)),
+                RecentServer(address: "watch-old.local", port: "6969", used: now.addingTimeInterval(-120)),
+            ])
+            #expect(model.recentServers.map(\.address) == ["watch-new.local", "pc.local", "watch-old.local"])
+
+            //this device sends only its own servers, so they don't bounce back and forth
+            model.ip = "laptop.local"
+            model.setConnected()
+            await pause(0.05)
+            #expect(sharing.shared.last?.map(\.address) == ["laptop.local", "pc.local"])
+
+            //a new list from the paired device replaces its old one; together at most 5
+            sharing.onPairedRecentServers?((1...6).map { RecentServer(address: "w\($0).local", port: "6969", used: now.addingTimeInterval(-Double($0) * 1000)) })
+            let expected = ["laptop.local", "pc.local", "w1.local", "w2.local", "w3.local"]
+            #expect(model.recentServers.map(\.address) == expected)
+            #expect(ConnectionModel(sharing: nil).recentServers.map(\.address) == expected)       //saved for the next start
         }
 
         @Test("volume button positions: the iPhone 17 from Apple's drawing; unknown models get the estimate")
@@ -169,7 +233,7 @@ extension OwOTrackTests {
         @Test("every explanation has a title and text; the permissions also say their state and offer Settings")
         func explanations() {
             let topics: [InfoTopic] = [.address, .port, .magnetometer, .server(.slimeVR), .server(.owoTrackDriver), .reconnecting,
-                                       .cantConnect, .location, .localNetwork, .screen, .volumeButtons]
+                                       .cantConnect, .location, .localNetwork, .screen, .volumeButtons, .watch]
             for topic in topics {
                 let content = InfoContent(topic, localNetwork: .unknown, location: .authorizedWhenInUse)
                 #expect(!content.title.isEmpty)
@@ -185,7 +249,7 @@ extension OwOTrackTests {
         @Test("a wrong address or port is reported instead of connecting")
         @MainActor
         func wrongInput() {
-            let model = ConnectionModel()
+            let model = ConnectionModel(sharing: nil)
             model.ip = "192.168.1"
             model.connectPressed()
             guard case .error(let message) = model.status else {
@@ -203,5 +267,20 @@ extension OwOTrackTests {
             }
             #expect(portMessage.contains("port"))
         }
+    }
+}
+
+private func clearRecentServers() {
+    UserDefaults.standard.removeObject(forKey: RECENT_SERVERS_USERDEFAULTS_KEY)
+    UserDefaults.standard.removeObject(forKey: PAIRED_RECENT_SERVERS_USERDEFAULTS_KEY)
+}
+
+//instead of WatchConnectivity: records what the model shares, and the test delivers the paired device's list
+private final class FakeRecentServerSharing: RecentServerSharing {
+    var shared: [[RecentServer]] = []
+    var onPairedRecentServers: (([RecentServer]) -> Void)?
+
+    func shareRecentServers(_ servers: [RecentServer]) {
+        shared.append(servers)
     }
 }

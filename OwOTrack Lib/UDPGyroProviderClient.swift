@@ -30,10 +30,12 @@ class PacketTypes {
 }
 
 //Uses one of the UDP clients to send the applications data to the server
-class UDPGyroProviderClient {
+class UDPGyroProviderClient: MotionSink {
 
     var connection: CompatibleUDPClient?
-    var logger = Logger.getInstance()
+    var logger: Logger {
+        return service.logger
+    }
     var hostUDP = "192.168.0.10"
     var portUDP = 6969
     
@@ -89,7 +91,7 @@ class UDPGyroProviderClient {
     var receivingBigEndian = true       //the app has to switch between handling data in BigEndian and LittleEndian because serer applications send data differently
     
     //the device's hardware, from TrackingService (a fake in the tests)
-    var hardware: any DeviceHardware.Type {
+    var hardware: TrackerHardware {
         return service.hardware
     }
     
@@ -127,7 +129,7 @@ class UDPGyroProviderClient {
         sendQueue.sync { self.packetId = 0 }
         lastHeartbeat = 0
 
-        self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP)
+        self.connection = NWConnectionUDPClient(host: hostUDP, port: portUDP, portKey: service.localPortKey)
 
         self.connection?.open(cb: {
             self.logStep("Connection Ready")
@@ -188,7 +190,7 @@ class UDPGyroProviderClient {
         }
 
         //SlimeVR's ids for this app, shown in its tracker settings: board "owoTrack" (13) and MCU "owoTrack iOS" (5).
-        //SlimeVR has no id for watchOS; the firmware text tells the two apart
+        //SlimeVR has no id for watchOS; the firmware text tells the two apart (also for the watch the iPhone relays)
         let boardType: Int32 = 13
         let imuType: Int32 = 0
         let mcuType: Int32 = 5
@@ -197,11 +199,7 @@ class UDPGyroProviderClient {
         //shown as the tracker's firmware version in SlimeVR, e.g. "owoTrack iOS 1.12".
         //not a bare version number like "1.12.0": SlimeVR compares those with its own firmware releases
         let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-        #if os(watchOS)
-        let firmware = "owoTrack watchOS \(appVersion)"
-        #else
-        let firmware = "owoTrack iOS \(appVersion)"
-        #endif
+        let firmware = "owoTrack \(service.firmwarePlatform) \(appVersion)"
         let firmwareData = Data(firmware.utf8)
         let firmwareLength : UInt8 = UInt8(firmwareData.count)
         let pseudoMac : [UInt8] = hardware.getPseudoMacAddress()

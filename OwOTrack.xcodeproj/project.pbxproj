@@ -81,6 +81,22 @@
 		C00000000000000000000033 /* Permissions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000031 /* Permissions.swift */; };
 		C00000000000000000000041 /* VolumeButtonPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000040 /* VolumeButtonPositions.swift */; };
 		C00000000000000000000042 /* VolumeButtonPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000040 /* VolumeButtonPositions.swift */; };
+		C00000000000000000000045 /* RelayMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000044 /* RelayMessage.swift */; };
+		C00000000000000000000046 /* RelayMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000044 /* RelayMessage.swift */; };
+		C00000000000000000000047 /* RelayMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000044 /* RelayMessage.swift */; };
+		C00000000000000000000049 /* RelayTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000048 /* RelayTransport.swift */; };
+		C0000000000000000000004A /* RelayTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000048 /* RelayTransport.swift */; };
+		C0000000000000000000004B /* RelayTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000048 /* RelayTransport.swift */; };
+		C0000000000000000000004D /* RelayHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000004C /* RelayHost.swift */; };
+		C0000000000000000000004E /* RelayHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000004C /* RelayHost.swift */; };
+		C0000000000000000000004F /* RelayHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0000000000000000000004C /* RelayHost.swift */; };
+		C00000000000000000000051 /* RelayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000050 /* RelayClient.swift */; };
+		C00000000000000000000052 /* RelayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000050 /* RelayClient.swift */; };
+		C00000000000000000000053 /* RelayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000050 /* RelayClient.swift */; };
+		C00000000000000000000055 /* WatchRelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000054 /* WatchRelayModel.swift */; };
+		C00000000000000000000056 /* WatchRelayModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000054 /* WatchRelayModel.swift */; };
+		C00000000000000000000058 /* RelayFakes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000057 /* RelayFakes.swift */; };
+		C0000000000000000000005A /* RelayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00000000000000000000059 /* RelayTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -164,6 +180,13 @@
 		C0000000000000000000002E /* InfoTopics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoTopics.swift; sourceTree = "<group>"; };
 		C00000000000000000000031 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
 		C00000000000000000000040 /* VolumeButtonPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonPositions.swift; sourceTree = "<group>"; };
+		C00000000000000000000044 /* RelayMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayMessage.swift; sourceTree = "<group>"; };
+		C00000000000000000000048 /* RelayTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayTransport.swift; sourceTree = "<group>"; };
+		C0000000000000000000004C /* RelayHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayHost.swift; sourceTree = "<group>"; };
+		C00000000000000000000050 /* RelayClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayClient.swift; sourceTree = "<group>"; };
+		C00000000000000000000054 /* WatchRelayModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchRelayModel.swift; sourceTree = "<group>"; };
+		C00000000000000000000057 /* RelayFakes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayFakes.swift; sourceTree = "<group>"; };
+		C00000000000000000000059 /* RelayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelayTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,6 +232,7 @@
 				C0000000000000000000002E /* InfoTopics.swift */,
 				C00000000000000000000031 /* Permissions.swift */,
 				C00000000000000000000040 /* VolumeButtonPositions.swift */,
+				C00000000000000000000054 /* WatchRelayModel.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -234,6 +258,7 @@
 				9AE20DE32953A114001B0874 /* DeviceHardware.swift */,
 				9AE20DF029548C17001B0874 /* ConnectUI.swift */,
 				B00000000000000000000007 /* ConnectionModel.swift */,
+				C00000000000000000000043 /* Relay */,
 			);
 			path = "OwOTrack Lib";
 			sourceTree = "<group>";
@@ -317,6 +342,7 @@
 				C00000000000000000000017 /* LiveSlimeVRTests.swift */,
 				C00000000000000000000029 /* ScreenDimmerTests.swift */,
 				C0000000000000000000001C /* Helpers */,
+				C00000000000000000000059 /* RelayTests.swift */,
 			);
 			path = OwOTrackTests;
 			sourceTree = "<group>";
@@ -329,8 +355,20 @@
 				C00000000000000000000005 /* Packets.swift */,
 				C00000000000000000000007 /* FakeServer.swift */,
 				C00000000000000000000009 /* Tracking.swift */,
+				C00000000000000000000057 /* RelayFakes.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		C00000000000000000000043 /* Relay */ = {
+			isa = PBXGroup;
+			children = (
+				C00000000000000000000044 /* RelayMessage.swift */,
+				C00000000000000000000048 /* RelayTransport.swift */,
+				C0000000000000000000004C /* RelayHost.swift */,
+				C00000000000000000000050 /* RelayClient.swift */,
+			);
+			path = Relay;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -511,6 +549,10 @@
 				9AE20E30295490BB001B0874 /* NWConnectionUDPClient.swift in Sources */,
 				9AE20E2A295490B6001B0874 /* GyroHandler.swift in Sources */,
 				9AE20E2E295490B6001B0874 /* UDPGyroProviderClient.swift in Sources */,
+				C00000000000000000000047 /* RelayMessage.swift in Sources */,
+				C0000000000000000000004B /* RelayTransport.swift in Sources */,
+				C0000000000000000000004F /* RelayHost.swift in Sources */,
+				C00000000000000000000053 /* RelayClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -537,6 +579,11 @@
 				C00000000000000000000032 /* Permissions.swift in Sources */,
 				C00000000000000000000041 /* VolumeButtonPositions.swift in Sources */,
 				B10000000000000000000010 /* ConnectionModel.swift in Sources */,
+				C00000000000000000000045 /* RelayMessage.swift in Sources */,
+				C00000000000000000000049 /* RelayTransport.swift in Sources */,
+				C0000000000000000000004D /* RelayHost.swift in Sources */,
+				C00000000000000000000051 /* RelayClient.swift in Sources */,
+				C00000000000000000000055 /* WatchRelayModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,6 +610,11 @@
 				C00000000000000000000033 /* Permissions.swift in Sources */,
 				C00000000000000000000042 /* VolumeButtonPositions.swift in Sources */,
 				B10000000000000000000011 /* ConnectionModel.swift in Sources */,
+				C00000000000000000000046 /* RelayMessage.swift in Sources */,
+				C0000000000000000000004A /* RelayTransport.swift in Sources */,
+				C0000000000000000000004E /* RelayHost.swift in Sources */,
+				C00000000000000000000052 /* RelayClient.swift in Sources */,
+				C00000000000000000000056 /* WatchRelayModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -583,6 +635,8 @@
 				C00000000000000000000016 /* ConnectScreenTests.swift in Sources */,
 				C00000000000000000000018 /* LiveSlimeVRTests.swift in Sources */,
 				C0000000000000000000002A /* ScreenDimmerTests.swift in Sources */,
+				C00000000000000000000058 /* RelayFakes.swift in Sources */,
+				C0000000000000000000005A /* RelayTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

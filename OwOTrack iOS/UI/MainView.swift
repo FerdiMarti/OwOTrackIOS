@@ -14,6 +14,7 @@ let PRIVACY_POLICY_URL = URL(string: "https://owotrack.martiniapps.dev")
 struct MainView: View {
     @ObservedObject var model: ConnectionModel
     @ObservedObject var dimmer: ScreenDimmer
+    @ObservedObject var watchRelay: WatchRelayModel
     @StateObject private var location = LocationPermission()
     @State private var sheet: Sheet?
     @State private var selectedSensor: Sensor?
@@ -62,7 +63,10 @@ struct MainView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         sensorRow
                         permissionRow
-                        if model.isConnected {
+                        if watchRelay.watchAvailable || watchRelay.isActive {
+                            watchRow
+                        }
+                        if model.isConnected || watchRelay.isActive {
                             screenRow
                         }
                         logRow
@@ -362,6 +366,57 @@ struct MainView: View {
         .buttonStyle(.plain)
         .accessibilityLabel("\(name) permission, \(state.spokenName)")
         .accessibilityHint("Explains the permission and how to change it")
+    }
+
+    // MARK: Apple Watch
+
+    //the watch tracks through this iPhone: its state, and a button to end it from here
+    private var watchRow: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "applewatch")
+                .font(.title3)
+                .foregroundColor(watchColor)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Apple Watch")
+                    .font(.headline)
+                Text(watchDetail)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer()
+            if watchRelay.isActive {
+                Button("Stop") {
+                    watchRelay.stop()
+                }
+                .buttonStyle(.bordered)
+                .tint(.red)
+            }
+            InfoButton(subject: "the Apple Watch") { sheet = .info(.watch) }
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var watchDetail: String {
+        let status = watchRelay.status
+        switch status.state {
+        case .notConnected: return "Connect on the watch to track with it"
+        case .connecting: return "Connecting…"
+        case .connected: return ["Tracking through this iPhone", status.serverType.name].compactMap { $0 }.joined(separator: " · ")
+        case .reconnecting: return "Reconnecting…"
+        case .failed: return status.reason ?? "Couldn't connect"
+        }
+    }
+
+    private var watchColor: Color {
+        switch watchRelay.status.state {
+        case .connected: return .green
+        case .connecting: return .primary
+        case .reconnecting: return .orange
+        case .failed: return .red
+        case .notConnected: return .secondary
+        }
     }
 
     // MARK: screen, log and footer

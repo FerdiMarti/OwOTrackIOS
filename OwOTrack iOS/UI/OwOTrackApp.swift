@@ -9,11 +9,13 @@ import SwiftUI
 struct OwOTrackApp: App {
     @StateObject private var model = ConnectionModel()
     @StateObject private var dimmer = ScreenDimmer()
+    //created right away, so the relay also answers a watch that launches the app in the background
+    @StateObject private var watchRelay = WatchRelayModel.shared
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
-            MainView(model: model, dimmer: dimmer)
+            MainView(model: model, dimmer: dimmer, watchRelay: watchRelay)
                 //while dimmed, the touch that brightens the screen ends here instead of pressing something
                 .overlay(alignment: .center) {
                     if dimmer.isDimmed {
@@ -24,13 +26,18 @@ struct OwOTrackApp: App {
                             .accessibilityLabel("Screen dimmed. Touch to brighten")
                     }
                 }
-                //the screen dims only while connected and while the app is in the foreground
+                //the screen dims only while tracking (this iPhone, or the watch through it) and while the app is in the foreground
                 .onChange(of: model.isConnected) { _ in updateDimmer() }
+                .onChange(of: watchRelay.isActive) { _ in updateDimmer() }
                 .onChange(of: scenePhase) { _ in updateDimmer() }
         }
     }
 
+    init() {
+        _ = WatchRelayModel.shared
+    }
+
     private func updateDimmer() {
-        dimmer.setActive(model.isConnected && scenePhase == .active)
+        dimmer.setActive((model.isConnected || watchRelay.isActive) && scenePhase == .active)
     }
 }

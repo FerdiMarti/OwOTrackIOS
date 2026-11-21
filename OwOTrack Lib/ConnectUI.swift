@@ -8,7 +8,7 @@
 import Foundation
 
 //what the app is connected to, found out while connecting
-enum ServerType {
+enum ServerType: String, Codable {
     case unknown            //not connected, or not found out yet
     case slimeVR            //acknowledged the sensor description
     case owoTrackDriver     //only answered the short handshake of the old protocol
