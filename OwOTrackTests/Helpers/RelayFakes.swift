@@ -72,6 +72,13 @@ final class LoopbackTransport: RelayTransport {
         return true
     }
 
+    //everything this end sent, as it went out
+    var sentPackets: [Data] {
+        lock.lock()
+        defer { lock.unlock() }
+        return sentData
+    }
+
     //how many batches of motion readings this end sent
     var sentBatches: Int {
         lock.lock()

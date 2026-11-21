@@ -164,6 +164,7 @@ struct InfoButton: View {
         Button(action: action) {
             Image(systemName: "info.circle")
                 .imageScale(.large)
+                .minimumTapArea()
         }
         .buttonStyle(.borderless)
         .accessibilityLabel("About \(subject)")

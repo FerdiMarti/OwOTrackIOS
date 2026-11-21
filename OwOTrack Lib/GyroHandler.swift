@@ -49,9 +49,16 @@ public class GyroHandler: MotionSource {
         let sensorQueue = OperationQueue()
         sensorQueue.name = "SensorQueue"
         sensorQueue.maxConcurrentOperationCount = 1 //OperationQueue is concurrent by default; handle sensor updates one at a time, in order
-        mmanager.deviceMotionUpdateInterval = 0.01
-        mmanager.gyroUpdateInterval = 0.01
-        mmanager.accelerometerUpdateInterval = 0.01
+        #if os(watchOS)
+        //50 Hz: the watch's readings reach the server through the iPhone 20 times a second, the newest of each kind,
+        //so measuring faster would only cost battery
+        let interval = 0.02
+        #else
+        let interval = 0.01
+        #endif
+        mmanager.deviceMotionUpdateInterval = interval
+        mmanager.gyroUpdateInterval = interval
+        mmanager.accelerometerUpdateInterval = interval
         mmanager.startDeviceMotionUpdates(using: useMagn ? CMAttitudeReferenceFrame.xArbitraryCorrectedZVertical : CMAttitudeReferenceFrame.xArbitraryZVertical, to: sensorQueue, withHandler: { (MotionData, Error) in
             if let md = MotionData {
                 let quat = md.attitude.quaternion

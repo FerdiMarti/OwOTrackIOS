@@ -11,12 +11,12 @@ import WatchKit
 struct OwOTrackWatchApp: App {
     //tracks through the iPhone app (RelayClient)
     @StateObject private var model: ConnectionModel
-    private let haptics: StatusHaptics
+    private let feedback: StatusFeedback
 
     init() {
         let model = ConnectionModel()
         _model = StateObject(wrappedValue: model)
-        haptics = StatusHaptics(model: model)
+        feedback = StatusFeedback(model: model)
         WatchConnectivityTransport.shared.activate()
     }
 
@@ -27,9 +27,9 @@ struct OwOTrackWatchApp: App {
     }
 }
 
-//felt on the wrist: connected, connection lost, connecting failed. Follows the model, not the screen,
-//so it also comes with the wrist down, when the screen isn't updated
-final class StatusHaptics {
+//felt on the wrist: connected, connection lost, connecting failed; and VoiceOver says every change.
+//Follows the model, not the screen, so it also comes with the wrist down, when the screen isn't updated
+final class StatusFeedback {
     private var subscription: AnyCancellable?
 
     init(model: ConnectionModel) {
@@ -39,6 +39,9 @@ final class StatusHaptics {
             case .reconnecting: WKInterfaceDevice.current().play(.retry)
             case .failed: WKInterfaceDevice.current().play(.failure)
             default: break
+            }
+            if #available(watchOS 10.0, *) {
+                AccessibilityNotification.Announcement(status.title).post()
             }
         }
     }

@@ -41,6 +41,7 @@ final class RelayHost {
     //if the watch missed that and asks for the session again, it gets this again instead of a new connection
     private var ended: RelayStatus?
     private var lastHeard = Date.distantPast
+    private var lastVersionsSent = Date.distantPast
     private var timer: Timer?
     private var statusSendScheduled = false
     private var receivedSamples = 0             //since rateCountStart: how fast the watch's readings arrive
@@ -63,6 +64,18 @@ final class RelayHost {
     //a packet from the watch. On the main thread
     func receive(_ data: Data) {
         guard let packet = RelayPacket(data: data) else {
+            return
+        }
+        if case .incompatible(let peerVersion) = packet {
+            //the watch app's version can't work with this one: the watch learns from this app's versions which app
+            //to update (at most once a second, it keeps asking), and this screen says it too
+            if service == nil {
+                status = RelayStatus(state: .failed, reason: RelayPacket.updateHint(peerVersion: peerVersion, onWatch: false))
+            }
+            if Date().timeIntervalSince(lastVersionsSent) >= 1 {
+                lastVersionsSent = Date()
+                _ = transport.send(RelayPacket.versions.data, onlyIfReachable: false, onConfirmed: nil)
+            }
             return
         }
         lastHeard = Date()
@@ -94,7 +107,7 @@ final class RelayHost {
                     self?.transport.send(.found(result))
                 }
             }
-        case .message:
+        case .message, .versions, .incompatible:
             break       //messages for the watch
         }
     }

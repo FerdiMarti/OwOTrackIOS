@@ -117,14 +117,7 @@ private struct TrackingPage: View {
     }
 
     private var title: String {
-        switch model.status {
-        case .notConnected: return "Not connected"
-        case .searching: return "Searching for SlimeVR…"
-        case .connecting: return "Connecting…"
-        case .connected: return "Connected"
-        case .reconnecting: return "Reconnecting…"
-        case .failed(let reason), .error(let reason): return reason
-        }
+        return model.status.title
     }
 
     private var color: Color {

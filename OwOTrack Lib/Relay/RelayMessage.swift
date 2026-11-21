@@ -69,17 +69,48 @@ struct MotionSample: Equatable {
     let values: [Data]
 }
 
-//the bytes on the way. The first byte tells a control message (0, then JSON) from a batch of motion readings
-//(1, then per reading its kind and its floats)
+//which version of the relay messages this app speaks. The watch app can update later than the iPhone app (or the other
+//way round): every control message carries both numbers, so an app that can't work with the other says which one to update
+enum RelayProtocol {
+    //raise for every change of the messages
+    static let version: UInt8 = 1
+    //the oldest version of the other app this one still works with: raise it only when an older app can no longer work
+    //with this one (it can't read what this one sends, or this one needs something it doesn't send). Messages an app
+    //doesn't know are ignored, so new messages and new optional fields don't need it
+    static let oldestPeer: UInt8 = 1
+
+    //the other app's version, and the oldest of this app's versions it works with
+    static func isCompatible(peerVersion: UInt8, peerOldest: UInt8) -> Bool {
+        return peerVersion >= oldestPeer && version >= peerOldest
+    }
+}
+
+//the bytes on the way. The first byte tells a control message (0, the versions, then JSON) from a batch of motion
+//readings (1, then per reading its kind and its floats) and the versions alone (2, the answer to an app that can't
+//work with this one). The versions come first and never change their place, so every version can read them
 enum RelayPacket: Equatable {
     case message(RelayMessage)
     case samples([MotionSample])
+    case versions                           //sent: only this app's versions
+    case incompatible(peerVersion: UInt8)   //received: the other app's version can't work with this one
+
+    //what to show when the other app's version can't work with this one (newer: this app is the old one)
+    static func updateHint(peerVersion: UInt8, onWatch: Bool) -> String {
+        let thisIsOlder = peerVersion > RelayProtocol.version
+        if onWatch {
+            return thisIsOlder ? "Update OwOTrack on this watch" : "Update OwOTrack on your iPhone"
+        }
+        return thisIsOlder ? "Update OwOTrack on this iPhone to track with the watch" : "Update OwOTrack on your Apple Watch"
+    }
 
     var data: Data {
+        let versions = Data([RelayProtocol.version, RelayProtocol.oldestPeer])
         switch self {
         case .message(let message):
             let json = (try? JSONEncoder().encode(message)) ?? Data()
-            return Data([0]) + json
+            return Data([0]) + versions + json
+        case .versions, .incompatible:
+            return Data([2]) + versions
         case .samples(let samples):
             var data = Data([1])
             for sample in samples {
@@ -107,8 +138,17 @@ enum RelayPacket: Equatable {
         }
         let body = data.dropFirst()
         switch first {
-        case 0:
-            guard let message = try? JSONDecoder().decode(RelayMessage.self, from: Data(body)) else {
+        case 0, 2:
+            guard body.count >= 2 else {
+                return nil
+            }
+            let peerVersion = body[body.startIndex], peerOldest = body[body.startIndex + 1]
+            guard RelayProtocol.isCompatible(peerVersion: peerVersion, peerOldest: peerOldest) else {
+                self = .incompatible(peerVersion: peerVersion)
+                return
+            }
+            //a message this version doesn't know (from a newer app) is ignored, like the versions alone
+            guard first == 0, let message = try? JSONDecoder().decode(RelayMessage.self, from: Data(body.dropFirst(2))) else {
                 return nil
             }
             self = .message(message)

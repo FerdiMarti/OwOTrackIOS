@@ -421,3 +421,17 @@ final class ConnectionModel: ObservableObject, ConnectUI {
         return ("0"..."9").contains(c)
     }
 }
+
+extension ConnectionModel.Status {
+    //the headline of the connect screen on the iPhone and the watch, which VoiceOver also announces
+    var title: String {
+        switch self {
+        case .notConnected: return "Not connected"
+        case .searching: return "Searching for SlimeVR…"
+        case .connecting: return "Connecting…"
+        case .connected: return "Connected"
+        case .reconnecting: return "Reconnecting…"
+        case .failed(let reason), .error(let reason): return reason
+        }
+    }
+}

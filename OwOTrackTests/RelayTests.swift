@@ -41,6 +41,65 @@ extension OwOTrackTests {
             #expect(RelayPacket(data: Data([0]) + Data("{".utf8)) == nil)
         }
 
+        @Test("every control message carries the app's relay version, so apps that can't work together say which to update")
+        func versions() throws {
+            let message = RelayPacket(.alive).data
+            #expect(Array(message.prefix(3)) == [0, RelayProtocol.version, RelayProtocol.oldestPeer])
+            #expect(RelayPacket.versions.data == Data([2, RelayProtocol.version, RelayProtocol.oldestPeer]))
+            //an app too new or too old for this one: its version is all that's read
+            let json = message.dropFirst(3)
+            #expect(RelayPacket(data: Data([0, 200, 200]) + json) == .incompatible(peerVersion: 200))
+            #expect(RelayPacket(data: Data([2, 0, 0])) == .incompatible(peerVersion: 0))
+            //a newer app that still works with this one: a message this one doesn't know is ignored, the rest is read
+            #expect(RelayPacket(data: Data([0, 200, RelayProtocol.version]) + Data(#"{"someday":{}}"#.utf8)) == nil)
+            #expect(RelayPacket(data: Data([0, 200, RelayProtocol.version]) + json) == .message(.alive))
+            #expect(RelayPacket(data: Data([2, RelayProtocol.version, RelayProtocol.oldestPeer])) == nil)
+
+            #expect(RelayPacket.updateHint(peerVersion: 200, onWatch: true) == "Update OwOTrack on this watch")
+            #expect(RelayPacket.updateHint(peerVersion: 0, onWatch: true) == "Update OwOTrack on your iPhone")
+            #expect(RelayPacket.updateHint(peerVersion: 0, onWatch: false) == "Update OwOTrack on your Apple Watch")
+        }
+
+        @Test("a watch app the iPhone app can't work with: both say which app to update")
+        func incompatibleApps() async throws {
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            //an old watch app asks to connect: the iPhone answers with its versions and says so on its screen
+            let start = RelayPacket(.start(RelayStart(address: "127.0.0.1", port: "6969", magnetometer: true,
+                                                     mac: FakeWatchHardware.mac, magnetometerAvailable: false))).data
+            relay.link.watch.send(Data([0, 0, 0]) + start.dropFirst(3), onlyIfReachable: false, onConfirmed: nil)
+            #expect(await waitUntil { relay.host?.status.reason == "Update OwOTrack on your Apple Watch" })
+            #expect(relay.host?.status.state == .failed)
+            #expect(relay.link.phone.sentPackets.last == RelayPacket.versions.data)
+
+            //a watch app that's too old for the iPhone's answer gives up with the hint, instead of waiting
+            relay.connect(port: 6969)
+            relay.link.phone.send(Data([2, 200, 200]), onlyIfReachable: false, onConfirmed: nil)
+            #expect(await waitUntil { relay.watchUI.lastState == "failed" })
+            #expect(relay.watchUI.failures.last == "Update OwOTrack on this watch")
+        }
+
+        @Test("each batch carries only the newest reading of each kind")
+        func newestReadings() async throws {
+            let server = FakeServer(mode: .oldDriver)       //the old driver also gets the gyro
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            await pause(0.1)
+            let before = relay.link.watch.sentSamples.count
+            for step in 1...5 {         //faster than a batch: all of them wait for the same one
+                relay.watchMotion.emit(rotation: [0, 0, Float(step) / 10, 1])
+                relay.watchMotion.emit(gyro: [Float(step), 0, 0])
+            }
+            #expect(await waitUntil { relay.link.watch.sentSamples.count > before })
+            let batch = Array(relay.link.watch.sentSamples.dropFirst(before))
+            #expect(batch.map(\.kind) == [.rotation, .gyro])
+            #expect(batch.first?.values == [0, 0, 0.5, 1].map { Data(bigEndian: Float($0)) })
+            #expect(batch.last?.values == [5, 0, 0].map { Data(bigEndian: Float($0)) })
+        }
+
         @Test("the watch connects through the iPhone, as a tracker of its own")
         func connects() async throws {
             let server = FakeServer(mode: .slimeVR)

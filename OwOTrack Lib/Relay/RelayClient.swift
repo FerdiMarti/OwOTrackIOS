@@ -21,8 +21,6 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         var statsInterval: TimeInterval = 60            //how often the log shows how fast the iPhone confirms the batches
     }
 
-    //at most this many readings wait for the next batch (when the iPhone can't keep up, the oldest go)
-    private static let maxBatch = 200
     //at most this many batches on their way: more would only queue up delay when the connection to the iPhone is slow
     private static let maxInFlight = 3
 
@@ -216,11 +214,19 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
     // MARK: from the iPhone, on the main thread
 
     private func receive(_ data: Data) {
-        if case .message(.found(let result))? = RelayPacket(data: data) {
+        let packet = RelayPacket(data: data)
+        if case .incompatible(let peerVersion)? = packet {
+            //the iPhone app's version can't work with this one: say which app to update
+            let hint = RelayPacket.updateHint(peerVersion: peerVersion, onWatch: true)
+            finishFind(ServerSearchResult(failure: hint))
+            finish(failure: hint)
+            return
+        }
+        if case .message(.found(let result))? = packet {
             finishFind(result)
             return
         }
-        guard active, case .message(let message)? = RelayPacket(data: data) else {
+        guard active, case .message(let message)? = packet else {
             return
         }
         if case .status(let status) = message, status.session != request?.session {
@@ -320,15 +326,19 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
             batchLock.unlock()
             return
         }
-        batch.append(MotionSample(kind: kind, values: values))
-        if batch.count > RelayClient.maxBatch {
-            batch.removeFirst(batch.count - RelayClient.maxBatch)
+        //only the newest reading of each kind: the server takes each reading as the current one, so the older ones of
+        //a batch (they all arrive at once) would only be overwritten right away, or replayed late after a slow moment
+        let sample = MotionSample(kind: kind, values: values)
+        if let index = batch.firstIndex(where: { $0.kind == kind }) {
+            batch[index] = sample
+        } else {
+            batch.append(sample)
         }
         batchLock.unlock()
     }
 
     //a few batches at a time: the next goes once the iPhone confirmed one, so a slow connection to the iPhone
-    //means bigger batches instead of a growing queue and more and more delay. On the main thread
+    //means fewer batches instead of a growing queue and more and more delay. On the main thread
     private func sendBatch() {
         let now = Date()
         for (number, sentAt) in inFlight where now.timeIntervalSince(sentAt) > timing.confirmTimeout {

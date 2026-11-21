@@ -108,6 +108,8 @@ struct MainView: View {
         }
         .onChange(of: model.status) { status in
             vibrate(for: status)
+            //VoiceOver says what changed, wherever its focus is
+            UIAccessibility.post(notification: .announcement, argument: status.title)
         }
     }
 
@@ -151,14 +153,7 @@ struct MainView: View {
     }
 
     private var statusTitle: String {
-        switch model.status {
-        case .notConnected: return "Not connected"
-        case .searching: return "Searching for SlimeVR…"
-        case .connecting: return "Connecting…"
-        case .connected: return "Connected"
-        case .reconnecting: return "Reconnecting…"
-        case .failed(let reason), .error(let reason): return reason
-        }
+        return model.status.title
     }
 
     private var statusColor: Color {
@@ -267,6 +262,7 @@ struct MainView: View {
                     } label: {
                         Image(systemName: "clock.arrow.circlepath")
                             .imageScale(.large)
+                            .minimumTapArea()
                     }
                     .disabled(!model.canEdit)
                     .accessibilityLabel("Recent servers")
@@ -276,6 +272,7 @@ struct MainView: View {
                 } label: {
                     Image(systemName: "antenna.radiowaves.left.and.right")
                         .imageScale(.large)
+                        .minimumTapArea()
                 }
                 .disabled(!model.canEdit)
                 .accessibilityLabel("Search the network for SlimeVR")
@@ -490,6 +487,7 @@ struct MainView: View {
             }
             .font(.subheadline)
             .contentShape(Rectangle())
+            .minimumTapArea()
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Connection log")
@@ -545,6 +543,12 @@ struct MainView: View {
 }
 
 extension View {
+    //Apple's minimum of 44 × 44 pt to tap: a small icon or line also reacts to taps right around it,
+    //without taking more room on the screen
+    func minimumTapArea() -> some View {
+        background(Color.clear.frame(minWidth: 44, minHeight: 44).contentShape(Rectangle()))
+    }
+
     //the screen fills the display, so it only needs to scroll when the content is taller (large text, keyboard,
     //small screens). Without this, iOS lets it bounce even when everything fits. Needs iOS 16.4; before, it keeps bouncing
     @ViewBuilder
@@ -578,6 +582,7 @@ private struct Badge: View {
                 .offset(x: size * 0.09, y: size * 0.09)
         }
         .contentShape(Rectangle())
+        .minimumTapArea()
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)     //four badges still fit next to each other
     }
 }
@@ -654,6 +659,7 @@ private struct VolumeButtonLabels: View {
                 .rotationEffect(.degrees(-90))
                 .frame(width: width, height: length)
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: width / 2))
+                .minimumTapArea()       //the slim tab is easier to hit
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(spoken): \(action)")
