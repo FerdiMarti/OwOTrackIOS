@@ -99,6 +99,25 @@ final class LocalServerFinder: ServerFinding {
         var order: [String] = []
         var driverSent = false
         var anySent = false
+
+        //the answers waiting now, or arriving within the time. Before the short handshake went out, an answer is to the
+        //full one: SlimeVR. After, only to the short one: the old driver, which can't read the full one
+        func collectAnswers(waiting time: TimeInterval) {
+            let until = Date().addingTimeInterval(time)
+            repeat {
+                var pollHandle = pollfd(fd: socketHandle, events: Int16(POLLIN), revents: 0)
+                let wait = until.timeIntervalSinceNow
+                if poll(&pollHandle, 1, Int32(max(0, min(50, wait * 1000)))) > 0 {
+                    while let host = receiveAnswer(on: socketHandle) {
+                        if types[host] == nil {
+                            types[host] = driverSent ? .owoTrackDriver : .slimeVR
+                            order.append(host)
+                        }
+                    }
+                }
+            } while until.timeIntervalSinceNow > 0
+        }
+
         let start = Date()
         while true {
             let elapsed = Date().timeIntervalSince(start)
@@ -107,23 +126,20 @@ final class LocalServerFinder: ServerFinding {
             }
             while let step = steps.first, step.at <= elapsed {
                 steps.removeFirst()
+                if step.isDriver && !driverSent {
+                    //first the answers already here, so a slow moment (many addresses, a busy device) can't make
+                    //SlimeVR's answers count as answers to the short handshake. SlimeVR then gets no short handshake,
+                    //which it would show as another tracker
+                    collectAnswers(waiting: 0.1)
+                }
                 driverSent = driverSent || step.isDriver
                 for (host, address) in addresses where types[host] == nil {
                     anySent = send(step.packet, to: address, on: socketHandle) || anySent
                 }
             }
-            //answers until the next step, a few at a time
+            //answers until the next step
             let next = min(steps.first?.at ?? timing.total, timing.total)
-            var pollHandle = pollfd(fd: socketHandle, events: Int16(POLLIN), revents: 0)
-            if poll(&pollHandle, 1, Int32(max(1, min(50, (next - elapsed) * 1000)))) > 0 {
-                while let host = receiveAnswer(on: socketHandle) {
-                    if types[host] == nil {
-                        //answered the full handshake: SlimeVR. Only the short one: the old driver, which can't read the full one
-                        types[host] = driverSent ? .owoTrackDriver : .slimeVR
-                        order.append(host)
-                    }
-                }
-            }
+            collectAnswers(waiting: max(0.001, next - Date().timeIntervalSince(start)))
         }
         //not a single handshake went out: iOS blocks the local network (not allowed, or still asking on the first search)
         if !anySent && order.isEmpty && !addresses.isEmpty {
@@ -184,8 +200,9 @@ final class LocalServerFinder: ServerFinding {
 
     // MARK: the network's addresses
 
-    //the other addresses of the local networks this device is on: Wi-Fi (or Ethernet) and its own hotspot,
-    //not cellular or VPN. nil when it isn't on such a network
+    //the addresses of the local networks this device is on: Wi-Fi (or Ethernet) and its own hotspot, not cellular or VPN.
+    //Its own address first: SlimeVR can run on the same computer (the app on a Mac, or in the simulator).
+    //nil when it isn't on such a network
     static func networkAddresses() -> [String]? {
         var list: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&list) == 0, let first = list else {
@@ -210,7 +227,7 @@ final class LocalServerFinder: ServerFinding {
                 continue
             }
             onNetwork = true
-            hosts += otherAddresses(ip: ip, mask: netmask)
+            hosts += [ip] + otherAddresses(ip: ip, mask: netmask)
         }
         var seen = Set<UInt32>()
         return onNetwork ? hosts.filter { seen.insert($0).inserted }.map(format) : nil

@@ -151,6 +151,56 @@ extension OwOTrackTests {
 
         //the app saves the local port and asks for it on the next connection (old SlimeVR versions told trackers apart by port).
         //this checks the app's part only: in the simulator, iOS ignores the asked-for port (tried with 0.0.0.0, any and 127.0.0.1)
+        //the simulator ignores the asked-for port, so it never reports it taken: this hands the connection iOS's report
+        //from a device directly
+        @Test("a saved local port that's taken (e.g. still closing) is replaced by a free one in the same attempt")
+        func busyLocalPort() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let key = "bindportTest"
+            UserDefaults.standard.set("50123", forKey: key)
+            defer { UserDefaults.standard.removeObject(forKey: key) }
+            let client = NWConnectionUDPClient(host: "127.0.0.1", port: Int(server.port), portKey: key)
+            defer { client.close() }
+            client.loadLastPort()
+            #expect(client.bindPort?.rawValue == 50123)
+
+            let problems = Recorded<ConnectionProblem>()
+            let ready = Recorded<Bool>()
+            let taken = NWConnection(host: "127.0.0.1", port: 6969, using: .udp)
+            client.handle(.waiting(.posix(.EADDRINUSE)), of: taken, cb: { ready.append(true) }, onProblem: { problems.append($0) })
+            #expect(problems.values.map(\.reason) == ["The network port of the last connection was still in use, connecting on a new one"])
+            #expect(problems.values.allSatisfy { !$0.fatal })
+            #expect(client.bindPort == nil)
+            #expect(UserDefaults.standard.string(forKey: key) == nil)
+            #expect(client.connection !== taken)
+            #expect(client.connection?.parameters.requiredLocalEndpoint == nil)     //any free port
+            #expect(await waitUntil { ready.values == [true] })      //the same attempt goes on
+            #expect(UserDefaults.standard.string(forKey: key) != nil)      //and the new port is asked for next time
+        }
+
+        @Test("the iPhone's and the watch's sessions don't bind the same local port, even if both saved the same one")
+        func separatePorts() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            defer { UserDefaults.standard.removeObject(forKey: "bindportWatch") }
+            try await withTracking(port: server.port) { service, ui in
+                #expect(await waitUntil { ui.lastState == "connected" })
+                let phone = try #require(service.client?.connection as? NWConnectionUDPClient)
+                guard case .hostPort(_, let phonePort)? = phone.connection?.currentPath?.localEndpoint else {
+                    Issue.record("the iPhone's connection has no local port")
+                    return
+                }
+                let watch = NWConnectionUDPClient(host: "127.0.0.1", port: Int(server.port), portKey: "bindportWatch")
+                UserDefaults.standard.set(String(phonePort.rawValue), forKey: "bindportWatch")
+                watch.loadLastPort()
+                #expect(watch.bindPort == nil)          //the iPhone's session uses it: a free one instead
+                UserDefaults.standard.set("50124", forKey: "bindportWatch")
+                watch.loadLastPort()
+                #expect(watch.bindPort?.rawValue == 50124)
+            }
+        }
+
         @Test("the local port is saved and asked for on the next connection")
         func localPortSaved() async throws {
             let server = FakeServer(mode: .slimeVR)
@@ -174,5 +224,23 @@ extension OwOTrackTests {
             let secondPort = try #require(server.received(type: 3).last?.sourcePort)
             #expect(UserDefaults.standard.string(forKey: BIND_PORT_USERDEFAULTS_KEY) == String(secondPort))
         }
+    }
+}
+
+//values reported from any thread
+final class Recorded<Value> {
+    private let lock = NSLock()
+    private var recorded: [Value] = []
+
+    func append(_ value: Value) {
+        lock.lock()
+        recorded.append(value)
+        lock.unlock()
+    }
+
+    var values: [Value] {
+        lock.lock()
+        defer { lock.unlock() }
+        return recorded
     }
 }
