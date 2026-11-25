@@ -9,14 +9,14 @@ import WatchKit
 
 @main
 struct OwOTrackWatchApp: App {
-    //tracks through the iPhone app (RelayClient)
-    @StateObject private var model: ConnectionModel
-    private let feedback: StatusFeedback
+    //tracks through the iPhone app (RelayClient). One for the whole app, whatever SwiftUI does with this struct:
+    //a second model would take over the messages from the iPhone, and the one on screen would never hear back
+    private static let sharedModel = ConnectionModel()
+    private static let feedback = StatusFeedback(model: sharedModel)
+    @StateObject private var model = OwOTrackWatchApp.sharedModel
 
     init() {
-        let model = ConnectionModel()
-        _model = StateObject(wrappedValue: model)
-        feedback = StatusFeedback(model: model)
+        _ = OwOTrackWatchApp.feedback
         //a session saved to Health shows on the iPhone too
         WorkoutRecorder.shared.onSaved = { summary in
             WatchConnectivityTransport.shared.send(.workout(summary))

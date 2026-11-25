@@ -19,6 +19,8 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         var heartbeatInterval: TimeInterval = 5         //nothing else sent for that long: the watch tells the iPhone it's still there
         var confirmTimeout: TimeInterval = 1            //a batch the iPhone hasn't confirmed by then no longer holds up the next
         var statsInterval: TimeInterval = 60            //how often the log shows how fast the iPhone confirms the batches
+        var pauseLength: TimeInterval = 2               //the regular check came that late: the app didn't run meanwhile (screen off without a workout)
+        var answersOnlyAfter: TimeInterval = 5          //no message of the iPhone's own for that long into a session, only its answers: the log says so
     }
 
     //at most this many batches on their way: more would only queue up delay when the connection to the iPhone is slow
@@ -41,6 +43,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
     private var lastAsked = Date()
     private var lostSince: Date?
     private var lastSent = Date()
+    private var lastCheck = Date()
+    private var heardDirectly = false           //a message the iPhone sent by itself arrived in this session, not only its answers to the watch's
+    private var answersOnlyLogged = false
     private var shownState: RelayStatus.State?
     private var shownServer = ServerType.unknown
     private var timers: [Timer] = []
@@ -62,8 +67,12 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         self.motion = motion
         self.logger = logger
         self.timing = timing
+        //the iPhone's own messages, and what comes back with the confirmations of the watch's (the status)
         transport.onReceive = { [weak self] data in
-            self?.receive(data)
+            self?.receive(data, direct: true)
+        }
+        transport.onReply = { [weak self] data in
+            self?.receive(data, direct: false)
         }
     }
 
@@ -82,6 +91,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         shownServer = .unknown
         startedAt = Date()
         lastAsked = Date()
+        lastCheck = Date()
+        heardDirectly = false
+        answersOnlyLogged = false
         connectUI.setLoading()
         batchLock.lock()
         sendsGyro = true
@@ -151,6 +163,18 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
             return
         }
         let now = Date()
+        let sinceLastCheck = now.timeIntervalSince(lastCheck)
+        lastCheck = now
+        if sinceLastCheck > timing.pauseLength {
+            //watchOS paused the app (the screen went off and no workout keeps it running). That time doesn't count as
+            //waiting for the iPhone; the iPhone may have ended the session meanwhile, so the watch asks for it again
+            logger.addEntry("The watch app was paused for \(Int(sinceLastCheck.rounded())) s")
+            startedAt = startedAt.addingTimeInterval(sinceLastCheck)
+            lastHeard = lastHeard.addingTimeInterval(sinceLastCheck)
+            lastAsked = now
+            send(.start(request))
+            return
+        }
         logStats(now)
         if !heardFromiPhone {
             if now.timeIntervalSince(startedAt) > timing.firstAnswerTimeout {
@@ -163,8 +187,10 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
             return
         }
         if now.timeIntervalSince(lastHeard) <= timing.iPhoneTimeout {
-            //without motion readings (the simulator has no motion sensors) the iPhone would think the watch is gone
-            if now.timeIntervalSince(lastSent) > timing.heartbeatInterval {
+            //without motion readings (the simulator has no motion sensors) the iPhone would think the watch is gone.
+            //Until it's connected more often: the iPhone's answer brings the status
+            let quiet = shownState == .connected ? timing.heartbeatInterval : min(1, timing.heartbeatInterval)
+            if now.timeIntervalSince(lastSent) > quiet {
                 send(.alive)
             }
             return
@@ -185,8 +211,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         }
     }
 
+    //asks for a confirmation: the iPhone's status comes back with it
     private func send(_ message: RelayMessage) {
-        transport.send(message)
+        transport.send(RelayPacket(message).data, onlyIfReachable: false, onConfirmed: { _ in })
         lastSent = Date()
     }
 
@@ -213,7 +240,8 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
 
     // MARK: from the iPhone, on the main thread
 
-    private func receive(_ data: Data) {
+    //direct: the iPhone sent it by itself. Else it came back with the confirmation of one of the watch's messages
+    private func receive(_ data: Data, direct: Bool) {
         let packet = RelayPacket(data: data)
         if case .incompatible(let peerVersion)? = packet {
             //the iPhone app's version can't work with this one: say which app to update
@@ -234,6 +262,12 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
         }
         heardFromiPhone = true
         lastHeard = Date()
+        if direct {
+            heardDirectly = true
+        } else if !heardDirectly && !answersOnlyLogged && lastHeard.timeIntervalSince(startedAt) > timing.answersOnlyAfter {
+            answersOnlyLogged = true
+            logger.addEntry("The iPhone's own messages don't arrive, only its answers to the watch's. Tracking works; the iPhone's log lines are missing here")
+        }
         switch message {
         case .status(let status):
             show(status)
@@ -244,15 +278,20 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
                 hardware.vibrate()
             }
         case .magnetometer(let use):
-            if use != magnetometer {
-                magnetometer = use
-                request?.magnetometer = use         //if the iPhone starts the session over, it keeps SlimeVR's choice
-                motion.stopUpdates()
-                motion.startUpdates(sink: self, useMagn: use)
-                connectUI?.setMagnometerToggle(use: use)
-            }
+            useMagnetometer(use)
         default:
             break
+        }
+    }
+
+    //the iPhone says how to measure (SlimeVR can switch the magnetometer), as a message and with every status
+    private func useMagnetometer(_ use: Bool) {
+        if use != magnetometer {
+            magnetometer = use
+            request?.magnetometer = use         //if the iPhone starts the session over, it keeps SlimeVR's choice
+            motion.stopUpdates()
+            motion.startUpdates(sink: self, useMagn: use)
+            connectUI?.setMagnometerToggle(use: use)
         }
     }
 
@@ -275,6 +314,9 @@ final class RelayClient: TrackingControl, ServerFinding, MotionSink {
             return
         default:
             break
+        }
+        if let use = status.magnetometer {
+            useMagnetometer(use)
         }
         if status.serverType != shownServer {
             shownServer = status.serverType

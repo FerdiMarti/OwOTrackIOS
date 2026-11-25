@@ -48,6 +48,7 @@ struct RelayStatus: Codable, Equatable {
     var giveUp: Date?                   //while reconnecting
     var reason: String?                 //why it failed, or why the iPhone ended it
     var session: UUID?                  //the watch's session it's about (RelayStart.session)
+    var magnetometer: Bool?             //how the watch should measure now (SlimeVR can switch it); nil: not known yet
 
     var isActive: Bool {
         return state == .connecting || state == .connected || state == .reconnecting
@@ -89,8 +90,9 @@ struct MotionSample: Equatable {
 //which version of the relay messages this app speaks. The watch app can update later than the iPhone app (or the other
 //way round): every control message carries both numbers, so an app that can't work with the other says which one to update
 enum RelayProtocol {
-    //raise for every change of the messages. 2: the watch's workout summary
-    static let version: UInt8 = 2
+    //raise for every change of the messages. 2: the watch's workout summary. 3: the status comes back with the
+    //confirmations of the watch's messages, and carries the magnetometer mode
+    static let version: UInt8 = 3
     //the oldest version of the other app this one still works with: raise it only when an older app can no longer work
     //with this one (it can't read what this one sends, or this one needs something it doesn't send). Messages an app
     //doesn't know are ignored, so new messages and new optional fields don't need it

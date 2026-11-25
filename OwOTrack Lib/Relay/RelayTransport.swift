@@ -9,6 +9,12 @@ import Foundation
 //Received packets are delivered on the main thread
 protocol RelayTransport: AnyObject {
     var onReceive: ((Data) -> Void)? { get set }
+    //what goes back with the confirmation of a received message (nil: nothing). The iPhone answers the watch's
+    //messages with its status this way: iOS only delivers messages the iPhone sends by itself while it considers the
+    //watch app reachable (screen on, or a workout running), but an answer always gets back. Called on the main thread
+    var replyProvider: (() -> Data?)? { get set }
+    //data that came back with a confirmation. Without it, that data goes to onReceive. On the main thread
+    var onReply: ((Data) -> Void)? { get set }
     //whether the other side can be reached right now
     var isReachable: Bool { get }
     //onlyIfReachable: skip it while the other side can't be reached (motion readings).
@@ -33,6 +39,8 @@ final class WatchConnectivityTransport: NSObject, RelayTransport, RecentServerSh
     private static let recentServersKey = "recentServers"
 
     var onReceive: ((Data) -> Void)?
+    var replyProvider: (() -> Data?)?
+    var onReply: ((Data) -> Void)?
     //activation, reachability or (on the iPhone) pairing changed. On the main thread
     var onStateChange: (() -> Void)?
     var onPairedRecentServers: (([RecentServer]) -> Void)? {
@@ -76,19 +84,22 @@ final class WatchConnectivityTransport: NSObject, RelayTransport, RecentServerSh
         guard let session = session, session.activationState == .activated else {
             return false
         }
-        #if os(iOS)
-        //the iPhone can't wake the watch app: only send while it's reachable
-        if !session.isReachable {
-            return false
-        }
-        #else
+        //the iPhone's messages are tried even while the watch doesn't look reachable: that flag can be behind, and
+        //a message that can't be delivered just fails (the iPhone can't wake the watch app)
         if onlyIfReachable && !session.isReachable {
             return false
         }
-        #endif
-        //with a reply handler, the other side confirms the message (see didReceiveMessageData with a reply handler)
+        //with a reply handler, the other side confirms the message (see didReceiveMessageData with a reply handler),
+        //and can send data back with the confirmation
         let replyHandler: ((Data) -> Void)? = onConfirmed.map { confirmed in
-            { _ in DispatchQueue.main.async { confirmed(true) } }
+            { reply in
+                DispatchQueue.main.async {
+                    if !reply.isEmpty {
+                        (self.onReply ?? self.onReceive)?(reply)
+                    }
+                    confirmed(true)
+                }
+            }
         }
         session.sendMessageData(data, replyHandler: replyHandler) { error in
             print("Relay: sending failed: \(error.localizedDescription)")
@@ -156,10 +167,12 @@ final class WatchConnectivityTransport: NSObject, RelayTransport, RecentServerSh
         DispatchQueue.main.async { self.onReceive?(messageData) }
     }
 
-    //a message the sender wants confirmed: confirm right away, then handle it
+    //a message the sender wants confirmed: handle it, then confirm it, with what the app has for the sender
     func session(_ session: WCSession, didReceiveMessageData messageData: Data, replyHandler: @escaping (Data) -> Void) {
-        replyHandler(Data())
-        DispatchQueue.main.async { self.onReceive?(messageData) }
+        DispatchQueue.main.async {
+            self.onReceive?(messageData)
+            replyHandler(self.replyProvider?() ?? Data())
+        }
     }
 
     func sessionReachabilityDidChange(_ session: WCSession) {

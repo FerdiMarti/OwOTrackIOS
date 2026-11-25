@@ -265,6 +265,64 @@ extension OwOTrackTests {
             #expect(relay.watchUI.failures.count == 1)
         }
 
+        //what happened on real devices: the watch's request arrived and the iPhone connected, but iOS didn't deliver
+        //what the iPhone sent back (it only does while it considers the watch app reachable), and the watch gave up
+        @Test("the iPhone's own messages don't reach the watch: it still gets the status, with the answers to its messages")
+        func answersOnly() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.link.phone.losesOwnMessages = true
+            relay.connect(port: server.port)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "connected" })
+            #expect(await waitUntil(5) { relay.watchUI.serverTypes.last == .slimeVR })
+            #expect(relay.watchUI.failures.isEmpty)
+
+            //SlimeVR switches the magnetometer: the mode is part of the status
+            server.send(type: 25, payload: [0, 0, 1, 0])
+            #expect(await waitUntil(5) { relay.watchMotion.startModes == [true, false] })
+            #expect(relay.watchUI.magnetometerToggles == [false])
+
+            //it stays connected well past the time it waits for a sign of life (2 s in the tests), and its log says what's going on
+            await pause(3)
+            #expect(relay.watchUI.lastState == "connected")
+            #expect(relay.watchLog.get().contains("The iPhone's own messages don't arrive"))
+
+            //Stop on the iPhone reaches it too
+            relay.host?.stop(tellWatch: true)
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "not connected" })
+            #expect(relay.watchLog.get().contains("Stopped on the iPhone"))
+        }
+
+        @Test("connecting fails while the iPhone's own messages don't arrive: the watch still gets the reason")
+        func answersOnlyFailure() async throws {
+            let server = FakeServer(mode: .slimeVR)
+            defer { server.stop() }
+            server.setState(.silent)
+            let relay = RelaySetup()
+            defer { relay.stop() }
+            relay.link.phone.losesOwnMessages = true
+            relay.connect(port: server.port)
+            #expect(await waitUntil(8) { relay.watchUI.lastState == "failed" })
+            #expect(relay.watchUI.failures == ["Couldn't connect to 127.0.0.1"])
+        }
+
+        @Test("the watch app was paused while it waited for the iPhone: that time doesn't count, it asks again")
+        func pausedWhileConnecting() async throws {
+            let relay = RelaySetup(withHost: false)
+            defer { relay.stop() }
+            relay.connect(port: 6969)
+            await pause(0.3)
+            let asked = relay.link.watch.sentMessages.filter(\.isStart).count
+            Thread.sleep(forTimeInterval: 3.5)      //nothing runs, like the app with the screen off and no workout. Longer than it waits for the iPhone (3 s)
+            await pause(0.8)
+            #expect(relay.watchUI.lastState == "connecting")       //not given up
+            #expect(relay.link.watch.sentMessages.filter(\.isStart).count > asked)
+            #expect(relay.watchLog.get().contains("The watch app was paused for"))
+            #expect(await waitUntil(5) { relay.watchUI.lastState == "failed" })       //it still gives up when nobody answers
+        }
+
         @Test("a late Stop of an earlier session doesn't end the next one")
         func staleStop() async throws {
             let server = FakeServer(mode: .slimeVR)

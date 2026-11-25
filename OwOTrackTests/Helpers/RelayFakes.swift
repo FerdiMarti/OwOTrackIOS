@@ -30,8 +30,13 @@ final class LoopbackTransport: RelayTransport {
     }
 
     var onReceive: ((Data) -> Void)?
+    var replyProvider: (() -> Data?)?
+    var onReply: ((Data) -> Void)?
     weak var other: LoopbackTransport?
     let link: Link
+    //true: what this end sends by itself gets lost, but its answers to the other end's messages still arrive.
+    //Like an iPhone whose iOS doesn't consider the watch app reachable
+    var losesOwnMessages = false
     private let lock = NSLock()
     private var sentData: [Data] = []
 
@@ -63,10 +68,20 @@ final class LoopbackTransport: RelayTransport {
             return false
         }
         let link = self.link
+        if losesOwnMessages {
+            DispatchQueue.main.async {
+                onConfirmed?(false)
+            }
+            return true
+        }
         DispatchQueue.main.async {
             other.onReceive?(data)
-            if link.confirms {
-                onConfirmed?(true)
+            if link.confirms, let onConfirmed = onConfirmed {
+                //a confirmed message: what the receiver has for the sender comes back with the confirmation
+                if let reply = other.replyProvider?(), !reply.isEmpty {
+                    (self.onReply ?? self.onReceive)?(reply)
+                }
+                onConfirmed(true)
             }
         }
         return true
@@ -193,12 +208,13 @@ final class FakeMotion: MotionSource {
 }
 
 extension RelayHost.Timing {
-    static let fastTest = RelayHost.Timing(watchTimeout: 3, statusInterval: 0.5, rateLogInterval: 2)
+    static let fastTest = RelayHost.Timing(watchTimeout: 3, statusInterval: 0.5, rateLogInterval: 2, answerStatusInterval: 0.3)
 }
 
 extension RelayClient.Timing {
     static let fastTest = RelayClient.Timing(batchInterval: 0.02, firstAnswerTimeout: 3, iPhoneTimeout: 2, retryInterval: 0.5,
-                                             giveUp: 6, batteryInterval: 1, heartbeatInterval: 1, confirmTimeout: 0.5, statsInterval: 2)
+                                             giveUp: 6, batteryInterval: 1, heartbeatInterval: 1, confirmTimeout: 0.5, statsInterval: 2,
+                                             pauseLength: 2, answersOnlyAfter: 1.5)
 }
 
 //a watch and an iPhone app connected by a loopback, with the iPhone's hardware faked by FakeHardware

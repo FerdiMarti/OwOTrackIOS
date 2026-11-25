@@ -14,6 +14,7 @@ final class RelayHost {
         var watchTimeout: TimeInterval = 20     //nothing from the watch for that long: it's gone, end its session
         var statusInterval: TimeInterval = 3    //how often the watch gets the status as a sign of life
         var rateLogInterval: TimeInterval = 60  //how often the log shows how many readings arrive from the watch
+        var answerStatusInterval: TimeInterval = 1     //how often an unchanged status goes back with the watch's messages
     }
 
     //the watch's connection, for the iPhone's screen. Changed on the main thread
@@ -43,6 +44,10 @@ final class RelayHost {
     private var ended: RelayStatus?
     private var lastHeard = Date.distantPast
     private var lastVersionsSent = Date.distantPast
+    private var versionsOwed = false            //the watch app's version can't work with this one: its next message is answered with this app's versions
+    private var magnetometerMode: Bool?         //how the watch should measure, as the session's motion source was last started
+    private var answeredStatus: RelayStatus?    //the status that last went back with one of the watch's messages, and when
+    private var answeredStatusAt = Date.distantPast
     private var timer: Timer?
     private var statusSendScheduled = false
     private var receivedSamples = 0             //since rateCountStart: how fast the watch's readings arrive
@@ -60,6 +65,32 @@ final class RelayHost {
         transport.onReceive = { [weak self] data in
             self?.receive(data)
         }
+        transport.replyProvider = { [weak self] in
+            self?.answer()
+        }
+    }
+
+    //what goes back with each of the watch's messages: the status of its session, when it changed or once a second.
+    //The messages the iPhone sends by itself only arrive while iOS considers the watch app reachable (its screen on,
+    //or its workout running), and on real devices that isn't always so while the watch is sending fine. This way the
+    //watch learns the status whenever it can reach the iPhone at all. On the main thread
+    private func answer() -> Data? {
+        if versionsOwed {
+            versionsOwed = false
+            return RelayPacket.versions.data
+        }
+        //the running session's status, or how the last one ended if the watch may have missed that. Not after the
+        //iPhone gave up on a quiet watch: that session starts over when the watch asks for it again
+        guard let status = request != nil ? self.status : ended else {
+            return nil
+        }
+        let now = Date()
+        if status == answeredStatus && now.timeIntervalSince(answeredStatusAt) < timing.answerStatusInterval {
+            return nil
+        }
+        answeredStatus = status
+        answeredStatusAt = now
+        return RelayPacket(.status(status)).data
     }
 
     //a packet from the watch. On the main thread
@@ -73,6 +104,7 @@ final class RelayHost {
             if service == nil {
                 status = RelayStatus(state: .failed, reason: RelayPacket.updateHint(peerVersion: peerVersion, onWatch: false))
             }
+            versionsOwed = true
             if Date().timeIntervalSince(lastVersionsSent) >= 1 {
                 lastVersionsSent = Date()
                 _ = transport.send(RelayPacket.versions.data, onlyIfReachable: false, onConfirmed: nil)
@@ -120,6 +152,15 @@ final class RelayHost {
         status = RelayStatus(state: .connecting, session: request.session)
         let hardware = RelayedWatchHardware(device: device, mac: request.mac, transport: transport)
         let motion = RelayedWatchMotion(magnetometerAvailable: request.magnetometerAvailable, transport: transport)
+        magnetometerMode = nil
+        motion.onMode = { [weak self, weak motion] useMagnetometer in
+            //the mode is part of the status too, so the watch also gets it with the answers to its messages
+            guard let self = self, let motion = motion, self.motion === motion else {
+                return
+            }
+            self.magnetometerMode = useMagnetometer
+            self.update { _ in }
+        }
         let service = TrackingService(device: hardware, motion: motion, logger: logger)
         service.timing = connectionTiming
         service.savesSettings = false
@@ -204,6 +245,7 @@ final class RelayHost {
             return
         }
         status.session = request?.session
+        status.magnetometer = magnetometerMode
         self.status = status
         if !statusSendScheduled {
             statusSendScheduled = true
@@ -347,6 +389,7 @@ final class RelayedWatchHardware: TrackerHardware {
 //Starting the readings (also when SlimeVR switches the magnetometer) tells the watch which mode to measure in
 final class RelayedWatchMotion: MotionSource {
     let magnetometerCorrectionAvailable: Bool
+    var onMode: ((Bool) -> Void)?       //the readings were started in this mode. Set and called on the main thread
     private let transport: RelayTransport
     private let lock = NSLock()
     private var sink: MotionSink?
@@ -362,6 +405,7 @@ final class RelayedWatchMotion: MotionSource {
         lock.unlock()
         DispatchQueue.main.async {
             self.transport.send(.magnetometer(useMagn))
+            self.onMode?(useMagn)
         }
     }
 
