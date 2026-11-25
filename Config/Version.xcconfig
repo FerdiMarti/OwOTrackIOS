@@ -4,4 +4,4 @@
 // Change them here, not in a target's General tab: that would set them on that one target only.
 
 MARKETING_VERSION = 2.2
-CURRENT_PROJECT_VERSION = 2
+CURRENT_PROJECT_VERSION = 3
